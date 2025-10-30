@@ -1,0 +1,6640 @@
+openapi: 3.1.0
+info:
+  contact:
+    email: support@hexiosec.com
+    name: Support
+    url: https://hexiosec.com/contact/
+  description: |
+    This API reference documents how to programmatically access Hexiosec ASM data, for automation and data extraction purposes.
+
+    The Hexiosec ASM API is organised around REST. Our API has resource-oriented URLs which accept query string parameters, and return JSON-encoded responses.
+    We use standard HTTP response codes and verbs, and authentication is provided via a custom header.
+
+    This API supports a subset of the functionality available in [Hexiosec ASM](https://hexiosec.com/asm/).
+
+    To download a copy of this documentation, please visit [https://asm.hexiosec.com/api/openapi.yml](https://asm.hexiosec.com/api/openapi.yml).
+
+    ### API access
+
+    Any user can create API keys to use as a credential to access the Hexiosec ASM API.
+    Management of organisations and resources within those organisations is restricted to certain pricing plans.
+    For more information on the features included with your subscription please see the [Hexiosec ASM Pricing](https://hexiosec.com/asm/pricing/)
+
+    API access for an organisation can be checked using [GET /v1/orgs/{id}](#get-/v1/orgs/-id-)
+
+    ### Versioning
+
+    API endpoints are versioned according to their path prefix, which at present is `/api/v1`.
+    Breaking changes will be released under an incremented prefix, whereas minor changes will be incorporated into the existing endpoints as necessary.
+
+    ### Pagination
+
+    Endpoints that support pagination do so via `limit` and `offset`.
+    The last set of results in a paginated set is the first response for which the number of received entries is less than the requested limit.
+
+    ### Expanding Responses
+
+    Many objects allow you to request additional information as an expanded response by using the expand request parameter.
+    This parameter only available on certain requests, and is shown in the list of query parameters for the API endpoint.
+
+    The list of expandable items is shown in the `expand` parameter specification, and will usually return summary information for the linked resource.
+    Summary entry specifications are shown in the specification of the endpoint response as an optional field.
+    If not requested, this optional field will either be null or omitted from the response.
+  termsOfService: https://hexiosec.com/terms/
+  title: Hexiosec ASM API
+  version: 1.0.0
+externalDocs:
+  description: Find out more about Hexiosec ASM
+  url: https://hexiosec.com/asm/
+servers:
+- url: https://asm.hexiosec.com/api
+tags:
+- description: Authentication/authorisation endpoints
+  name: auth
+- description: Organisation endpoints
+  name: organisations
+- description: Scan Group endpoints
+  name: scan_groups
+- description: Scan endpoints
+  name: scans
+- description: Graph endpoints
+  name: graph
+- description: Discovery data endpoints
+  name: scan_data
+- description: Scan iteration endpoints
+  name: iterations
+- description: Actions endpoints
+  name: actions
+- description: User management endpoints
+  name: users
+- description: Admin endpoints
+  name: admin
+- description: Log client errors
+  name: client_errors
+paths:
+  /auth:
+    get:
+      operationId: getState
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+          description: Valid response
+      security:
+      - {}
+      - APIKey: []
+      summary: Get the auth state and associated user for the request
+      tags:
+      - auth
+  /v1/orgs:
+    get:
+      description: |
+        Required role: `organisations:read`
+
+        This endpoint only returns entries for which API access is enabled.
+        In the event the user is not a member of any organisation with API access, an empty array will be returned.
+      operationId: getOrganisations
+      parameters:
+      - description: Maximum number of entries to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Offset into the list of entries to return
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Column to order results by
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          enum:
+          - created
+          - updated
+          type: string
+        style: form
+      - description: Sort direction
+        explode: true
+        in: query
+        name: dir
+        required: false
+        schema:
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Included deleted entries in results
+        explode: true
+        in: query
+        name: include_deleted
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: Fields to expand with additional information
+        explode: true
+        in: query
+        name: expand
+        required: false
+        schema:
+          items:
+            enum:
+            - roles
+            - groups
+            - owner
+            - created_by
+            type: string
+          type: array
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/OrganisationResponse"
+                type: array
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+      security:
+      - APIKey: []
+      summary: Get the organisations for which the current user is a member
+      tags:
+      - organisations
+  /v1/orgs/{id}:
+    get:
+      description: |
+        Required role: `organisations:read`
+
+        This endpoint requires that the organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getOrganisationByID
+      parameters:
+      - description: Organisation ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Fields to expand with additional information
+        explode: true
+        in: query
+        name: expand
+        required: false
+        schema:
+          items:
+            enum:
+            - roles
+            - groups
+            - owner
+            - created_by
+            type: string
+          type: array
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrganisationResponse"
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Get an organisation by ID
+      tags:
+      - organisations
+  /v1/orgs/{id}/asset/{key}:
+    delete:
+      description: |
+        Required role: `organisations:write`
+
+        This endpoint requires that the organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: deleteOrganisationAsset
+      parameters:
+      - description: Organisation ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Asset key
+        explode: false
+        in: path
+        name: key
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Delete an organisation asset
+      tags:
+      - organisations
+    get:
+      description: |
+        Required role: `organisations:read`
+
+        This endpoint requires that the organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getOrganisationAsset
+      parameters:
+      - description: Organisation ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Asset key
+        explode: false
+        in: path
+        name: key
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrganisationAssetResponse"
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Get an organisation asset by key
+      tags:
+      - organisations
+  /v1/scan_groups:
+    get:
+      description: |
+        Required role: `scan_groups:read`
+
+        This endpoint requires that the organisation of which the scan group is part of has API access enabled.
+        If API access is not allowed, the request will succeed but return an empty array.
+      operationId: getScanGroups
+      parameters:
+      - description: Organisation ID
+        explode: true
+        in: query
+        name: organisation_id
+        required: true
+        schema:
+          type: string
+        style: form
+      - description: Maximum number of entries to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Offset into the list of entries to return
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Column to order results by
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          enum:
+          - created
+          - updated
+          type: string
+        style: form
+      - description: Sort direction
+        explode: true
+        in: query
+        name: dir
+        required: false
+        schema:
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Included deleted entries in results
+        explode: true
+        in: query
+        name: include_deleted
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: Fields to expand with additional information
+        explode: true
+        in: query
+        name: expand
+        required: false
+        schema:
+          items:
+            enum:
+            - roles
+            - groups
+            - updated_by
+            - created_by
+            type: string
+          type: array
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ScanGroupResponse"
+                type: array
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Get the Scan Groups for a specified organisation
+      tags:
+      - scan_groups
+    post:
+      description: |
+        Required role: `scan_groups:create`
+      operationId: createScanGroup
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScanGroupCreateRequestBody"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanGroupResponse"
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Create a new scan group
+      tags:
+      - scan_groups
+  /v1/scan_groups/{id}:
+    delete:
+      description: |
+        Required role: `scan_groups:manage`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: deleteScanGroupByID
+      parameters:
+      - description: Scan Group ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Delete a scan group by ID
+      tags:
+      - scan_groups
+    get:
+      description: |
+        Required role: `scan_groups:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScanGroupByID
+      parameters:
+      - description: Scan Group ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Fields to expand with additional information
+        explode: true
+        in: query
+        name: expand
+        required: false
+        schema:
+          items:
+            enum:
+            - organisation
+            - roles
+            - groups
+            - updated_by
+            - created_by
+            type: string
+          type: array
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanGroupResponse"
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Get a scan group by ID
+      tags:
+      - scan_groups
+    patch:
+      description: |
+        Required role: `scan_groups:write`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: updateScanGroupByID
+      parameters:
+      - description: Scan Group ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScanGroupUpdateRequestBody"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanGroupResponse"
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Update a scan group by ID
+      tags:
+      - scan_groups
+  /v1/scans:
+    get:
+      description: |
+        Required role: `scans:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScans
+      parameters:
+      - description: Scan Group ID
+        explode: true
+        in: query
+        name: scan_group_id
+        required: true
+        schema:
+          type: string
+        style: form
+      - description: Filter by scan types
+        explode: true
+        in: query
+        name: type
+        required: true
+        schema:
+          items:
+            enum:
+            - adhoc
+            - continuous_own
+            - continuous_vendor
+            type: string
+          type: array
+        style: form
+      - description: Maximum number of entries to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Offset into the list of entries to return
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Column to order results by
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          enum:
+          - created
+          - updated
+          - name
+          type: string
+        style: form
+      - description: Sort direction
+        explode: true
+        in: query
+        name: dir
+        required: false
+        schema:
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Fields to expand with additional information
+        explode: true
+        in: query
+        name: expand
+        required: false
+        schema:
+          items:
+            enum:
+            - node
+            - iteration
+            - created_by
+            type: string
+          type: array
+        style: form
+      - description: Search string
+        explode: true
+        in: query
+        name: search
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Include seeds in text search
+        explode: true
+        in: query
+        name: search_seeds
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: Include disabled scans
+        explode: true
+        in: query
+        name: include_disabled
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: Include deleted scans
+        explode: true
+        in: query
+        name: include_deleted
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ScanResponse"
+                type: array
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+      security:
+      - APIKey: []
+      summary: Get the Scans for a specified scan group
+      tags:
+      - scans
+    post:
+      description: "Required role: `scans:manage`\n\nStep 1 of 3 in creating a scan.\
+        \ [Step 2](#post-/v1/scans/-id-/seeds). [Step 3](#patch-/v1/scans/-id-)\n\n\
+        This endpoint requires that the associated organisation has API access enabled.\
+        \ \nIf API access is not allowed, the response code will be 403 (Forbidden).\n\
+        A calendar schedule can only be provided if the associated organisation and\
+        \ scan type has this feature enabled.\nThe endpoint is subject to usage restrictions\
+        \ based on the associated organisation's plan, to find out more see the [Scan\
+        \ Allowance documentation](https://docs.hexiosec.com/asm/scan-allowances)\n"
+      operationId: createScan
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateScanRequest"
+        description: Parameters to create the new scan
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanResponse"
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+      security:
+      - APIKey: []
+      summary: Create a scan
+      tags:
+      - scans
+  /v1/scans/count:
+    get:
+      description: |
+        Required role: `scans:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScansCount
+      parameters:
+      - description: Scan Group ID
+        explode: true
+        in: query
+        name: scan_group_id
+        required: true
+        schema:
+          type: string
+        style: form
+      - description: Filter by scan types
+        explode: true
+        in: query
+        name: type
+        required: true
+        schema:
+          items:
+            enum:
+            - adhoc
+            - continuous_own
+            - continuous_vendor
+            type: string
+          type: array
+        style: form
+      - description: Search string
+        explode: true
+        in: query
+        name: search
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Include seeds in text search
+        explode: true
+        in: query
+        name: search_seeds
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: Include disabled scans
+        explode: true
+        in: query
+        name: include_disabled
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: Include deleted scans
+        explode: true
+        in: query
+        name: include_deleted
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "200":
+          $ref: "#/components/responses/CountResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+      security:
+      - APIKey: []
+      summary: Get the count of Scans for a specified scan group according to the
+        filter settings
+      tags:
+      - scans
+  /v1/scans/{id}:
+    delete:
+      description: |
+        Required role: `scans:manage`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: deleteScanById
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Delete a scan by ID
+      tags:
+      - scans
+    get:
+      description: |
+        Required role: `scans:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScanByID
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Fields to expand with additional information
+        explode: true
+        in: query
+        name: expand
+        required: false
+        schema:
+          items:
+            enum:
+            - node
+            - iteration
+            - created_by
+            - groups
+            - roles
+            - organisation_id
+            type: string
+          type: array
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanResponse"
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Get a scan by ID
+      tags:
+      - scans
+    patch:
+      description: |
+        Required role: `scans:write`
+
+        Step 3 of 3 in creating a scan. [Step 1](#post-/v1/scans). [Step 2](#post-/v1/scans/-id-/seeds).
+
+        To start a scan, set `enabled` to `true`. Conversely, to stop a scan, set `enabled` to `false`.
+        A calendar schedule can only be provided if the associated organisation and scan type has this feature enabled.
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: updateScanById
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/updateScanById_request"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanResponse"
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Update a scan by ID
+      tags:
+      - scans
+  /v1/scans/{id}/rescan:
+    post:
+      description: |
+        Required role: `scans:refresh`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: triggerRescanByScanId
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Trigger rescan by scan ID
+      tags:
+      - scans
+  /v1/scans/{id}/seeds:
+    get:
+      operationId: getScanSeedsById
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Fields to expand with additional information
+        explode: true
+        in: query
+        name: expand
+        required: false
+        schema:
+          items:
+            enum:
+            - tags
+            type: string
+          type: array
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SeedsResponse"
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+      security:
+      - APIKey: []
+      summary: Get the seeds for a scan by ID
+      tags:
+      - scans
+    post:
+      description: |
+        Required role: `scans:write`
+
+        Step 2 of 3 in creating a scan. [Step 1](#post-/v1/scans). [Step 3](#patch-/v1/scans/-id-)
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+        IP ranges can either be provided in the format "8.8.8.1-8.8.8.254" or using CIDR notation i.e "8.8.8.0/24".
+        The endpoint is subject to usage restrictions based on the associated organisation's plan, to find out more see the [Seeds documentation](https://docs.hexiosec.com/asm/seeds-and-ips)
+      operationId: addScanSeedById
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateScanSeedRequest"
+        description: Parameters to create the new seed
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NodeResponse"
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+      security:
+      - APIKey: []
+      summary: Add a seed to a scan by ID
+      tags:
+      - scans
+  /v1/scans/{id}/seeds/{seed_id}:
+    delete:
+      description: |
+        Required role: `scans:write`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: removeScanSeedById
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Seed ID
+        explode: false
+        in: path
+        name: seed_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+      security:
+      - APIKey: []
+      summary: Remove a seed from a scan by ID
+      tags:
+      - scans
+  /v1/scans/{id}/seeds/{seed_id}/tags/{tag_name}:
+    delete:
+      description: |
+        Required role: `scans:write`
+
+        Removes the association between the seed and the specified tag. The seed remains available even when tag removed.
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: removeSeedTag
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Seed ID
+        explode: false
+        in: path
+        name: seed_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Tag name to remove from the seed
+        explode: false
+        in: path
+        name: tag_name
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+      security:
+      - APIKey: []
+      summary: Remove a tag from a seed
+      tags:
+      - scans
+  /v1/scans/{id}/iterations:
+    get:
+      description: |
+        Required role: `scans:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScanIterationsById
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Maximum number of entries to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Offset into the list of entries to return
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Column to order results by
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          enum:
+          - created
+          type: string
+        style: form
+      - description: Sort direction
+        explode: true
+        in: query
+        name: dir
+        required: false
+        schema:
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ScanIterationResponse"
+                type: array
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+      security:
+      - APIKey: []
+      summary: Get the Iterations for a specified scan
+      tags:
+      - scans
+  /v1/scans/{scan_id}/iterations/{iteration_id}/progress:
+    get:
+      description: |
+        Required role: `scans:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScanIterationProgress
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: scan_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Iteration ID
+        explode: false
+        in: path
+        name: iteration_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanProgressResponse"
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+      security:
+      - APIKey: []
+      summary: Get the progress for the provided iteration
+      tags:
+      - scans
+  /v1/scans/{id}/nodes/{node_id}:
+    patch:
+      deprecated: true
+      description: "**Deprecated:** Use [Update a node by ID](#patch-/v1/graph/nodes/-id-)\
+        \ instead.\n\nRequired role: `scans:write`\n\nThis endpoint allows you to\
+        \ move assets in and out of scope, and ignore IPs.\n\nIgnoring IPs can be\
+        \ used to mark CDN hosted domains and hide IP risks (Out of Scope) linked\
+        \ to these domains.\n\n**Note:** \n  - Only **Domain**, **IPv4** or **IPv6**\
+        \ nodes can be removed from scope. \n  - Only **Domain** nodes can be marked\
+        \ to ignore IPs, and the associated organisation must have this feature enabled.\n\
+        \nThis endpoint requires that the associated organisation has API access enabled.\n\
+        If API access is not allowed, the response code will be 403 (Forbidden).\n"
+      operationId: updateNodeInScanById
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Node ID
+        explode: false
+        in: path
+        name: node_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateNodeRequest"
+        description: Parameters to update the node
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericGraphNode"
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Update a node by ID
+      tags:
+      - scans
+  /v1/scans/{scan_id}/screenshots/{id}:
+    get:
+      description: |
+        Required role: `scans:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScreenshotById
+      parameters:
+      - description: Screenshot ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Scan ID
+        explode: false
+        in: path
+        name: scan_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            image/webp:
+              schema:
+                format: binary
+                type: string
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Get a web presence screenshot by ID
+      tags:
+      - scans
+  /v1/scans/{id}/link_tags:
+    get:
+      description: |
+        Required role: `scans:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScanLinkTags
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Maximum number of entries to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Offset into the list of entries to return
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Column to order results by
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          enum:
+          - created_at
+          - updated_at
+          type: string
+        style: form
+      - description: Sort direction
+        explode: true
+        in: query
+        name: dir
+        required: false
+        schema:
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Fields to expand with additional information
+        explode: true
+        in: query
+        name: expand
+        required: false
+        schema:
+          items:
+            enum:
+            - link
+            - tag
+            - created_by
+            - updated_by
+            - tag_name
+            type: string
+          type: array
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanLinkTagsResponse"
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+      security:
+      - APIKey: []
+      summary: Get link tags for a scan
+      tags:
+      - scans
+  /v1/actions:
+    get:
+      description: |
+        Required role: `scans.tickets:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getActions
+      parameters:
+      - description: Scan ID
+        explode: true
+        in: query
+        name: scan_id
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Scan Group ID (required if Scan ID is not provided)
+        explode: true
+        in: query
+        name: scan_group_id
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Maximum number of entries to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Offset into the list of entries to return
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Column to order results by
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          enum:
+          - created
+          - modified
+          type: string
+        style: form
+      - description: Sort direction
+        explode: true
+        in: query
+        name: dir
+        required: false
+        schema:
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: |
+          Fields to expand with additional information:
+
+          * `links` - Expand instances of the risks under this action. DEPRECATED
+          * `link_ids` - Same as `links` except only the IDs are returned. DEPRECATED
+          * `link_from` - Node where the risk was found (requires `links` to be expanded). DEPRECATED
+          * `link_to` - Node which represents the risk (requires `links` to be expanded). DEPRECATED
+          * `target` - Node which carries this action. DEPRECATED
+          * `assignee_user` - User to whom this action is assigned
+          * `modified_by` - User to last update this action
+          * `note_modified_by` - User to last update the note against this action
+        explode: true
+        in: query
+        name: expand
+        required: false
+        schema:
+          items:
+            enum:
+            - links
+            - link_ids
+            - link_from
+            - link_to
+            - target
+            - assignee_user
+            - modified_by
+            - note_modified_by
+            type: string
+          type: array
+        style: form
+      - deprecated: true
+        description: "If set, return actions with out_of_scope set to false DEPRECATED\
+          \ - Use include_secondary"
+        explode: true
+        in: query
+        name: include_out_of_scope
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: "If set, returns primary and secondary actions"
+        explode: true
+        in: query
+        name: include_secondary
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: Language of text
+        explode: true
+        in: query
+        name: lang
+        required: false
+        schema:
+          enum:
+          - en_gb
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ActionResponse"
+                type: array
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Get the actions for a specified scan or scan group
+      tags:
+      - actions
+  /v1/actions/{id}:
+    get:
+      description: |
+        Required role: `scans.tickets:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getActionByID
+      parameters:
+      - description: Action ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          Fields to expand with additional information:
+
+          * `links` - Expand instances of the risks under this action. DEPRECATED
+          * `link_ids` - Same as `links` except only the IDs are returned. DEPRECATED
+          * `link_from` - Node where the risk was found. DEPRECATED
+          * `link_to` - Node which represents the risk. DEPRECATED
+          * `target` - Node which carries this action. DEPRECATED
+          * `assignee_user` - User to whom this action is assigned
+          * `modified_by` - User to last update this action
+          * `note_modified_by` - User to last update the note against this action
+        explode: true
+        in: query
+        name: expand
+        required: false
+        schema:
+          items:
+            enum:
+            - links
+            - link_ids
+            - link_from
+            - link_to
+            - target
+            - assignee_user
+            - modified_by
+            - note_modified_by
+            type: string
+          type: array
+        style: form
+      - description: Language of text
+        explode: true
+        in: query
+        name: lang
+        required: false
+        schema:
+          enum:
+          - en_gb
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActionResponse"
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Get an action by ID
+      tags:
+      - actions
+  /v1/actions/{id}/risks:
+    get:
+      description: |
+        Required role: `scans.tickets:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getRisksByActionID
+      parameters:
+      - description: Action ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Maximum number of entries to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Offset into the list of entries to return
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Column to order results by
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          enum:
+          - created
+          - modified
+          type: string
+        style: form
+      - description: Sort direction
+        explode: true
+        in: query
+        name: dir
+        required: false
+        schema:
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Language of text
+        explode: true
+        in: query
+        name: lang
+        required: false
+        schema:
+          enum:
+          - en_gb
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ScanDataRiskResponse"
+                type: array
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Get the open risks associated with an action. Actions that are resolved
+        will not return any risks.
+      tags:
+      - actions
+  /users/api_key:
+    post:
+      parameters:
+      - description: |
+          API Keys can only be created when logged in via session authentication, which requires the session CSRF token to be set.
+        explode: false
+        in: header
+        name: X-CSRF-Token
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UsersCreateAPIKeyRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsersCreateAPIKeyResponse"
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - SessionCookie: []
+      summary: Create an API key for the user logged in to the current session
+      tags:
+      - users
+  /users/preferences:
+    patch:
+      operationId: updateUserPreferences
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/updateUserPreferences_request"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserRowResponse"
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+      security:
+      - APIKey: []
+      summary: Update preferences for the user logged in to the current session
+      tags:
+      - users
+  /v1/users:
+    get:
+      description: |
+        Required role: `organisations:read` or `scan_groups:read`
+
+         Either an Organisation ID or ScanGroup ID must be specified.
+      operationId: getUsers
+      parameters:
+      - description: Organisation ID
+        explode: true
+        in: query
+        name: organisation_id
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Scan Group ID
+        explode: true
+        in: query
+        name: scan_group_id
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/UserResponse"
+                type: array
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+      security:
+      - APIKey: []
+      summary: Get the users in an organisation or scan group
+      tags:
+      - users
+  /v1/scan_data/{scan_id}/domains/count:
+    get:
+      description: |
+        Required role: `scans:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScanDataDomainsCount
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: scan_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: List of domain IDs to filter by
+        explode: true
+        in: query
+        name: ids
+        required: false
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      responses:
+        "200":
+          $ref: "#/components/responses/CountResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Request was valid but did not find a result. The scan could
+            be in progress or the scan ID is invalid.
+      security:
+      - APIKey: []
+      summary: Get count of primary domains by Scan ID
+      tags:
+      - scan_data
+  /v1/scan_data/{scan_id}/domains:
+    get:
+      description: |
+        Required role: `scans:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScanDataDomains
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: scan_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: List of domain IDs to filter by
+        explode: true
+        in: query
+        name: ids
+        required: false
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      - description: Maximum number of entries to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Offset into the list of entries to return
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Column to order results by
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          enum:
+          - created
+          - last_seen
+          type: string
+        style: form
+      - description: Sort direction
+        explode: true
+        in: query
+        name: dir
+        required: false
+        schema:
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Language of text
+        explode: true
+        in: query
+        name: lang
+        required: false
+        schema:
+          enum:
+          - en_gb
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ScanDataDomainResponse"
+                type: array
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Request was valid but did not find a result. The scan could
+            be in progress or the scan ID is invalid.
+      security:
+      - APIKey: []
+      summary: Get primary domains by Scan ID
+      tags:
+      - scan_data
+  /v1/scan_data/{scan_id}/ips/count:
+    get:
+      description: |
+        Required role: `scans:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScanDataIPsCount
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: scan_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: List of ip IDs to filter by
+        explode: true
+        in: query
+        name: ids
+        required: false
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      responses:
+        "200":
+          $ref: "#/components/responses/CountResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Request was valid but did not find a result. The scan could
+            be in progress or the scan ID is invalid.
+      security:
+      - APIKey: []
+      summary: Get count of primary IPs by Scan ID
+      tags:
+      - scan_data
+  /v1/scan_data/{scan_id}/ips:
+    get:
+      description: |
+        Required role: `scans:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScanDataIPs
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: scan_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: List of ip IDs to filter by
+        explode: true
+        in: query
+        name: ids
+        required: false
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      - description: Maximum number of entries to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Offset into the list of entries to return
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Column to order results by
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          enum:
+          - created
+          - last_seen
+          type: string
+        style: form
+      - description: Sort direction
+        explode: true
+        in: query
+        name: dir
+        required: false
+        schema:
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Language of text
+        explode: true
+        in: query
+        name: lang
+        required: false
+        schema:
+          enum:
+          - en_gb
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ScanDataIPResponse"
+                type: array
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Request was valid but did not find a result. The scan could
+            be in progress or the scan ID is invalid.
+      security:
+      - APIKey: []
+      summary: Get primary IPs by Scan ID
+      tags:
+      - scan_data
+  /v1/scan_data/{scan_id}/web_presence/count:
+    get:
+      description: |
+        Required role: `scans:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScanDataWebPresenceCount
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: scan_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: List of URL IDs to filter by
+        explode: true
+        in: query
+        name: ids
+        required: false
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      responses:
+        "200":
+          $ref: "#/components/responses/CountResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Request was valid but did not find a result. The scan could
+            be in progress or the scan ID is invalid.
+      security:
+      - APIKey: []
+      summary: Get count of primary web presence URLs by Scan ID
+      tags:
+      - scan_data
+  /v1/scan_data/{scan_id}/web_presence:
+    get:
+      description: |
+        Required role: `scans:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScanDataWebPresence
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: scan_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: List of URL IDs to filter by
+        explode: true
+        in: query
+        name: ids
+        required: false
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      - description: Maximum number of entries to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Offset into the list of entries to return
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Column to order results by
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          enum:
+          - created
+          - last_seen
+          type: string
+        style: form
+      - description: Sort direction
+        explode: true
+        in: query
+        name: dir
+        required: false
+        schema:
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Language of text
+        explode: true
+        in: query
+        name: lang
+        required: false
+        schema:
+          enum:
+          - en_gb
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ScanDataWebPresenceResponse"
+                type: array
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Request was valid but did not find a result. The scan could
+            be in progress or the scan ID is invalid.
+      security:
+      - APIKey: []
+      summary: Get primary web presence URLs by Scan ID
+      tags:
+      - scan_data
+  /v1/scan_data/{scan_id}/out_of_scope_domains/count:
+    get:
+      deprecated: true
+      description: |
+        **Deprecated:** Use [Get count of secondary domains by Scan ID](#get-/v1/scan_data/{scan_id}/secondary_domains/count) instead.
+        Required role: `scans:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScanDataOutOfScopeDomainsCount
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: scan_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: List of out-of-scope domain IDs to filter by
+        explode: true
+        in: query
+        name: ids
+        required: false
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      responses:
+        "200":
+          $ref: "#/components/responses/CountResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Request was valid but did not find a result. The scan could
+            be in progress or the scan ID is invalid.
+      security:
+      - APIKey: []
+      summary: Get count of out-of-scope domains by Scan ID
+      tags:
+      - scan_data
+  /v1/scan_data/{scan_id}/secondary_domains/count:
+    get:
+      description: |
+        Required role: `scans:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScanDataSecondaryDomainsCount
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: scan_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: List of secondary domain IDs to filter by
+        explode: true
+        in: query
+        name: ids
+        required: false
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      responses:
+        "200":
+          $ref: "#/components/responses/CountResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Request was valid but did not find a result. The scan could
+            be in progress or the scan ID is invalid.
+      security:
+      - APIKey: []
+      summary: Get count of secondary domains by Scan ID
+      tags:
+      - scan_data
+  /v1/scan_data/{scan_id}/out_of_scope_domains:
+    get:
+      deprecated: true
+      description: |
+        **Deprecated:** Use [Get secondary domains by Scan ID](#get-/v1/scan_data/{scan_id}/secondary_domains) instead.
+        Required role: `scans:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScanDataOutOfScopeDomains
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: scan_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: List of out-of-scope domain IDs to filter by
+        explode: true
+        in: query
+        name: ids
+        required: false
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      - description: Maximum number of entries to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Offset into the list of entries to return
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Column to order results by
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          enum:
+          - created
+          - last_seen
+          type: string
+        style: form
+      - description: Sort direction
+        explode: true
+        in: query
+        name: dir
+        required: false
+        schema:
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Language of text
+        explode: true
+        in: query
+        name: lang
+        required: false
+        schema:
+          enum:
+          - en_gb
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ScanDataOutOfScopeDomainResponse"
+                type: array
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Request was valid but did not find a result. The scan could
+            be in progress or the scan ID is invalid.
+      security:
+      - APIKey: []
+      summary: Get out-of-scope domains by Scan ID
+      tags:
+      - scan_data
+  /v1/scan_data/{scan_id}/secondary_domains:
+    get:
+      description: |
+        Required role: `scans:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScanDataSecondaryDomains
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: scan_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: List of secondary domain IDs to filter by
+        explode: true
+        in: query
+        name: ids
+        required: false
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      - description: Maximum number of entries to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Offset into the list of entries to return
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Column to order results by
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          enum:
+          - created
+          - last_seen
+          type: string
+        style: form
+      - description: Sort direction
+        explode: true
+        in: query
+        name: dir
+        required: false
+        schema:
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Language of text
+        explode: true
+        in: query
+        name: lang
+        required: false
+        schema:
+          enum:
+          - en_gb
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ScanDataOutOfScopeDomainResponse"
+                type: array
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Request was valid but did not find a result. The scan could
+            be in progress or the scan ID is invalid.
+      security:
+      - APIKey: []
+      summary: Get secondary domains by Scan ID
+      tags:
+      - scan_data
+  /v1/scan_data/{scan_id}/components/count:
+    get:
+      description: |
+        Required role: `scans:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScanDataComponentsCount
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: scan_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: List of component IDs to filter by
+        explode: true
+        in: query
+        name: ids
+        required: false
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      responses:
+        "200":
+          $ref: "#/components/responses/CountResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Request was valid but did not find a result. The scan could
+            be in progress or the scan ID is invalid.
+      security:
+      - APIKey: []
+      summary: Get count of components by Scan ID
+      tags:
+      - scan_data
+  /v1/scan_data/{scan_id}/components:
+    get:
+      description: |
+        Required role: `scans:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScanDataComponents
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: scan_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: List of component IDs to filter by
+        explode: true
+        in: query
+        name: ids
+        required: false
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      - description: Maximum number of entries to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Offset into the list of entries to return
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Column to order results by
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          enum:
+          - created
+          - last_seen
+          type: string
+        style: form
+      - description: Sort direction
+        explode: true
+        in: query
+        name: dir
+        required: false
+        schema:
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Language of text
+        explode: true
+        in: query
+        name: lang
+        required: false
+        schema:
+          enum:
+          - en_gb
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ScanDataComponentResponse"
+                type: array
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Request was valid but did not find a result. The scan could
+            be in progress or the scan ID is invalid.
+      security:
+      - APIKey: []
+      summary: Get components by Scan ID
+      tags:
+      - scan_data
+  /v1/scan_data/{scan_id}/services/count:
+    get:
+      description: |
+        Required role: `scans:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScanDataServicesCount
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: scan_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: List of service IDs to filter by
+        explode: true
+        in: query
+        name: ids
+        required: false
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      responses:
+        "200":
+          $ref: "#/components/responses/CountResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Request was valid but did not find a result. The scan could
+            be in progress or the scan ID is invalid.
+      security:
+      - APIKey: []
+      summary: Get count of services by Scan ID
+      tags:
+      - scan_data
+  /v1/scan_data/{scan_id}/services:
+    get:
+      description: |
+        Required role: `scans:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScanDataServices
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: scan_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: List of service IDs to filter by
+        explode: true
+        in: query
+        name: ids
+        required: false
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      - description: Maximum number of entries to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Offset into the list of entries to return
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Column to order results by
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          enum:
+          - created
+          - last_seen
+          type: string
+        style: form
+      - description: Sort direction
+        explode: true
+        in: query
+        name: dir
+        required: false
+        schema:
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Language of text
+        explode: true
+        in: query
+        name: lang
+        required: false
+        schema:
+          enum:
+          - en_gb
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ScanDataServiceResponse"
+                type: array
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Request was valid but did not find a result. The scan could
+            be in progress or the scan ID is invalid.
+      security:
+      - APIKey: []
+      summary: Get services by Scan ID
+      tags:
+      - scan_data
+  /v1/scan_data/{scan_id}/risks/count:
+    get:
+      description: |
+        Required role: `scans:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScanDataRisksCount
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: scan_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: List of risk Link IDs to filter by
+        explode: true
+        in: query
+        name: link_ids
+        required: false
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      - description: List of risk Node IDs to filter by
+        explode: true
+        in: query
+        name: risk_node_ids
+        required: false
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      responses:
+        "200":
+          $ref: "#/components/responses/CountResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Request was valid but did not find a result. The scan could
+            be in progress or the scan ID is invalid.
+      security:
+      - APIKey: []
+      summary: Get count of risks by Scan ID
+      tags:
+      - scan_data
+  /v1/scan_data/{scan_id}/risks:
+    get:
+      description: |
+        Required role: `scans:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScanDataRisks
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: scan_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: List of risk Link IDs to filter by
+        explode: true
+        in: query
+        name: link_ids
+        required: false
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      - description: List of risk Node IDs to filter by
+        explode: true
+        in: query
+        name: risk_node_ids
+        required: false
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      - description: Maximum number of entries to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Offset into the list of entries to return
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Column to order results by
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          enum:
+          - created
+          - last_seen
+          type: string
+        style: form
+      - description: Sort direction
+        explode: true
+        in: query
+        name: dir
+        required: false
+        schema:
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Language of text
+        explode: true
+        in: query
+        name: lang
+        required: false
+        schema:
+          enum:
+          - en_gb
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ScanDataRiskResponse"
+                type: array
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Request was valid but did not find a result. The scan could
+            be in progress or the scan ID is invalid.
+      security:
+      - APIKey: []
+      summary: Get risks by Scan ID
+      tags:
+      - scan_data
+  /v1/scan_data/{scan_id}/link_changes:
+    get:
+      description: "Required role: `scans:read`\n\nThis endpoint requires that the\
+        \ associated organisation has API access enabled.\nIf API access is not allowed,\
+        \ the response code will be 403 (Forbidden).\n\nThe Link Changes endpoint\
+        \ returns the same information shown on the **Changes** page in the Hexiosec\
+        \ ASM app — for example, when a new risk is detected on a service or when\
+        \ a domain starts pointing to a new IP.  \n\nFor counts of new and removed\
+        \ assets per iteration, see the `/v1/scans/{id}/iterations` endpoint.  \n\n\
+        Read the full user guide for examples and best practices: [docs.hexiosec.com/asm/link-changes-endpoint](https://docs.hexiosec.com/asm/link-changes-endpoint)\n"
+      operationId: getScanDataLinkChanges
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: scan_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Filter by link type
+        explode: true
+        in: query
+        name: link_type
+        required: false
+        schema:
+          items:
+            enum:
+            - ASSIGNED
+            - CHILD
+            - CLOUD
+            - DNS_A
+            - DNS_AAAA
+            - DNS_CNAME
+            - DNS_MX_DOMAIN
+            - DNS_MX_IP
+            - DNS_NS
+            - DNS_PTR
+            - HOSTS
+            - HOSTS_CERTIFICATE
+            - RISK
+            - LOCATED
+            - LINKS
+            - PROVIDES
+            - REDIRECT
+            - REFERENCED
+            - REFERS
+            - ROUTED
+            - SEED
+            - SPF_IP
+            - SPF_DOMAIN
+            - SPF_RANGE
+            - SPF_REDIRECT
+            - SUBSET
+            - USES_ASSET
+            - USES_CERTIFICATE
+            - USES_CLOUD_ASSET
+            - USES_COMPONENT
+            - WITHIN
+            type: string
+          type: array
+        style: form
+      - description: Filter by from node type
+        explode: true
+        in: query
+        name: from_type
+        required: false
+        schema:
+          items:
+            enum:
+            - Scan
+            - IPv4
+            - IPv6
+            - IPRange
+            - Domain
+            - Country
+            - Service
+            - Risk
+            - Certificate
+            - Component
+            - Registrant
+            - URL
+            - Entity
+            - CloudRegion
+            - CloudAsset
+            - ASN
+            - Asset
+            type: string
+          type: array
+        style: form
+      - description: Filter by to node type
+        explode: true
+        in: query
+        name: to_type
+        required: false
+        schema:
+          items:
+            enum:
+            - Scan
+            - IPv4
+            - IPv6
+            - IPRange
+            - Domain
+            - Country
+            - Service
+            - Risk
+            - Certificate
+            - Component
+            - Registrant
+            - URL
+            - Entity
+            - CloudRegion
+            - CloudAsset
+            - ASN
+            - Asset
+            type: string
+          type: array
+        style: form
+      - description: Filter by risk severity
+        explode: true
+        in: query
+        name: risk_severity_number
+        required: false
+        schema:
+          items:
+            maximum: 4
+            minimum: 0
+            type: integer
+          type: array
+        style: form
+      - description: Include transient link changes. A transient link is one that
+          was added and then removed within the timeframe of the changes.
+        explode: true
+        in: query
+        name: include_transient
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: From iteration ID (uuid)
+        explode: true
+        in: query
+        name: from_iteration
+        required: false
+        schema:
+          format: uuid
+          type: string
+        style: form
+      - description: To iteration ID (uuid)
+        explode: true
+        in: query
+        name: to_iteration
+        required: false
+        schema:
+          format: uuid
+          type: string
+        style: form
+      - description: Number of last iterations to compare
+        explode: true
+        in: query
+        name: last_iterations
+        required: false
+        schema:
+          maximum: 1000
+          minimum: 1
+          type: integer
+        style: form
+      - description: Language of text
+        explode: true
+        in: query
+        name: lang
+        required: false
+        schema:
+          enum:
+          - en_gb
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanDataLinkChangesResponse"
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Request was valid but did not find a result. The scan could
+            be in progress or the scan ID is invalid.
+      security:
+      - APIKey: []
+      summary: Get link changes by Scan ID and iteration(s)
+      tags:
+      - scan_data
+  /v1/graph/nodes/{id}:
+    patch:
+      description: "Required role: `scans:write`\n\nThis endpoint allows you to set\
+        \ a node as a primary or secondary asset, and ignore IPs.\n\nIgnoring IPs\
+        \ can be used to mark CDN hosted domains and hide IP risks (mark IPs as secondary\
+        \ assets) linked to these domains.\n\n**Note:** \n  - Only **Domain**, **IPv4**\
+        \ or **IPv6** nodes can be marked as secondary assets. \n  - Only **Domain**\
+        \ nodes can be marked to ignore IPs, and the associated organisation must\
+        \ have this feature enabled.\n  - You can not use both the deprecated *remove_from_scope*\
+        \ and the *mark_as_secondary* parameters, use one or the other.\n\nThis endpoint\
+        \ requires that the associated organisation has API access enabled.\nIf API\
+        \ access is not allowed, the response code will be 403 (Forbidden).\n"
+      operationId: updateNodeById
+      parameters:
+      - description: Node ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateNodeRequest"
+        description: Parameters to update the node
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericGraphNode"
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Update a node by ID
+      tags:
+      - graph
+  /v1/reports:
+    post:
+      description: "Required role: `scans.reports:write`\n\nReport generation is an\
+        \ asynchronous operation. The response will contain the report ID and the\
+        \ report will be generated in the background.\nYou can use the report ID to\
+        \ check the state of the report. The \"state\" property will be set to \"\
+        done\" when the report is ready for download.\n\nThis endpoint requires that\
+        \ the associated organisation has API access enabled. \nIf API access is not\
+        \ allowed, the response code will be 403 (Forbidden).\n"
+      operationId: createReport
+      requestBody:
+        content:
+          application/json:
+            examples:
+              summary:
+                value:
+                  type: summary
+                  scan_id: 123e4567-e89b-12d3-a456-426614174000
+                  name: My Report
+                  send_email: false
+                  time_zone: Europe/London
+                  executive_summary: This is an executive summary
+                  time_selection:
+                    from: 1970-01-01T00:00:00Z
+                    to: 1970-01-01T00:00:00Z
+                  branded: false
+              excel_summary:
+                value:
+                  type: excel_summary
+                  scan_id: 123e4567-e89b-12d3-a456-426614174000
+                  name: My Report
+                  send_email: false
+            schema:
+              $ref: "#/components/schemas/createReport_request"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportResponse"
+          description: Report created
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+      security:
+      - APIKey: []
+      summary: Create a report
+      tags:
+      - reports
+  /v1/reports/{id}:
+    delete:
+      description: |
+        Required role: `scans.reports:write`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: deleteReport
+      parameters:
+      - description: Report ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Valid response
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Delete a report
+      tags:
+      - reports
+    get:
+      description: |
+        Required role: `scans.reports:read`
+
+        The "state" property will be set to "done" when the report is ready for download.
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getReport
+      parameters:
+      - description: Report ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportResponse"
+          description: Valid responses
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Get a report
+      tags:
+      - reports
+  /v1/reports/scan/{scan_id}:
+    get:
+      description: |
+        Required role: `scans.reports:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getReportsForScan
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: scan_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: Search term
+        explode: true
+        in: query
+        name: search
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Report type
+        explode: true
+        in: query
+        name: type
+        required: false
+        schema:
+          $ref: "#/components/schemas/ReportType"
+        style: form
+      - description: Template ID used to generate report
+        explode: true
+        in: query
+        name: template_id
+        required: false
+        schema:
+          format: uuid
+          type: string
+        style: form
+      - description: Maximum number of entries to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: integer
+        style: form
+      - description: Offset into the list of entries to return
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: integer
+        style: form
+      - description: Column to order results by
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          enum:
+          - name
+          - scan_name
+          - created
+          type: string
+        style: form
+      - description: Sort direction
+        explode: true
+        in: query
+        name: dir
+        required: false
+        schema:
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ReportResponse"
+                type: array
+          description: Valid responses
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Get reports for a scan
+      tags:
+      - reports
+  /v1/reports/scan/{scan_id}/count:
+    get:
+      description: |
+        Required role: `scans.reports:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getReportCountForScan
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: scan_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: Search term
+        explode: true
+        in: query
+        name: search
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Report type
+        explode: true
+        in: query
+        name: type
+        required: false
+        schema:
+          $ref: "#/components/schemas/ReportType"
+        style: form
+      - description: Template ID used to generate report
+        explode: true
+        in: query
+        name: template_id
+        required: false
+        schema:
+          format: uuid
+          type: string
+        style: form
+      responses:
+        "200":
+          $ref: "#/components/responses/CountResponse"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Get report count for a scan
+      tags:
+      - reports
+  /v1/reports/organisation/{org_id}:
+    get:
+      description: |
+        Required role: `scans.reports:read`
+
+        The "download_url" property will be blank as it is time-limited, and should be obtained when needed via `GET /v1/reports/{id}`.
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getReportsForOrg
+      parameters:
+      - description: Organisation ID
+        explode: false
+        in: path
+        name: org_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: Search term
+        explode: true
+        in: query
+        name: search
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Report type
+        explode: true
+        in: query
+        name: type
+        required: false
+        schema:
+          $ref: "#/components/schemas/ReportType"
+        style: form
+      - description: Template ID used to generate report
+        explode: true
+        in: query
+        name: template_id
+        required: false
+        schema:
+          format: uuid
+          type: string
+        style: form
+      - description: Maximum number of entries to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: integer
+        style: form
+      - description: Offset into the list of entries to return
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: integer
+        style: form
+      - description: Column to order results by
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          enum:
+          - name
+          - scan_name
+          - created
+          type: string
+        style: form
+      - description: Sort direction
+        explode: true
+        in: query
+        name: dir
+        required: false
+        schema:
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ReportResponse"
+                type: array
+          description: Valid responses
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Get reports for an organisation
+      tags:
+      - reports
+  /v1/reports/organisation/{org_id}/count:
+    get:
+      description: |
+        Required role: `scans.reports:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getReportCountForOrg
+      parameters:
+      - description: Organisation ID
+        explode: false
+        in: path
+        name: org_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: Search term
+        explode: true
+        in: query
+        name: search
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Report type
+        explode: true
+        in: query
+        name: type
+        required: false
+        schema:
+          $ref: "#/components/schemas/ReportType"
+        style: form
+      - description: Template ID used to generate report
+        explode: true
+        in: query
+        name: template_id
+        required: false
+        schema:
+          format: uuid
+          type: string
+        style: form
+      responses:
+        "200":
+          $ref: "#/components/responses/CountResponse"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Get report count for an organisation
+      tags:
+      - reports
+  /v1/reports/templates/organisation/{org_id}:
+    get:
+      description: |
+        Required role: `organisations.report_templates:read`
+
+
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getReportTemplatesForOrg
+      parameters:
+      - description: Organisation ID
+        explode: false
+        in: path
+        name: org_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ReportTemplateResponse"
+                type: array
+          description: Valid responses
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Get report templates for an organisation
+      tags:
+      - reports
+components:
+  responses:
+    CountResponse:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/inline_object"
+      description: Valid count response
+    BadRequest:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+      description: Request did not match expected format or failed validation
+    Unauthorized:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+      description: Authorisation failed or was not provided
+    Forbidden:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+      description: Authorisation was successful but the operation was not allowed
+    NotFound:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+      description: Request was valid but did not find a result
+    Conflict:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+      description: Request was valid but could not be completed due to a conflict
+    Error:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+      description: An error occurred processing the request
+  schemas:
+    AuthResponse:
+      example:
+        authenticated: true
+        scheme: session
+        roles:
+        - files:list
+        - files:create
+        groups:
+        - groups
+        - groups
+        csrf: session
+        attributes: "{}"
+        user:
+          last_ip: last_ip
+          created: 2000-01-23T04:56:07.000+00:00
+          totp_enabled: true
+          given_name: given_name
+          enabled: true
+          name: name
+          attributes: "{}"
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          sso_subject: sso_subject
+          family_name: family_name
+          updated: 2000-01-23T04:56:07.000+00:00
+          email: email
+          default_organisation_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+      properties:
+        authenticated:
+          description: True if the chosen authentication scheme has passed.
+          example: true
+          type: boolean
+        scheme:
+          description: Name of the authentication scheme used.
+          example: session
+          type: string
+        groups:
+          description: List of groups for which the current user is a member.
+          items:
+            type: string
+          type: array
+        roles:
+          description: List of roles granted to the current user
+          example:
+          - files:list
+          - files:create
+          items:
+            type: string
+          type: array
+        csrf:
+          description: CSRF token to use with POST/PUT/PATCH/DELETE requests which
+            use session authentication.
+          example: session
+          type: string
+        attributes:
+          description: Combined attributes for the current user.
+          type: object
+        user:
+          $ref: "#/components/schemas/UserRowResponse"
+      required:
+      - authenticated
+    OrganisationResponse:
+      example:
+        owner_id: owner_id
+        created: 2000-01-23T04:56:07.000+00:00
+        email_suffixes:
+        - email_suffixes
+        - email_suffixes
+        roles:
+        - roles
+        - roles
+        groups:
+        - groups
+        - groups
+        created_by: created_by
+        owner_user:
+          name: name
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          given_name: given_name
+          family_name: family_name
+          email: email
+        created_by_user:
+          name: name
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          given_name: given_name
+          family_name: family_name
+          email: email
+        deleted: true
+        tier: tier
+        name: name
+        updated_by: updated_by
+        attributes: "{}"
+        id: id
+        updated: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          description: Organisation ID
+          type: string
+        name:
+          description: Organisation Name
+          type: string
+        tier:
+          description: Organisation tier
+          type: string
+        attributes:
+          description: Configuration attributes for the organisation
+          type: object
+        owner_id:
+          description: User ID of the organisation owner
+          type: string
+        email_suffixes:
+          description: Email suffixes for the organisation
+          items:
+            type: string
+          type: array
+        deleted:
+          description: True if the organisation has been marked as deleted
+          type: boolean
+        created:
+          description: Timestamp at which the entry was created
+          format: date-time
+          type: string
+        created_by:
+          description: User ID of the creator user
+          type: string
+        updated:
+          description: Timestamp at which the entry was last updated
+          format: date-time
+          type: string
+        updated_by:
+          description: User ID of the last user to update this entry
+          type: string
+        roles:
+          description: Roles granted to the current user for this organisation if
+            requested
+          items:
+            description: Role name
+            type: string
+          type: array
+        groups:
+          description: Groups assigned to the current user for this organisation if
+            requested
+          items:
+            description: Group name
+            type: string
+          type: array
+        owner_user:
+          $ref: "#/components/schemas/UserDetailsResponse"
+        created_by_user:
+          $ref: "#/components/schemas/UserDetailsResponse"
+      required:
+      - attributes
+      - created
+      - created_by
+      - deleted
+      - id
+      - name
+      - owner_id
+      - tier
+      - updated
+      - updated_by
+    OrganisationAssetResponse:
+      example:
+        asset: asset
+      properties:
+        asset:
+          description: Asset data
+          type: string
+      required:
+      - asset
+    ScanGroupResponse:
+      example:
+        organisation_id: organisation_id
+        deleted: true
+        created: 2000-01-23T04:56:07.000+00:00
+        roles:
+        - roles
+        - roles
+        name: name
+        updated_by: updated_by
+        groups:
+        - groups
+        - groups
+        id: id
+        created_by: created_by
+        updated: 2000-01-23T04:56:07.000+00:00
+        updated_by_user:
+          name: name
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          given_name: given_name
+          family_name: family_name
+          email: email
+        created_by_user:
+          name: name
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          given_name: given_name
+          family_name: family_name
+          email: email
+      properties:
+        id:
+          description: Scan Group ID
+          type: string
+        organisation_id:
+          description: Scan Group ID
+          type: string
+        name:
+          description: Scan Group Name
+          type: string
+        created:
+          description: Timestamp at which the entry was created
+          format: date-time
+          type: string
+        created_by:
+          description: User ID of the creator user
+          type: string
+        updated:
+          description: Timestamp at which the entry was last updated
+          format: date-time
+          type: string
+        updated_by:
+          description: User ID of the last user to update this entry
+          type: string
+        deleted:
+          description: True if the scan group has been marked as deleted
+          type: boolean
+        roles:
+          description: Roles granted to the current user for this scan group if requested
+          items:
+            description: Role name
+            type: string
+          type: array
+        groups:
+          description: Groups assigned to the current user for this scan group if
+            requested
+          items:
+            description: Group name
+            type: string
+          type: array
+        created_by_user:
+          $ref: "#/components/schemas/UserDetailsResponse"
+        updated_by_user:
+          $ref: "#/components/schemas/UserDetailsResponse"
+      required:
+      - created
+      - created_by
+      - deleted
+      - id
+      - name
+      - organisation_id
+      - updated
+      - updated_by
+    ScanGroupUpdateRequestBody:
+      example:
+        name: name
+      properties:
+        name:
+          description: Scan Group Name
+          type: string
+    ScanGroupCreateRequestBody:
+      example:
+        organisation_id: organisation_id
+        name: name
+      properties:
+        name:
+          description: Scan Group Name
+          type: string
+        organisation_id:
+          description: Organisation ID
+          type: string
+      required:
+      - name
+      - organisation_id
+    CreateScanRequest:
+      example:
+        dns_namelist: true
+        scan_group_id: scan_group_id
+        include_br_risks:
+          urn:component:application:apache: true
+        name: name
+        calendar_schedule: daily
+        type: adhoc
+        ignore_ip_nodes: true
+      properties:
+        name:
+          description: Scan name
+          type: string
+        scan_group_id:
+          description: Scan Group ID
+          type: string
+        type:
+          $ref: "#/components/schemas/ScanType"
+        dns_namelist:
+          description: Check for commonly used seed domains (true if not set)
+          type: boolean
+        ignore_ip_nodes:
+          description: Only show IP risks if they relate to seed IP nodes (false if
+            not set)
+          type: boolean
+        calendar_schedule:
+          description: |
+            The frequency of scan iteration  i.e. "daily", "weekly", "monthly", "quarterly", "yearly"
+          enum:
+          - daily
+          - weekly
+          - monthly
+          - quarterly
+          - yearly
+          type: string
+        include_br_risks:
+          $ref: "#/components/schemas/CreateScanRequest_include_br_risks"
+      required:
+      - name
+      - scan_group_id
+      - type
+    CreateScanSeedRequest:
+      example:
+        name: name
+        type: Domain
+        tags:
+        - tags
+        - tags
+        - tags
+        - tags
+        - tags
+      properties:
+        name:
+          description: Seed name
+          type: string
+        type:
+          description: Seed type
+          enum:
+          - Domain
+          - IPv4
+          - IPRange
+          type: string
+        tags:
+          description: Optional tags to describe seeds
+          items:
+            maxLength: 255
+            minLength: 1
+            type: string
+          maxItems: 5
+          type: array
+          uniqueItems: true
+      required:
+      - name
+      - type
+    SeedsResponse:
+      items:
+        $ref: "#/components/schemas/SeedsResponse_inner"
+      type: array
+    NodeResponse:
+      example:
+        metadata: "{}"
+        deleted: true
+        last_seen: 2000-01-23T04:56:07.000+00:00
+        created: 2000-01-23T04:56:07.000+00:00
+        id: id
+        scan_id: scan_id
+        label: label
+        updated: 2000-01-23T04:56:07.000+00:00
+        hash: hash
+      properties:
+        id:
+          type: string
+        scan_id:
+          type: string
+        label:
+          type: string
+        deleted:
+          type: boolean
+        hash:
+          type: string
+        metadata:
+          type: object
+        created:
+          format: date-time
+          type: string
+        updated:
+          format: date-time
+          type: string
+        last_seen:
+          format: date-time
+          type: string
+      required:
+      - created
+      - deleted
+      - hash
+      - id
+      - label
+      - last_seen
+      - metadata
+      - scan_id
+      - updated
+    ScanResponse:
+      example:
+        scan_group_id: scan_group_id
+        monitor_next: 2000-01-23T04:56:07.000+00:00
+        roles:
+        - role: role
+          group_id: group_id
+        - role: role
+          group_id: group_id
+        type: adhoc
+        enabled: true
+        insights_generated: 2000-01-23T04:56:07.000+00:00
+        created_by_user:
+          name: name
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          given_name: given_name
+          family_name: family_name
+          email: email
+        deep_page_depth: 6.027456183070403
+        organisation_id: organisation_id
+        include_br_risks: "{}"
+        iteration: "{}"
+        id: id
+        ignore_ip_nodes: true
+        shallow_page_depth: 0.8008281904610115
+        insights: "{}"
+        created: 2000-01-23T04:56:07.000+00:00
+        seeds: 1.4658129805029452
+        groups:
+        - created: 2000-01-23T04:56:07.000+00:00
+          name: name
+          attributes: "{}"
+          id: id
+          priority: 5.962133916683182
+          type: type
+        - created: 2000-01-23T04:56:07.000+00:00
+          name: name
+          attributes: "{}"
+          id: id
+          priority: 5.962133916683182
+          type: type
+        monitor: true
+        created_by: created_by
+        monitor_schedule: monitor_schedule
+        node: "{}"
+        deleted: true
+        dns_namelist: true
+        name: name
+        updated: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          description: Scan ID
+          type: string
+        name:
+          description: Scan name
+          type: string
+        scan_group_id:
+          description: Scan Group ID
+          type: string
+        type:
+          $ref: "#/components/schemas/ScanType"
+        enabled:
+          description: Scan enabled
+          type: boolean
+        deleted:
+          description: Scan deleted
+          type: boolean
+        created:
+          description: Timestamp at which the entry was created
+          format: date-time
+          type: string
+        created_by:
+          description: User ID of the creator user
+          type: string
+        updated:
+          description: Timestamp at which the entry was last updated
+          format: date-time
+          type: string
+        node:
+          description: Scan graph root node if requested
+          type: object
+        iteration:
+          description: Latest scan iteration state if requested
+          type: object
+        created_by_user:
+          $ref: "#/components/schemas/UserDetailsResponse"
+        monitor:
+          description: Scan has continuous monitor enabled
+          type: boolean
+        monitor_schedule:
+          description: The frequency of the continuous scans
+          type: string
+        monitor_next:
+          description: The next time continuous monitoring will trigger a scan
+          format: date-time
+          type: string
+        shallow_page_depth:
+          description: Scan configuration
+          type: number
+        deep_page_depth:
+          description: Scan configuration
+          type: number
+        dns_namelist:
+          description: Scan configuration
+          type: boolean
+        ignore_ip_nodes:
+          description: Scan configuration
+          type: boolean
+        include_br_risks:
+          description: Config for backported resolvable risks
+          type: object
+        insights_generated:
+          description: Timestamp at which the insights were generated
+          format: date-time
+          type: string
+        insights:
+          description: Insights for Scan
+          type: object
+        seeds:
+          description: Number of seeds associated with scan
+          type: number
+        groups:
+          description: Permission groups the user has for this scan if requested
+          items:
+            $ref: "#/components/schemas/Group"
+          type: array
+        roles:
+          description: Permission roles the user has for this scan if requested
+          items:
+            $ref: "#/components/schemas/Role"
+          type: array
+        organisation_id:
+          description: Organisation ID the scan belongs to if requested
+          type: string
+      required:
+      - created
+      - created_by
+      - deleted
+      - enabled
+      - id
+      - include_br_risks
+      - name
+      - type
+      - updated
+    ScanIterationResponse:
+      example:
+        limited: true
+        scores: "{}"
+        insights: "{}"
+        created: 2000-01-23T04:56:07.000+00:00
+        merged: false
+        started: 2000-01-23T04:56:07.000+00:00
+        completed: 2000-01-23T04:56:07.000+00:00
+        issues: "{}"
+        insights_generated: 2000-01-23T04:56:07.000+00:00
+        completed_time: 2000-01-23T04:56:07.000+00:00
+        stats: "{}"
+        id: id
+        scan_id: scan_id
+        state: created
+        updated: 2000-01-23T04:56:07.000+00:00
+        summary_generated: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          description: Scan Iteration ID
+          type: string
+        scan_id:
+          description: Scan ID
+          type: string
+        state:
+          description: Scan Iteration state
+          enum:
+          - created
+          - in_progress
+          - completed
+          - timed_out
+          - failed
+          - post_processing
+          - queued
+          type: string
+        created:
+          description: Timestamp at which the entry was created
+          format: date-time
+          type: string
+        updated:
+          description: Timestamp at which the entry was last updated
+          format: date-time
+          type: string
+        started:
+          description: Timestamp at which the Scan Iteration started running
+          format: date-time
+          type: string
+        completed:
+          description: Timestamp at which the Scan Iteration completed running
+          format: date-time
+          type: string
+        completed_time:
+          deprecated: true
+          description: Deprecated - Timestamp at which the Scan Iteration completed
+            running - Use **completed**
+          format: date-time
+          type: string
+        limited:
+          description: Scan Iteration reached the scan's organisation limit
+          type: boolean
+        summary_generated:
+          description: "Timestamp at which the scores, issues and stats were generated"
+          format: date-time
+          type: string
+        scores:
+          description: Health scores for Scan Iteration
+          type: object
+        issues:
+          description: Summary of issues found in Scan Iteration
+          type: object
+        stats:
+          description: Breakdown of the number of items discovered in Scan Iteration
+          type: object
+        insights_generated:
+          description: Timestamp at which the insights were generated
+          format: date-time
+          type: string
+        insights:
+          description: Insights for Scan Iteration
+          type: object
+        merged:
+          description: Scan Iteration has been consolidated in accordance with scan's
+            organisation history settings
+          enum:
+          - false
+          - step_1
+          - step_2
+          type: string
+      required:
+      - created
+      - id
+      - scan_id
+      - started
+      - state
+      - updated
+    UpdateNodeRequest:
+      example:
+        mark_as_secondary: true
+        remove_from_scope: true
+        ignore_ips: true
+      properties:
+        remove_from_scope:
+          deprecated: true
+          description: "Deprecated - remove the node from scope, if it is in scope.\
+            \ Or undo this action, if it has been previously removed from scope -\
+            \ Use **mark_as_secondary**"
+          type: boolean
+        mark_as_secondary:
+          description: "Mark node as secondary asset if the node is a primary asset.\
+            \ Or undo this action, if it has been previously marked as secondary."
+          type: boolean
+        ignore_ips:
+          description: Ignore IPs for the node
+          type: boolean
+    ScanType:
+      description: Scan type
+      enum:
+      - adhoc
+      - continuous_own
+      - continuous_vendor
+      type: string
+    ScanProgressResponse:
+      example:
+        in_progress: 1.4658129805029452
+        total: 7.061401241503109
+        idle: 0.8008281904610115
+        queued: 6.027456183070403
+        failed: 5.637376656633329
+        error: 2.3021358869347655
+        complete: 9.301444243932576
+        done: 5.962133916683182
+        errors: 3.616076749251911
+      properties:
+        idle:
+          type: number
+        queued:
+          type: number
+        in_progress:
+          type: number
+        done:
+          type: number
+        failed:
+          type: number
+        error:
+          type: number
+        total:
+          type: number
+        complete:
+          type: number
+        errors:
+          type: number
+      required:
+      - complete
+      - done
+      - error
+      - errors
+      - failed
+      - idle
+      - in_progress
+      - queued
+      - total
+    TagResponse:
+      example:
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        org_id: org_id
+        name: name
+        updated_by: updated_by
+        created_at: 2000-01-23T04:56:07.000+00:00
+        id: id
+        created_by: created_by
+      properties:
+        id:
+          description: Tag ID
+          type: string
+        org_id:
+          description: Organisation ID
+          type: string
+        name:
+          description: Tag name
+          type: string
+        created_at:
+          description: Timestamp at which the tag was created
+          format: date-time
+          type: string
+        created_by:
+          description: User ID of the creator
+          type: string
+        updated_at:
+          description: Timestamp at which the tag was last updated
+          format: date-time
+          type: string
+        updated_by:
+          description: User ID of the last updater
+          type: string
+      required:
+      - created_at
+      - created_by
+      - id
+      - name
+      - org_id
+      - updated_at
+      - updated_by
+    ScanLinkResponse:
+      example:
+        metadata: "{}"
+        from_id: from_id
+        last_seen: 2000-01-23T04:56:07.000+00:00
+        created: 2000-01-23T04:56:07.000+00:00
+        to_id: to_id
+        valid_from: 2000-01-23T04:56:07.000+00:00
+        label: label
+        deleted: true
+        valid_to: 2000-01-23T04:56:07.000+00:00
+        id: id
+        scan_id: scan_id
+        updated: 2000-01-23T04:56:07.000+00:00
+        hash: hash
+      properties:
+        id:
+          description: Link ID
+          type: string
+        from_id:
+          description: From Node ID
+          type: string
+        to_id:
+          description: To Node ID
+          type: string
+        scan_id:
+          description: Scan ID
+          type: string
+        label:
+          description: Link label
+          type: string
+        hash:
+          description: Hash of metadata
+          type: string
+        created:
+          description: Timestamp at which the link was created
+          format: date-time
+          type: string
+        updated:
+          description: Timestamp at which the link was last updated
+          format: date-time
+          type: string
+        last_seen:
+          description: Timestamp at which the link was last seen in an iteration
+          format: date-time
+          type: string
+        valid_from:
+          description: Timestamp at which the link is valid from
+          format: date-time
+          type: string
+        valid_to:
+          description: Timestamp at which the link is valid to. When valid to < valid
+            from the link is considered open.
+          format: date-time
+          type: string
+        metadata:
+          description: Link metadata
+          type: object
+        deleted:
+          description: Link is deleted
+          type: boolean
+      required:
+      - created
+      - deleted
+      - from_id
+      - hash
+      - id
+      - label
+      - last_seen
+      - metadata
+      - scan_id
+      - to_id
+      - updated
+      - valid_from
+      - valid_to
+    ScanLinkTagResponse:
+      example:
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        tag_name: tag_name
+        updated_by: updated_by
+        link:
+          metadata: "{}"
+          from_id: from_id
+          last_seen: 2000-01-23T04:56:07.000+00:00
+          created: 2000-01-23T04:56:07.000+00:00
+          to_id: to_id
+          valid_from: 2000-01-23T04:56:07.000+00:00
+          label: label
+          deleted: true
+          valid_to: 2000-01-23T04:56:07.000+00:00
+          id: id
+          scan_id: scan_id
+          updated: 2000-01-23T04:56:07.000+00:00
+          hash: hash
+        tag_id: tag_id
+        created_at: 2000-01-23T04:56:07.000+00:00
+        tag:
+          updated_at: 2000-01-23T04:56:07.000+00:00
+          org_id: org_id
+          name: name
+          updated_by: updated_by
+          created_at: 2000-01-23T04:56:07.000+00:00
+          id: id
+          created_by: created_by
+        created_by: created_by
+        updated_by_user:
+          name: name
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          given_name: given_name
+          family_name: family_name
+          email: email
+        link_id: link_id
+        created_by_user:
+          name: name
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          given_name: given_name
+          family_name: family_name
+          email: email
+      properties:
+        link_id:
+          description: Link ID
+          type: string
+        tag_id:
+          description: Tag ID
+          type: string
+        created_at:
+          description: Timestamp at which the tag was added to the link
+          format: date-time
+          type: string
+        created_by:
+          description: User ID of the creator
+          type: string
+        updated_at:
+          description: Timestamp at which the link tag was last updated
+          format: date-time
+          type: string
+        updated_by:
+          description: User ID of the last updater
+          type: string
+        link:
+          $ref: "#/components/schemas/ScanLinkResponse"
+        tag:
+          $ref: "#/components/schemas/TagResponse"
+        created_by_user:
+          $ref: "#/components/schemas/UserDetailsResponse"
+        updated_by_user:
+          $ref: "#/components/schemas/UserDetailsResponse"
+        tag_name:
+          description: Tag Name
+          type: string
+      required:
+      - created_at
+      - created_by
+      - link_id
+      - tag_id
+      - updated_at
+      - updated_by
+    ScanLinkTagsResponse:
+      items:
+        $ref: "#/components/schemas/ScanLinkTagResponse"
+      type: array
+    ActionResponse:
+      example:
+        note: note
+        is_secondary: true
+        link_ids:
+        - link_ids
+        - link_ids
+        assignee_user:
+          name: name
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          given_name: given_name
+          family_name: family_name
+          email: email
+        created: 2000-01-23T04:56:07.000+00:00
+        rule: rule
+        description: description
+        asset_id: asset_id
+        out_of_scope: true
+        target: "{}"
+        remediation: remediation
+        note_modified_by_user:
+          name: name
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          given_name: given_name
+          family_name: family_name
+          email: email
+        asset_name: asset_name
+        resolved_at: 2000-01-23T04:56:07.000+00:00
+        asset_type: asset_type
+        name: name
+        modified: 2000-01-23T04:56:07.000+00:00
+        links:
+        - link_from: "{}"
+          link_to: "{}"
+        - link_from: "{}"
+          link_to: "{}"
+        modified_by_user:
+          name: name
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          given_name: given_name
+          family_name: family_name
+          email: email
+        id: id
+        scan_id: scan_id
+        state: unplanned
+        node_id: node_id
+      properties:
+        id:
+          description: Action ID
+          type: string
+        node_id:
+          deprecated: true
+          description: ID of the node against which this action is registered. Has
+            been replaced with the asset_id param
+          type: string
+        scan_id:
+          description: Scan ID
+          type: string
+        asset_id:
+          description: ID of the node against which this action is registered
+          type: string
+        asset_type:
+          description: Label of the node against which this action is registered
+          type: string
+        asset_name:
+          description: Name of the node against which this action is registered
+          type: string
+        rule:
+          description: Name of the rule that has caused this action
+          type: string
+        state:
+          description: Management state of the action
+          enum:
+          - unplanned
+          - prioritised
+          - in_progress
+          - done
+          - resolved
+          type: string
+        name:
+          description: Description in lang
+          type: string
+        description:
+          description: Description in lang
+          type: string
+        remediation:
+          description: Remediation in lang
+          type: string
+        note:
+          description: User-supplied notes about this action
+          type: string
+        created:
+          description: Timestamp at which the entry was created
+          format: date-time
+          type: string
+        modified:
+          description: Timestamp at which the entry was updated
+          format: date-time
+          type: string
+        out_of_scope:
+          deprecated: true
+          description: Deprecated – True if this action has been marked as out of
+            scope - Use **is_secondary**
+          type: boolean
+        is_secondary:
+          description: True if this action has been marked as secondary
+          type: boolean
+        resolved_at:
+          description: Timestamp at which the action was resolved
+          format: date-time
+          type: string
+        links:
+          description: Has been replaced with the get risks endpoint
+          items:
+            $ref: "#/components/schemas/ActionLinkResponse"
+          type: array
+        link_ids:
+          description: Has been replaced with the get risks endpoint
+          items:
+            type: string
+          type: array
+        target:
+          type: object
+        assignee_user:
+          $ref: "#/components/schemas/UserDetailsResponse"
+        modified_by_user:
+          $ref: "#/components/schemas/UserDetailsResponse"
+        note_modified_by_user:
+          $ref: "#/components/schemas/UserDetailsResponse"
+      required:
+      - created
+      - id
+      - node_id
+      - rule
+      - scan_id
+      - state
+    ActionLinkResponse:
+      example:
+        link_from: "{}"
+        link_to: "{}"
+      properties:
+        link_from:
+          type: object
+        link_to:
+          type: object
+    ActionNodeResponse:
+      type: object
+    UserRowResponse:
+      example:
+        last_ip: last_ip
+        created: 2000-01-23T04:56:07.000+00:00
+        totp_enabled: true
+        given_name: given_name
+        enabled: true
+        name: name
+        attributes: "{}"
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        sso_subject: sso_subject
+        family_name: family_name
+        updated: 2000-01-23T04:56:07.000+00:00
+        email: email
+        default_organisation_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+      properties:
+        id:
+          format: uuid
+          type: string
+        email:
+          type: string
+        name:
+          type: string
+        family_name:
+          type: string
+        given_name:
+          type: string
+        last_ip:
+          type: string
+        created:
+          format: date-time
+          type: string
+        updated:
+          format: date-time
+          type: string
+        sso_subject:
+          type: string
+        attributes:
+          type: object
+        enabled:
+          type: boolean
+        default_organisation_id:
+          format: uuid
+          type: string
+        totp_enabled:
+          description: User has enabled Time-based one-time passwords (TOTP)
+          type: boolean
+    UserResponse:
+      example:
+        sso_user: true
+        totp_enabled: true
+        scan_groups:
+        - organisation_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          roles:
+          - roles
+          - roles
+          name: name
+          groups:
+          - groups
+          - groups
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          is_default: true
+        - organisation_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          roles:
+          - roles
+          - roles
+          name: name
+          groups:
+          - groups
+          - groups
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          is_default: true
+        roles:
+        - roles
+        - roles
+        name: name
+        groups:
+        - groups
+        - groups
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        email: email
+        enabled: true
+        last_session_updated: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          format: uuid
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        enabled:
+          type: boolean
+        last_session_updated:
+          description: Most recent session activity of user
+          format: date-time
+          type: string
+        totp_enabled:
+          description: User has enabled Time-based one-time passwords (TOTP)
+          type: boolean
+        sso_user:
+          description: User is an SSO user
+          type: boolean
+        groups:
+          description: Groups the user is a apart of in the organisation / scan group
+          items:
+            type: string
+          type: array
+        roles:
+          description: Roles the user has in the organisation / scan group
+          items:
+            type: string
+          type: array
+        scan_groups:
+          description: Scan Groups the user is apart of in the organisation (if the
+            organisation is requested)
+          items:
+            $ref: "#/components/schemas/UserResponse_scan_groups_inner"
+          type: array
+      required:
+      - email
+      - enabled
+      - groups
+      - id
+      - name
+      - roles
+      - totp_enabled
+    UsersCreateAPIKeyRequest:
+      example:
+        lifetime: 168h
+        description: Test API key
+      properties:
+        description:
+          description: API Key description
+          example: Test API key
+          type: string
+        lifetime:
+          description: "Validity duration (Valid time units include \"s\", \"m\",\
+            \ \"h\")"
+          example: 168h
+          type: string
+      required:
+      - description
+      - lifetime
+    UsersCreateAPIKeyResponse:
+      example:
+        api_key: api_key
+        lifetime: 168h
+        description: Test API key
+      properties:
+        api_key:
+          description: API Key
+          type: string
+        description:
+          description: API Key description
+          example: Test API key
+          type: string
+        lifetime:
+          description: Validity duration
+          example: 168h
+          type: string
+      required:
+      - api_key
+      - description
+    UserDetailsResponse:
+      example:
+        name: name
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        given_name: given_name
+        family_name: family_name
+        email: email
+      properties:
+        id:
+          format: uuid
+          type: string
+        name:
+          description: "Full name, might be an empty string"
+          type: string
+        given_name:
+          description: "Given name, might be an empty string"
+          type: string
+        family_name:
+          description: "Family name, might be an empty string"
+          type: string
+        email:
+          description: Email address
+          type: string
+      required:
+      - email
+      - id
+    ScanDataDomainResponse:
+      example:
+        seed: true
+        last_seen: 2000-01-23T04:56:07.000+00:00
+        limited: true
+        created: 2000-01-23T04:56:07.000+00:00
+        cloud_regions:
+        - name: name
+          id: id
+        - name: name
+          id: id
+        services:
+        - name: name
+          id: id
+        - name: name
+          id: id
+        ips:
+        - name: name
+          id: id
+        - name: name
+          id: id
+        risk_counts:
+          high: 5
+          critical: 5
+          low: 6
+          medium: 1
+          info: 0
+        risks:
+        - severity: severity
+          is_br_risk: true
+          epss_score: 0.8008281904610115
+          epss_last_update: 2000-01-23T04:56:07.000+00:00
+          last_seen: 2000-01-23T04:56:07.000+00:00
+          created: 2000-01-23T04:56:07.000+00:00
+          description: description
+          asset_node_id: asset_node_id
+          link_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          tags:
+          - tags
+          - tags
+          risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          urn: urn
+          has_known_exploit: true
+          remediation: remediation
+          epss_model_ver: epss_model_ver
+          asset_name: asset_name
+          asset_type: asset_type
+          name: name
+          category: category
+          epss_percentile: 6.027456183070403
+        - severity: severity
+          is_br_risk: true
+          epss_score: 0.8008281904610115
+          epss_last_update: 2000-01-23T04:56:07.000+00:00
+          last_seen: 2000-01-23T04:56:07.000+00:00
+          created: 2000-01-23T04:56:07.000+00:00
+          description: description
+          asset_node_id: asset_node_id
+          link_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          tags:
+          - tags
+          - tags
+          risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          urn: urn
+          has_known_exploit: true
+          remediation: remediation
+          epss_model_ver: epss_model_ver
+          asset_name: asset_name
+          asset_type: asset_type
+          name: name
+          category: category
+          epss_percentile: 6.027456183070403
+        stale: true
+        name_server: true
+        certificates:
+        - name: name
+          id: id
+        - name: name
+          id: id
+        entities:
+        - name: name
+          id: id
+        - name: name
+          id: id
+        name: name
+        alias:
+          name: name
+          id: id
+        asns:
+        - name: name
+          id: id
+        - name: name
+          id: id
+        id: id
+        dns_destinations:
+        - name: name
+          id: id
+        - name: name
+          id: id
+      properties:
+        id:
+          description: Domain ID
+          type: string
+        name:
+          description: Domain name
+          type: string
+        dns_destinations:
+          description: "[DEPRECATED] use `ips` and `alias` instead, they contain the\
+            \ same data."
+          items:
+            $ref: "#/components/schemas/ScanDataNodeResponse"
+          type: array
+        alias:
+          $ref: "#/components/schemas/ScanDataNodeResponse"
+        ips:
+          description: IPs
+          items:
+            $ref: "#/components/schemas/ScanDataNodeResponse"
+          type: array
+        services:
+          description: Services
+          items:
+            $ref: "#/components/schemas/ScanDataNodeResponse"
+          type: array
+        certificates:
+          description: Certificates
+          items:
+            $ref: "#/components/schemas/ScanDataNodeResponse"
+          type: array
+        cloud_regions:
+          description: Cloud regions
+          items:
+            $ref: "#/components/schemas/ScanDataNodeResponse"
+          type: array
+        asns:
+          description: ASNs
+          items:
+            $ref: "#/components/schemas/ScanDataNodeResponse"
+          type: array
+        entities:
+          description: Entities
+          items:
+            $ref: "#/components/schemas/ScanDataNodeResponse"
+          type: array
+        risk_counts:
+          $ref: "#/components/schemas/ScanDataRiskCountsResponse"
+        risks:
+          items:
+            $ref: "#/components/schemas/ScanDataRiskResponse"
+          type: array
+        limited:
+          description: Whether the domain is limited or not
+          type: boolean
+        stale:
+          description: Whether the domain is stale or not
+          type: boolean
+        name_server:
+          description: Whether the domain is a name server or not
+          type: boolean
+        seed:
+          description: Whether the domain is a seed or not
+          type: boolean
+        created:
+          description: Domain creation date
+          format: date-time
+          type: string
+        last_seen:
+          description: Domain last seen date
+          format: date-time
+          type: string
+      required:
+      - asns
+      - certificates
+      - cloud_regions
+      - created
+      - dns_destinations
+      - entities
+      - id
+      - ips
+      - last_seen
+      - limited
+      - name
+      - name_server
+      - risk_counts
+      - seed
+      - services
+      - stale
+    ScanDataOutOfScopeDomainResponse:
+      example:
+        last_seen: 2000-01-23T04:56:07.000+00:00
+        created: 2000-01-23T04:56:07.000+00:00
+        name: name
+        id: id
+      properties:
+        id:
+          description: Domain ID
+          type: string
+        name:
+          description: Domain name
+          type: string
+        created:
+          description: Domain creation date
+          format: date-time
+          type: string
+        last_seen:
+          description: Domain last seen date
+          format: date-time
+          type: string
+      required:
+      - created
+      - id
+      - last_seen
+      - name
+    ScanDataIPResponse:
+      example:
+        country: country
+        seed: true
+        last_seen: 2000-01-23T04:56:07.000+00:00
+        limited: true
+        city: city
+        created: 2000-01-23T04:56:07.000+00:00
+        ip: ip
+        latitude: 0.8008281904610115
+        cloud_regions:
+        - name: name
+          id: id
+        - name: name
+          id: id
+        services:
+        - name: name
+          id: id
+        - name: name
+          id: id
+        dns_sources:
+        - name: name
+          id: id
+        - name: name
+          id: id
+        risk_counts:
+          high: 5
+          critical: 5
+          low: 6
+          medium: 1
+          info: 0
+        risks:
+        - severity: severity
+          is_br_risk: true
+          epss_score: 0.8008281904610115
+          epss_last_update: 2000-01-23T04:56:07.000+00:00
+          last_seen: 2000-01-23T04:56:07.000+00:00
+          created: 2000-01-23T04:56:07.000+00:00
+          description: description
+          asset_node_id: asset_node_id
+          link_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          tags:
+          - tags
+          - tags
+          risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          urn: urn
+          has_known_exploit: true
+          remediation: remediation
+          epss_model_ver: epss_model_ver
+          asset_name: asset_name
+          asset_type: asset_type
+          name: name
+          category: category
+          epss_percentile: 6.027456183070403
+        - severity: severity
+          is_br_risk: true
+          epss_score: 0.8008281904610115
+          epss_last_update: 2000-01-23T04:56:07.000+00:00
+          last_seen: 2000-01-23T04:56:07.000+00:00
+          created: 2000-01-23T04:56:07.000+00:00
+          description: description
+          asset_node_id: asset_node_id
+          link_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          tags:
+          - tags
+          - tags
+          risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          urn: urn
+          has_known_exploit: true
+          remediation: remediation
+          epss_model_ver: epss_model_ver
+          asset_name: asset_name
+          asset_type: asset_type
+          name: name
+          category: category
+          epss_percentile: 6.027456183070403
+        dns_ptrs:
+        - name: name
+          id: id
+        - name: name
+          id: id
+        certificates:
+        - name: name
+          id: id
+        - name: name
+          id: id
+        entities:
+        - name: name
+          id: id
+        - name: name
+          id: id
+        asns:
+        - name: name
+          id: id
+        - name: name
+          id: id
+        id: id
+        longitude: 6.027456183070403
+      properties:
+        id:
+          description: IP ID
+          type: string
+        ip:
+          description: IP Address
+          type: string
+        dns_sources:
+          description: DNS sources
+          items:
+            $ref: "#/components/schemas/ScanDataNodeResponse"
+          type: array
+        dns_ptrs:
+          description: DNS pointers
+          items:
+            $ref: "#/components/schemas/ScanDataNodeResponse"
+          type: array
+        services:
+          description: Services
+          items:
+            $ref: "#/components/schemas/ScanDataNodeResponse"
+          type: array
+        certificates:
+          description: Certificates
+          items:
+            $ref: "#/components/schemas/ScanDataNodeResponse"
+          type: array
+        cloud_regions:
+          description: Cloud regions
+          items:
+            $ref: "#/components/schemas/ScanDataNodeResponse"
+          type: array
+        asns:
+          description: ASNs
+          items:
+            $ref: "#/components/schemas/ScanDataNodeResponse"
+          type: array
+        entities:
+          description: Entities
+          items:
+            $ref: "#/components/schemas/ScanDataNodeResponse"
+          type: array
+        risk_counts:
+          $ref: "#/components/schemas/ScanDataRiskCountsResponse"
+        risks:
+          items:
+            $ref: "#/components/schemas/ScanDataRiskResponse"
+          type: array
+        limited:
+          description: Whether the IP is limited or not
+          type: boolean
+        country:
+          description: Country
+          type: string
+        city:
+          description: City
+          type: string
+        latitude:
+          description: Latitude
+          type: number
+        longitude:
+          description: Longitude
+          type: number
+        seed:
+          description: Whether the IP is a seed or not
+          type: boolean
+        created:
+          description: IP creation date
+          format: date-time
+          type: string
+        last_seen:
+          description: IP last seen date
+          format: date-time
+          type: string
+      required:
+      - asns
+      - certificates
+      - cloud_regions
+      - created
+      - dns_ptrs
+      - dns_sources
+      - entities
+      - id
+      - ip
+      - last_seen
+      - limited
+      - risk_counts
+      - seed
+      - services
+    ScanDataWebPresenceResponse:
+      example:
+        components:
+        - name: name
+          id: id
+        - name: name
+          id: id
+        status_code: 0
+        last_seen: 2000-01-23T04:56:07.000+00:00
+        page_title: page_title
+        created: 2000-01-23T04:56:07.000+00:00
+        screenshot_id: screenshot_id
+        url: url
+        content_type: content_type
+        redirects:
+        - status_code: 6
+          id: id
+          tls_status: tls_status
+          url: url
+        - status_code: 6
+          id: id
+          tls_status: tls_status
+          url: url
+        domain: domain
+        id: id
+        form_input: true
+        http_server: http_server
+        tls_status: tls_status
+      properties:
+        id:
+          description: URL ID
+          type: string
+        url:
+          description: URL
+          type: string
+        domain:
+          description: Domain
+          type: string
+        screenshot_id:
+          description: Screenshot ID
+          type: string
+        http_server:
+          description: HTTP web server details
+          type: string
+        status_code:
+          description: HTTP status code
+          type: integer
+        page_title:
+          description: Page title
+          type: string
+        tls_status:
+          description: "Can be one of `http`, `https`, `http-risk`, `https-risk`"
+          type: string
+        content_type:
+          description: Content type
+          type: string
+        form_input:
+          description: Whether the web page at the URL contains a form input
+          type: boolean
+        components:
+          description: Components
+          items:
+            $ref: "#/components/schemas/ScanDataNodeResponse"
+          type: array
+        redirects:
+          description: Redirects
+          items:
+            $ref: "#/components/schemas/ScanDataWebPresenceRedirectResponse"
+          type: array
+        created:
+          description: URL creation date
+          format: date-time
+          type: string
+        last_seen:
+          description: URL last seen date
+          format: date-time
+          type: string
+      required:
+      - components
+      - created
+      - domain
+      - form_input
+      - id
+      - last_seen
+      - redirects
+      - status_code
+      - tls_status
+      - url
+    ScanDataWebPresenceRedirectResponse:
+      example:
+        status_code: 6
+        id: id
+        tls_status: tls_status
+        url: url
+      properties:
+        id:
+          description: Redirect ID
+          type: string
+        url:
+          description: URL
+          type: string
+        status_code:
+          description: HTTP status code
+          type: integer
+        tls_status:
+          description: "Can be one of `http`, `https`, `http-risk`, `https-risk`"
+          type: string
+      required:
+      - id
+      - status_code
+      - tls_status
+      - url
+    ScanDataComponentResponse:
+      example:
+        urn: urn
+        risk_counts:
+          high: 5
+          critical: 5
+          low: 6
+          medium: 1
+          info: 0
+        risks:
+        - severity: severity
+          is_br_risk: true
+          epss_score: 0.8008281904610115
+          epss_last_update: 2000-01-23T04:56:07.000+00:00
+          last_seen: 2000-01-23T04:56:07.000+00:00
+          created: 2000-01-23T04:56:07.000+00:00
+          description: description
+          asset_node_id: asset_node_id
+          link_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          tags:
+          - tags
+          - tags
+          risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          urn: urn
+          has_known_exploit: true
+          remediation: remediation
+          epss_model_ver: epss_model_ver
+          asset_name: asset_name
+          asset_type: asset_type
+          name: name
+          category: category
+          epss_percentile: 6.027456183070403
+        - severity: severity
+          is_br_risk: true
+          epss_score: 0.8008281904610115
+          epss_last_update: 2000-01-23T04:56:07.000+00:00
+          last_seen: 2000-01-23T04:56:07.000+00:00
+          created: 2000-01-23T04:56:07.000+00:00
+          description: description
+          asset_node_id: asset_node_id
+          link_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          tags:
+          - tags
+          - tags
+          risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          urn: urn
+          has_known_exploit: true
+          remediation: remediation
+          epss_model_ver: epss_model_ver
+          asset_name: asset_name
+          asset_type: asset_type
+          name: name
+          category: category
+          epss_percentile: 6.027456183070403
+        last_seen: 2000-01-23T04:56:07.000+00:00
+        vendor: vendor
+        created: 2000-01-23T04:56:07.000+00:00
+        name: name
+        id: id
+        services:
+        - name: name
+          id: id
+        - name: name
+          id: id
+        version: version
+        cpe23: cpe23
+      properties:
+        id:
+          description: Component ID
+          type: string
+        name:
+          description: Component name
+          type: string
+        urn:
+          description: Component URN
+          type: string
+        cpe23:
+          description: Component CPE23
+          type: string
+        vendor:
+          description: Component vendor
+          type: string
+        version:
+          description: Component version
+          type: string
+        services:
+          description: Services
+          items:
+            $ref: "#/components/schemas/ScanDataNodeResponse"
+          type: array
+        risk_counts:
+          $ref: "#/components/schemas/ScanDataRiskCountsResponse"
+        risks:
+          items:
+            $ref: "#/components/schemas/ScanDataRiskResponse"
+          type: array
+        created:
+          description: Component creation date
+          format: date-time
+          type: string
+        last_seen:
+          description: Component last seen date
+          format: date-time
+          type: string
+      required:
+      - created
+      - id
+      - last_seen
+      - name
+      - services
+      - urn
+    ScanDataServiceResponse:
+      example:
+        socket_encrypted: true
+        iana_description: iana_description
+        last_seen: 2000-01-23T04:56:07.000+00:00
+        created: 2000-01-23T04:56:07.000+00:00
+        shodan_last_update: 2000-01-23T04:56:07.000+00:00
+        socket_authorized: true
+        risk_counts:
+          high: 5
+          critical: 5
+          low: 6
+          medium: 1
+          info: 0
+        protocol: protocol
+        risks:
+        - severity: severity
+          is_br_risk: true
+          epss_score: 0.8008281904610115
+          epss_last_update: 2000-01-23T04:56:07.000+00:00
+          last_seen: 2000-01-23T04:56:07.000+00:00
+          created: 2000-01-23T04:56:07.000+00:00
+          description: description
+          asset_node_id: asset_node_id
+          link_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          tags:
+          - tags
+          - tags
+          risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          urn: urn
+          has_known_exploit: true
+          remediation: remediation
+          epss_model_ver: epss_model_ver
+          asset_name: asset_name
+          asset_type: asset_type
+          name: name
+          category: category
+          epss_percentile: 6.027456183070403
+        - severity: severity
+          is_br_risk: true
+          epss_score: 0.8008281904610115
+          epss_last_update: 2000-01-23T04:56:07.000+00:00
+          last_seen: 2000-01-23T04:56:07.000+00:00
+          created: 2000-01-23T04:56:07.000+00:00
+          description: description
+          asset_node_id: asset_node_id
+          link_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          tags:
+          - tags
+          - tags
+          risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          urn: urn
+          has_known_exploit: true
+          remediation: remediation
+          epss_model_ver: epss_model_ver
+          asset_name: asset_name
+          asset_type: asset_type
+          name: name
+          category: category
+          epss_percentile: 6.027456183070403
+        port: 0
+        name: name
+        host:
+          name: name
+          id: id
+          type: type
+        iana_name: iana_name
+        source_last_updated: 2000-01-23T04:56:07.000+00:00
+        id: id
+      properties:
+        id:
+          description: Service ID
+          type: string
+        name:
+          description: Service name
+          type: string
+        host:
+          $ref: "#/components/schemas/ScanDataServiceResponse_host"
+        port:
+          description: Service port
+          type: integer
+        protocol:
+          description: Service protocol
+          type: string
+        iana_name:
+          description: Service IANA name
+          type: string
+        iana_description:
+          description: Service IANA description
+          type: string
+        socket_encrypted:
+          description: Whether the service used SSL
+          type: boolean
+        socket_authorized:
+          description: Whether the SSL certificate is valid
+          type: boolean
+        risk_counts:
+          $ref: "#/components/schemas/ScanDataRiskCountsResponse"
+        risks:
+          items:
+            $ref: "#/components/schemas/ScanDataRiskResponse"
+          type: array
+        shodan_last_update:
+          deprecated: true
+          description: Last time Shodan data was updated for the host IP. Has been
+            replaced by source_last_updated
+          format: date-time
+          type: string
+        source_last_updated:
+          description: Last time IP data source was updated for the host IP.
+          format: date-time
+          type: string
+        created:
+          description: Service creation date
+          format: date-time
+          type: string
+        last_seen:
+          description: Service last seen date
+          format: date-time
+          type: string
+      required:
+      - created
+      - host
+      - id
+      - last_seen
+      - name
+    ScanDataNodeResponse:
+      example:
+        name: name
+        id: id
+      properties:
+        id:
+          description: Node ID
+          type: string
+        name:
+          description: Node name
+          type: string
+      required:
+      - id
+      - name
+    ScanDataRiskCountsResponse:
+      description: Risk counts per severity
+      example:
+        high: 5
+        critical: 5
+        low: 6
+        medium: 1
+        info: 0
+      properties:
+        info:
+          description: Number of info risks
+          type: integer
+        low:
+          description: Number of low risks
+          type: integer
+        medium:
+          description: Number of medium risks
+          type: integer
+        high:
+          description: Number of high risks
+          type: integer
+        critical:
+          description: Number of critical risks
+          type: integer
+      required:
+      - critical
+      - high
+      - info
+      - low
+      - medium
+    ScanDataRiskResponse:
+      example:
+        severity: severity
+        is_br_risk: true
+        epss_score: 0.8008281904610115
+        epss_last_update: 2000-01-23T04:56:07.000+00:00
+        last_seen: 2000-01-23T04:56:07.000+00:00
+        created: 2000-01-23T04:56:07.000+00:00
+        description: description
+        asset_node_id: asset_node_id
+        link_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        tags:
+        - tags
+        - tags
+        risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        urn: urn
+        has_known_exploit: true
+        remediation: remediation
+        epss_model_ver: epss_model_ver
+        asset_name: asset_name
+        asset_type: asset_type
+        name: name
+        category: category
+        epss_percentile: 6.027456183070403
+      properties:
+        link_id:
+          description: Link ID of Risk
+          format: uuid
+          type: string
+        risk_node_id:
+          description: Node ID of Risk
+          format: uuid
+          type: string
+        urn:
+          description: URN of Risk
+          type: string
+        asset_type:
+          description: Type of Risk's parent
+          type: string
+        asset_name:
+          description: Name of Risk's parent
+          type: string
+        asset_node_id:
+          description: Node ID of Risk's parent
+          type: string
+        name:
+          description: Name of Risk
+          type: string
+        description:
+          description: Description of Risk
+          type: string
+        remediation:
+          description: Remediation of Risk
+          type: string
+        severity:
+          description: Severity of Risk
+          type: string
+        category:
+          description: Category of Risk
+          type: string
+        tags:
+          description: Tags of Risk
+          items:
+            type: string
+          type: array
+        has_known_exploit:
+          description: Risk has a known exploit
+          type: boolean
+        is_br_risk:
+          description: Risk may have backported security patches applied
+          type: boolean
+        epss_score:
+          description: "Exploit Prediction Scoring System score of CVE, if risk isn't\
+            \ a CVE then this is omitted"
+          type: number
+        epss_percentile:
+          description: "Exploit Prediction Scoring System percentile of CVE, if risk\
+            \ isn't a CVE then this is omitted"
+          type: number
+        epss_model_ver:
+          description: "Exploit Prediction Scoring System model version used for CVE,\
+            \ if risk isn't a CVE then this is omitted"
+          type: string
+        epss_last_update:
+          description: "Exploit Prediction Scoring System last update for CVE, if\
+            \ risk isn't a CVE then this is omitted"
+          format: date-time
+          type: string
+        created:
+          description: Creation date of Risk
+          format: date-time
+          type: string
+        last_seen:
+          description: Last seen data of Risk
+          format: date-time
+          type: string
+      required:
+      - asset_name
+      - asset_node_id
+      - asset_type
+      - created
+      - description
+      - has_known_exploit
+      - is_br_risk
+      - last_seen
+      - link_id
+      - name
+      - remediation
+      - risk_node_id
+      - severity
+      - urn
+    ScanDataLinkChangesResponse:
+      example:
+        comparison:
+          iteration_ids:
+          - iteration_ids
+          - iteration_ids
+          iteration_from: iteration_from
+          iteration_to: iteration_to
+        removed:
+        - link_type: link_type
+          risk_severity_number: 0
+          removed_in: removed_in
+          added_in: added_in
+          from:
+            id: id
+            type: type
+            display_name: display_name
+            key: key
+          id: id
+          to:
+            id: id
+            type: type
+            display_name: display_name
+            key: key
+          risk_severity: risk_severity
+        - link_type: link_type
+          risk_severity_number: 0
+          removed_in: removed_in
+          added_in: added_in
+          from:
+            id: id
+            type: type
+            display_name: display_name
+            key: key
+          id: id
+          to:
+            id: id
+            type: type
+            display_name: display_name
+            key: key
+          risk_severity: risk_severity
+        added:
+        - link_type: link_type
+          risk_severity_number: 0
+          removed_in: removed_in
+          added_in: added_in
+          from:
+            id: id
+            type: type
+            display_name: display_name
+            key: key
+          id: id
+          to:
+            id: id
+            type: type
+            display_name: display_name
+            key: key
+          risk_severity: risk_severity
+        - link_type: link_type
+          risk_severity_number: 0
+          removed_in: removed_in
+          added_in: added_in
+          from:
+            id: id
+            type: type
+            display_name: display_name
+            key: key
+          id: id
+          to:
+            id: id
+            type: type
+            display_name: display_name
+            key: key
+          risk_severity: risk_severity
+      properties:
+        comparison:
+          $ref: "#/components/schemas/ScanDataLinkChangesResponse_comparison"
+        added:
+          description: List of added links
+          items:
+            $ref: "#/components/schemas/ScanDataLinkChangeResponse"
+          type: array
+        removed:
+          description: List of removed links
+          items:
+            $ref: "#/components/schemas/ScanDataLinkChangeResponse"
+          type: array
+      required:
+      - added
+      - comparison
+      - removed
+    ScanDataLinkChangeResponse:
+      example:
+        link_type: link_type
+        risk_severity_number: 0
+        removed_in: removed_in
+        added_in: added_in
+        from:
+          id: id
+          type: type
+          display_name: display_name
+          key: key
+        id: id
+        to:
+          id: id
+          type: type
+          display_name: display_name
+          key: key
+        risk_severity: risk_severity
+      properties:
+        id:
+          description: Link ID
+          type: string
+        link_type:
+          description: Type of the link
+          type: string
+        added_in:
+          description: Iteration ID link was added in
+          type: string
+        removed_in:
+          description: Iteration ID link was removed in
+          type: string
+        from:
+          $ref: "#/components/schemas/ScanDataLinkChangeResponse_from"
+        to:
+          $ref: "#/components/schemas/ScanDataLinkChangeResponse_to"
+        risk_severity:
+          description: Set if the link type is RISK
+          type: string
+        risk_severity_number:
+          type: integer
+      required:
+      - added_in
+      - from
+      - id
+      - link_type
+      - to
+    GenericGraphNode:
+      example:
+        last_seen: 2000-01-23T04:56:07.000+00:00
+        created: 2000-01-23T04:56:07.000+00:00
+        name: name
+        id: id
+        scan_id: scan_id
+        label: label
+        updated: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: string
+        scan_id:
+          type: string
+        label:
+          type: string
+        name:
+          type: string
+        created:
+          format: date-time
+          type: string
+        updated:
+          format: date-time
+          type: string
+        last_seen:
+          format: date-time
+          type: string
+      required:
+      - created
+      - id
+      - label
+      - last_seen
+      - name
+      - scan_id
+      - updated
+    DomainGraphNode:
+      allOf:
+      - $ref: "#/components/schemas/GenericGraphNode"
+      - properties:
+          ignored:
+            type: boolean
+          ips_ignored:
+            type: boolean
+        required:
+        - ignored
+        - ips_ignored
+    Group:
+      example:
+        created: 2000-01-23T04:56:07.000+00:00
+        name: name
+        attributes: "{}"
+        id: id
+        priority: 5.962133916683182
+        type: type
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        created:
+          format: date-time
+          type: string
+        priority:
+          type: number
+        type:
+          type: string
+        attributes:
+          type: object
+      required:
+      - created
+      - id
+      - name
+      - priority
+      - type
+    Role:
+      example:
+        role: role
+        group_id: group_id
+      properties:
+        group_id:
+          type: string
+        role:
+          type: string
+      required:
+      - group_id
+      - role
+    ReportState:
+      description: Report state
+      enum:
+      - pending
+      - in_progress
+      - done
+      - failed
+      type: string
+    ReportTemplateState:
+      description: Report template state
+      enum:
+      - pending
+      - in_progress
+      - done
+      - failed
+      type: string
+    ReportType:
+      description: Report type
+      enum:
+      - summary
+      - excel_summary
+      type: string
+    TemplateReportType:
+      description: Templatable report type (subset of ReportType that use templates)
+      type: string
+    ReportTimeSelection:
+      description: "For Ad Hoc scans this doesn't need to be included. For Continuous\
+        \ scans, if this is not provided, only data from the latest iteration will\
+        \ be used."
+      properties:
+        from:
+          description: From time (ISO 8601)
+          example: 1970-01-01T00:00:00Z
+          format: date-time
+          type: string
+        to:
+          description: To time (ISO 8601)
+          example: 1970-01-01T00:00:00Z
+          format: date-time
+          type: string
+    CreateSummaryReportBody:
+      properties:
+        type:
+          $ref: "#/components/schemas/ReportType"
+        scan_id:
+          description: Scan ID
+          format: uuid
+          type: string
+        name:
+          description: Report display name
+          maxLength: 200
+          type: string
+        send_email:
+          description: Send email notification when report is ready
+          type: boolean
+        time_zone:
+          description: IANA Time zone
+          example: Europe/London
+          maxLength: 50
+          type: string
+        executive_summary:
+          description: Executive summary
+          maxLength: 3000
+          type: string
+        time_selection:
+          $ref: "#/components/schemas/ReportTimeSelection"
+        branded:
+          description: Display organisation logo in report header. Requires feature
+            to be enabled for the organisation.
+          type: boolean
+      required:
+      - name
+      - scan_id
+      - time_zone
+      - type
+    CreateExcelSummaryReportBody:
+      properties:
+        type:
+          $ref: "#/components/schemas/ReportType"
+        scan_id:
+          description: Scan ID
+          format: uuid
+          type: string
+        name:
+          description: Report display name
+          maxLength: 200
+          type: string
+        send_email:
+          description: Send email notification when report is ready
+          type: boolean
+      required:
+      - name
+      - scan_id
+      - type
+    ReportResponse:
+      example:
+        can_manage: true
+        file_name: file_name
+        created: 2000-01-23T04:56:07.000+00:00
+        type: summary
+        display_name: display_name
+        iteration_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        download_url: download_url
+        template_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        scan_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        state: pending
+        scan_name: scan_name
+        updated: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          description: Report ID
+          format: uuid
+          type: string
+        scan_id:
+          description: Scan ID
+          format: uuid
+          type: string
+        scan_name:
+          description: Scan name
+          type: string
+        iteration_id:
+          description: Iteration ID
+          format: uuid
+          type: string
+        state:
+          $ref: "#/components/schemas/ReportState"
+        type:
+          $ref: "#/components/schemas/ReportType"
+        display_name:
+          description: Report display name
+          type: string
+        file_name:
+          description: Report file name
+          type: string
+        template_id:
+          description: Report template ID used (for templated report types)
+          format: uuid
+          type: string
+        created:
+          description: Report created date
+          format: date-time
+          type: string
+        updated:
+          description: Report last updated date
+          format: date-time
+          type: string
+        download_url:
+          description: Will only be present when the report is done. Expires after
+            60s.
+          type: string
+        can_manage:
+          description: User has "scans.reports:manage" role for this report
+          type: boolean
+      required:
+      - created
+      - display_name
+      - id
+      - iteration_id
+      - scan_id
+      - scan_name
+      - state
+      - type
+      - updated
+    CreateReportTemplateBody:
+      properties:
+        type:
+          description: Templatable report type (subset of ReportType that use templates)
+          type: string
+        organisation_id:
+          description: Organisation ID
+          format: uuid
+          type: string
+        name:
+          description: Report template display name
+          maxLength: 200
+          type: string
+      required:
+      - name
+      - organisation_id
+      - type
+    UpdateReportTemplateBody:
+      properties:
+        name:
+          description: Report template display name
+          maxLength: 200
+          type: string
+      required:
+      - name
+    CompleteReportTemplateUploadBody:
+      properties:
+        file_name:
+          description: File name of the source file uploaded
+          maxLength: 200
+          type: string
+    ReportTemplateResponse:
+      example:
+        organisation_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        file_name: file_name
+        created: 2000-01-23T04:56:07.000+00:00
+        download_url: download_url
+        upload_url: upload_url
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        state: pending
+        type: type
+        display_name: display_name
+        updated: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          description: Report ID
+          format: uuid
+          type: string
+        organisation_id:
+          description: Organisation ID
+          format: uuid
+          type: string
+        state:
+          $ref: "#/components/schemas/ReportTemplateState"
+        type:
+          description: Templatable report type (subset of ReportType that use templates)
+          type: string
+        display_name:
+          description: Report template display name
+          type: string
+        file_name:
+          description: Report template file name
+          type: string
+        created:
+          description: Report template created date
+          format: date-time
+          type: string
+        updated:
+          description: Report template last updated date
+          format: date-time
+          type: string
+        download_url:
+          description: Expires after 60s.
+          type: string
+        upload_url:
+          description: Expires after 60s.
+          type: string
+      required:
+      - created
+      - display_name
+      - id
+      - organisation_id
+      - state
+      - type
+      - updated
+    ErrorResponse:
+      example:
+        code: error_short_code
+      properties:
+        code:
+          description: Short code for the specific error type that occurred
+          example: error_short_code
+          type: string
+      required:
+      - code
+    updateScanById_request_include_br_risks:
+      properties:
+        urn:component:application:apache:
+          description: Include backported resolvable risks for Apache
+          type: boolean
+    updateScanById_request:
+      properties:
+        name:
+          description: Name of the scan
+          type: string
+        enabled:
+          description: "Whether the scan is enabled (`false` on new scans, enable\
+            \ to start the scan)"
+          type: boolean
+        scan_group_id:
+          description: Scan Group ID
+          type: string
+        ignore_ip_nodes:
+          description: Whether to hide IP risks
+          type: boolean
+        calendar_schedule:
+          description: |
+            The frequency of scan iteration  i.e. "daily", "weekly", "monthly", "quarterly", "yearly"
+          enum:
+          - daily
+          - weekly
+          - monthly
+          - quarterly
+          - yearly
+          type: string
+        include_br_risks:
+          $ref: "#/components/schemas/updateScanById_request_include_br_risks"
+    updateUserPreferences_request:
+      description: Free-form object containing user attributes to be merged
+      properties:
+        default_scan_group:
+          description: Default Scan Group ID (selected by default when creating a
+            new scan)
+          type: string
+    createReport_request:
+      discriminator:
+        mapping:
+          summary: "#/components/schemas/CreateSummaryReportBody"
+          excel_summary: "#/components/schemas/CreateExcelSummaryReportBody"
+        propertyName: type
+      oneOf:
+      - $ref: "#/components/schemas/CreateSummaryReportBody"
+      - $ref: "#/components/schemas/CreateExcelSummaryReportBody"
+    CreateScanRequest_include_br_risks:
+      example:
+        urn:component:application:apache: true
+      properties:
+        urn:component:application:apache:
+          description: Include backported resolvable risks for Apache
+          type: boolean
+      required:
+      - urn:component:application:apache
+    SeedsResponse_inner:
+      example:
+        size: 0.8008281904610115
+        name: name
+        id: id
+        type: Domain
+        tags:
+        - tags
+        - tags
+      properties:
+        id:
+          description: Seed ID
+          type: string
+        name:
+          description: Seed name
+          type: string
+        type:
+          description: Seed type
+          enum:
+          - Domain
+          - IPv4
+          - IPRange
+          type: string
+        size:
+          description: "If Seed type is IPRange, then this is the number of IPs in\
+            \ the IP Range."
+          type: number
+        tags:
+          description: Optional tags to describe seeds
+          items:
+            type: string
+          type: array
+      required:
+      - id
+      - name
+      - type
+    UserResponse_scan_groups_inner:
+      example:
+        organisation_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        roles:
+        - roles
+        - roles
+        name: name
+        groups:
+        - groups
+        - groups
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        is_default: true
+      properties:
+        id:
+          format: uuid
+          type: string
+        organisation_id:
+          format: uuid
+          type: string
+        name:
+          type: string
+        is_default:
+          description: Scan Group is the user's default
+          type: boolean
+        groups:
+          description: Groups the user is a apart of in the organisation
+          items:
+            type: string
+          type: array
+        roles:
+          description: Roles the user has in the organisation
+          items:
+            type: string
+          type: array
+      required:
+      - groups
+      - id
+      - is_default
+      - name
+      - organisation_id
+      - roles
+    ScanDataServiceResponse_host:
+      example:
+        name: name
+        id: id
+        type: type
+      properties:
+        id:
+          description: Host ID
+          type: string
+        type:
+          description: Host type
+          type: string
+        name:
+          description: Host name
+          type: string
+      required:
+      - id
+      - name
+      - type
+    ScanDataLinkChangesResponse_comparison:
+      example:
+        iteration_ids:
+        - iteration_ids
+        - iteration_ids
+        iteration_from: iteration_from
+        iteration_to: iteration_to
+      properties:
+        iteration_from:
+          description: The starting iteration ID
+          type: string
+        iteration_to:
+          description: The ending iteration ID
+          type: string
+        iteration_ids:
+          description: List of iteration IDs between the starting and ending iterations.
+          items:
+            type: string
+          type: array
+      required:
+      - iteration_from
+      - iteration_ids
+      - iteration_to
+    ScanDataLinkChangeResponse_from:
+      example:
+        id: id
+        type: type
+        display_name: display_name
+        key: key
+      properties:
+        id:
+          description: Node ID (from)
+          type: string
+        type:
+          description: Node type (from)
+          type: string
+        key:
+          description: Unique identifier (from)
+          type: string
+        display_name:
+          description: Node name (from)
+          type: string
+      required:
+      - display_name
+      - id
+      - key
+      - type
+    ScanDataLinkChangeResponse_to:
+      example:
+        id: id
+        type: type
+        display_name: display_name
+        key: key
+      properties:
+        id:
+          description: Node ID (to)
+          type: string
+        type:
+          description: Node type (to)
+          type: string
+        key:
+          description: Unique identifier (to)
+          type: string
+        display_name:
+          description: Node name (to)
+          type: string
+      required:
+      - display_name
+      - id
+      - key
+      - type
+    inline_object:
+      example:
+        count: 0
+      properties:
+        count:
+          type: integer
+  securitySchemes:
+    SessionCookie:
+      in: cookie
+      name: hexiosec-session
+      type: apiKey
+    APIKey:
+      in: header
+      name: X-Hexiosec-API-Key
+      type: apiKey
