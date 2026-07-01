@@ -5,6 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **UrnComponentApplicationApache** | **bool** | Include backported resolvable risks for Apache | 
+**UrnComponentApplicationOpenssl** | Pointer to **bool** | Include backported resolvable risks for OpenSSL | [optional] 
 
 ## Methods
 
@@ -44,6 +45,31 @@ and a boolean to check if the value has been set.
 
 SetUrnComponentApplicationApache sets UrnComponentApplicationApache field to given value.
 
+
+### GetUrnComponentApplicationOpenssl
+
+`func (o *CreateScanRequestIncludeBrRisks) GetUrnComponentApplicationOpenssl() bool`
+
+GetUrnComponentApplicationOpenssl returns the UrnComponentApplicationOpenssl field if non-nil, zero value otherwise.
+
+### GetUrnComponentApplicationOpensslOk
+
+`func (o *CreateScanRequestIncludeBrRisks) GetUrnComponentApplicationOpensslOk() (*bool, bool)`
+
+GetUrnComponentApplicationOpensslOk returns a tuple with the UrnComponentApplicationOpenssl field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetUrnComponentApplicationOpenssl
+
+`func (o *CreateScanRequestIncludeBrRisks) SetUrnComponentApplicationOpenssl(v bool)`
+
+SetUrnComponentApplicationOpenssl sets UrnComponentApplicationOpenssl field to given value.
+
+### HasUrnComponentApplicationOpenssl
+
+`func (o *CreateScanRequestIncludeBrRisks) HasUrnComponentApplicationOpenssl() bool`
+
+HasUrnComponentApplicationOpenssl returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

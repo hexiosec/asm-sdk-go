@@ -1,7 +1,7 @@
 /*
 Hexiosec ASM API
 
-This API reference documents how to programmatically access Hexiosec ASM data, for automation and data extraction purposes.  The Hexiosec ASM API is organised around REST. Our API has resource-oriented URLs which accept query string parameters, and return JSON-encoded responses. We use standard HTTP response codes and verbs, and authentication is provided via a custom header.  This API supports a subset of the functionality available in [Hexiosec ASM](https://hexiosec.com/asm/).  To download a copy of this documentation, please visit [https://asm.hexiosec.com/api/openapi.yml](https://asm.hexiosec.com/api/openapi.yml).  ### API access  Any user can create API keys to use as a credential to access the Hexiosec ASM API. Management of organisations and resources within those organisations is restricted to certain pricing plans. For more information on the features included with your subscription please see the [Hexiosec ASM Pricing](https://hexiosec.com/asm/pricing/)  API access for an organisation can be checked using [GET /v1/orgs/{id}](#get-/v1/orgs/-id-)  ### Versioning  API endpoints are versioned according to their path prefix, which at present is `/api/v1`. Breaking changes will be released under an incremented prefix, whereas minor changes will be incorporated into the existing endpoints as necessary.  ### Pagination  Endpoints that support pagination do so via `limit` and `offset`. The last set of results in a paginated set is the first response for which the number of received entries is less than the requested limit.  ### Expanding Responses  Many objects allow you to request additional information as an expanded response by using the expand request parameter. This parameter only available on certain requests, and is shown in the list of query parameters for the API endpoint.  The list of expandable items is shown in the `expand` parameter specification, and will usually return summary information for the linked resource. Summary entry specifications are shown in the specification of the endpoint response as an optional field. If not requested, this optional field will either be null or omitted from the response. 
+This API reference documents how to programmatically access Hexiosec ASM data, for automation and data extraction purposes.  The Hexiosec ASM API is organised around REST. Our API has resource-oriented URLs which accept query string parameters, and return JSON-encoded responses. We use standard HTTP response codes and verbs, and authentication is provided via a custom header.  This API supports a subset of the functionality available in [Hexiosec ASM](https://hexiosec.com/asm/).  To download a copy of this documentation, please visit [https://asm.hexiosec.com/api/openapi.yml](https://asm.hexiosec.com/api/openapi.yml).  ### API access  Any user can create API keys to use as a credential to access the Hexiosec ASM API. Management of organisations and resources within those organisations is restricted to certain pricing plans. For more information on the features included with your subscription please see the [Hexiosec ASM Pricing](https://hexiosec.com/asm/pricing/)  API access for an organisation can be checked using [GET /v1/orgs/{id}](#get-/v1/orgs/-id-)  ### Versioning  API endpoints are versioned according to their path prefix, which at present is `/api/v1`. Breaking changes will be released under an incremented prefix, whereas minor changes will be incorporated into the existing endpoints as necessary.  ### Pagination  Endpoints that support pagination do so via `limit` and `offset`. The last set of results in a paginated set is the first response for which the number of received entries is less than the requested limit.  ### Expanding Responses  Many objects allow you to request additional information as an expanded response by using the expand request parameter. This parameter is only available on certain requests, and is shown in the list of query parameters for the API endpoint.  The list of expandable items is shown in the `expand` parameter specification, and will usually return summary information for the linked resource. Summary entry specifications are shown in the specification of the endpoint response as an optional field. If not requested, this optional field will either be null or omitted from the response. 
 
 API version: 1.0.0
 Contact: support@hexiosec.com
@@ -25,11 +25,13 @@ type ReportResponse struct {
 	// Report ID
 	Id string `json:"id"`
 	// Scan ID
-	ScanId string `json:"scan_id"`
+	ScanId *string `json:"scan_id,omitempty"`
+	// Organisation ID for organisation-scoped reports
+	OrganisationId *string `json:"organisation_id,omitempty"`
 	// Scan name
-	ScanName string `json:"scan_name"`
+	ScanName *string `json:"scan_name,omitempty"`
 	// Iteration ID
-	IterationId string `json:"iteration_id"`
+	IterationId *string `json:"iteration_id,omitempty"`
 	State ReportState `json:"state"`
 	Type ReportType `json:"type"`
 	// Report display name
@@ -55,12 +57,9 @@ type _ReportResponse ReportResponse
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewReportResponse(id string, scanId string, scanName string, iterationId string, state ReportState, type_ ReportType, displayName string, created time.Time, updated time.Time) *ReportResponse {
+func NewReportResponse(id string, state ReportState, type_ ReportType, displayName string, created time.Time, updated time.Time) *ReportResponse {
 	this := ReportResponse{}
 	this.Id = id
-	this.ScanId = scanId
-	this.ScanName = scanName
-	this.IterationId = iterationId
 	this.State = state
 	this.Type = type_
 	this.DisplayName = displayName
@@ -101,76 +100,132 @@ func (o *ReportResponse) SetId(v string) {
 	o.Id = v
 }
 
-// GetScanId returns the ScanId field value
+// GetScanId returns the ScanId field value if set, zero value otherwise.
 func (o *ReportResponse) GetScanId() string {
-	if o == nil {
+	if o == nil || IsNil(o.ScanId) {
 		var ret string
 		return ret
 	}
-
-	return o.ScanId
+	return *o.ScanId
 }
 
-// GetScanIdOk returns a tuple with the ScanId field value
+// GetScanIdOk returns a tuple with the ScanId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *ReportResponse) GetScanIdOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.ScanId) {
 		return nil, false
 	}
-	return &o.ScanId, true
+	return o.ScanId, true
 }
 
-// SetScanId sets field value
+// HasScanId returns a boolean if a field has been set.
+func (o *ReportResponse) HasScanId() bool {
+	if o != nil && !IsNil(o.ScanId) {
+		return true
+	}
+
+	return false
+}
+
+// SetScanId gets a reference to the given string and assigns it to the ScanId field.
 func (o *ReportResponse) SetScanId(v string) {
-	o.ScanId = v
+	o.ScanId = &v
 }
 
-// GetScanName returns the ScanName field value
-func (o *ReportResponse) GetScanName() string {
-	if o == nil {
+// GetOrganisationId returns the OrganisationId field value if set, zero value otherwise.
+func (o *ReportResponse) GetOrganisationId() string {
+	if o == nil || IsNil(o.OrganisationId) {
 		var ret string
 		return ret
 	}
-
-	return o.ScanName
+	return *o.OrganisationId
 }
 
-// GetScanNameOk returns a tuple with the ScanName field value
+// GetOrganisationIdOk returns a tuple with the OrganisationId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ReportResponse) GetOrganisationIdOk() (*string, bool) {
+	if o == nil || IsNil(o.OrganisationId) {
+		return nil, false
+	}
+	return o.OrganisationId, true
+}
+
+// HasOrganisationId returns a boolean if a field has been set.
+func (o *ReportResponse) HasOrganisationId() bool {
+	if o != nil && !IsNil(o.OrganisationId) {
+		return true
+	}
+
+	return false
+}
+
+// SetOrganisationId gets a reference to the given string and assigns it to the OrganisationId field.
+func (o *ReportResponse) SetOrganisationId(v string) {
+	o.OrganisationId = &v
+}
+
+// GetScanName returns the ScanName field value if set, zero value otherwise.
+func (o *ReportResponse) GetScanName() string {
+	if o == nil || IsNil(o.ScanName) {
+		var ret string
+		return ret
+	}
+	return *o.ScanName
+}
+
+// GetScanNameOk returns a tuple with the ScanName field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *ReportResponse) GetScanNameOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.ScanName) {
 		return nil, false
 	}
-	return &o.ScanName, true
+	return o.ScanName, true
 }
 
-// SetScanName sets field value
+// HasScanName returns a boolean if a field has been set.
+func (o *ReportResponse) HasScanName() bool {
+	if o != nil && !IsNil(o.ScanName) {
+		return true
+	}
+
+	return false
+}
+
+// SetScanName gets a reference to the given string and assigns it to the ScanName field.
 func (o *ReportResponse) SetScanName(v string) {
-	o.ScanName = v
+	o.ScanName = &v
 }
 
-// GetIterationId returns the IterationId field value
+// GetIterationId returns the IterationId field value if set, zero value otherwise.
 func (o *ReportResponse) GetIterationId() string {
-	if o == nil {
+	if o == nil || IsNil(o.IterationId) {
 		var ret string
 		return ret
 	}
-
-	return o.IterationId
+	return *o.IterationId
 }
 
-// GetIterationIdOk returns a tuple with the IterationId field value
+// GetIterationIdOk returns a tuple with the IterationId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *ReportResponse) GetIterationIdOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.IterationId) {
 		return nil, false
 	}
-	return &o.IterationId, true
+	return o.IterationId, true
 }
 
-// SetIterationId sets field value
+// HasIterationId returns a boolean if a field has been set.
+func (o *ReportResponse) HasIterationId() bool {
+	if o != nil && !IsNil(o.IterationId) {
+		return true
+	}
+
+	return false
+}
+
+// SetIterationId gets a reference to the given string and assigns it to the IterationId field.
 func (o *ReportResponse) SetIterationId(v string) {
-	o.IterationId = v
+	o.IterationId = &v
 }
 
 // GetState returns the State field value
@@ -432,9 +487,18 @@ func (o ReportResponse) MarshalJSON() ([]byte, error) {
 func (o ReportResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["id"] = o.Id
-	toSerialize["scan_id"] = o.ScanId
-	toSerialize["scan_name"] = o.ScanName
-	toSerialize["iteration_id"] = o.IterationId
+	if !IsNil(o.ScanId) {
+		toSerialize["scan_id"] = o.ScanId
+	}
+	if !IsNil(o.OrganisationId) {
+		toSerialize["organisation_id"] = o.OrganisationId
+	}
+	if !IsNil(o.ScanName) {
+		toSerialize["scan_name"] = o.ScanName
+	}
+	if !IsNil(o.IterationId) {
+		toSerialize["iteration_id"] = o.IterationId
+	}
 	toSerialize["state"] = o.State
 	toSerialize["type"] = o.Type
 	toSerialize["display_name"] = o.DisplayName
@@ -466,9 +530,6 @@ func (o *ReportResponse) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"id",
-		"scan_id",
-		"scan_name",
-		"iteration_id",
 		"state",
 		"type",
 		"display_name",
@@ -505,6 +566,7 @@ func (o *ReportResponse) UnmarshalJSON(data []byte) (err error) {
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "id")
 		delete(additionalProperties, "scan_id")
+		delete(additionalProperties, "organisation_id")
 		delete(additionalProperties, "scan_name")
 		delete(additionalProperties, "iteration_id")
 		delete(additionalProperties, "state")

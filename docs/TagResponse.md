@@ -7,6 +7,7 @@ Name | Type | Description | Notes
 **Id** | **string** | Tag ID | 
 **OrgId** | **string** | Organisation ID | 
 **Name** | **string** | Tag name | 
+**Colour** | Pointer to **string** | Optional tag colour as a hex value | [optional] 
 **CreatedAt** | **time.Time** | Timestamp at which the tag was created | 
 **CreatedBy** | **string** | User ID of the creator | 
 **UpdatedAt** | **time.Time** | Timestamp at which the tag was last updated | 
@@ -90,6 +91,31 @@ and a boolean to check if the value has been set.
 
 SetName sets Name field to given value.
 
+
+### GetColour
+
+`func (o *TagResponse) GetColour() string`
+
+GetColour returns the Colour field if non-nil, zero value otherwise.
+
+### GetColourOk
+
+`func (o *TagResponse) GetColourOk() (*string, bool)`
+
+GetColourOk returns a tuple with the Colour field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetColour
+
+`func (o *TagResponse) SetColour(v string)`
+
+SetColour sets Colour field to given value.
+
+### HasColour
+
+`func (o *TagResponse) HasColour() bool`
+
+HasColour returns a boolean if a field has been set.
 
 ### GetCreatedAt
 

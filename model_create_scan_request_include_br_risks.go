@@ -1,7 +1,7 @@
 /*
 Hexiosec ASM API
 
-This API reference documents how to programmatically access Hexiosec ASM data, for automation and data extraction purposes.  The Hexiosec ASM API is organised around REST. Our API has resource-oriented URLs which accept query string parameters, and return JSON-encoded responses. We use standard HTTP response codes and verbs, and authentication is provided via a custom header.  This API supports a subset of the functionality available in [Hexiosec ASM](https://hexiosec.com/asm/).  To download a copy of this documentation, please visit [https://asm.hexiosec.com/api/openapi.yml](https://asm.hexiosec.com/api/openapi.yml).  ### API access  Any user can create API keys to use as a credential to access the Hexiosec ASM API. Management of organisations and resources within those organisations is restricted to certain pricing plans. For more information on the features included with your subscription please see the [Hexiosec ASM Pricing](https://hexiosec.com/asm/pricing/)  API access for an organisation can be checked using [GET /v1/orgs/{id}](#get-/v1/orgs/-id-)  ### Versioning  API endpoints are versioned according to their path prefix, which at present is `/api/v1`. Breaking changes will be released under an incremented prefix, whereas minor changes will be incorporated into the existing endpoints as necessary.  ### Pagination  Endpoints that support pagination do so via `limit` and `offset`. The last set of results in a paginated set is the first response for which the number of received entries is less than the requested limit.  ### Expanding Responses  Many objects allow you to request additional information as an expanded response by using the expand request parameter. This parameter only available on certain requests, and is shown in the list of query parameters for the API endpoint.  The list of expandable items is shown in the `expand` parameter specification, and will usually return summary information for the linked resource. Summary entry specifications are shown in the specification of the endpoint response as an optional field. If not requested, this optional field will either be null or omitted from the response. 
+This API reference documents how to programmatically access Hexiosec ASM data, for automation and data extraction purposes.  The Hexiosec ASM API is organised around REST. Our API has resource-oriented URLs which accept query string parameters, and return JSON-encoded responses. We use standard HTTP response codes and verbs, and authentication is provided via a custom header.  This API supports a subset of the functionality available in [Hexiosec ASM](https://hexiosec.com/asm/).  To download a copy of this documentation, please visit [https://asm.hexiosec.com/api/openapi.yml](https://asm.hexiosec.com/api/openapi.yml).  ### API access  Any user can create API keys to use as a credential to access the Hexiosec ASM API. Management of organisations and resources within those organisations is restricted to certain pricing plans. For more information on the features included with your subscription please see the [Hexiosec ASM Pricing](https://hexiosec.com/asm/pricing/)  API access for an organisation can be checked using [GET /v1/orgs/{id}](#get-/v1/orgs/-id-)  ### Versioning  API endpoints are versioned according to their path prefix, which at present is `/api/v1`. Breaking changes will be released under an incremented prefix, whereas minor changes will be incorporated into the existing endpoints as necessary.  ### Pagination  Endpoints that support pagination do so via `limit` and `offset`. The last set of results in a paginated set is the first response for which the number of received entries is less than the requested limit.  ### Expanding Responses  Many objects allow you to request additional information as an expanded response by using the expand request parameter. This parameter is only available on certain requests, and is shown in the list of query parameters for the API endpoint.  The list of expandable items is shown in the `expand` parameter specification, and will usually return summary information for the linked resource. Summary entry specifications are shown in the specification of the endpoint response as an optional field. If not requested, this optional field will either be null or omitted from the response. 
 
 API version: 1.0.0
 Contact: support@hexiosec.com
@@ -23,6 +23,8 @@ var _ MappedNullable = &CreateScanRequestIncludeBrRisks{}
 type CreateScanRequestIncludeBrRisks struct {
 	// Include backported resolvable risks for Apache
 	UrnComponentApplicationApache bool `json:"urn:component:application:apache"`
+	// Include backported resolvable risks for OpenSSL
+	UrnComponentApplicationOpenssl *bool `json:"urn:component:application:openssl,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -70,6 +72,38 @@ func (o *CreateScanRequestIncludeBrRisks) SetUrnComponentApplicationApache(v boo
 	o.UrnComponentApplicationApache = v
 }
 
+// GetUrnComponentApplicationOpenssl returns the UrnComponentApplicationOpenssl field value if set, zero value otherwise.
+func (o *CreateScanRequestIncludeBrRisks) GetUrnComponentApplicationOpenssl() bool {
+	if o == nil || IsNil(o.UrnComponentApplicationOpenssl) {
+		var ret bool
+		return ret
+	}
+	return *o.UrnComponentApplicationOpenssl
+}
+
+// GetUrnComponentApplicationOpensslOk returns a tuple with the UrnComponentApplicationOpenssl field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateScanRequestIncludeBrRisks) GetUrnComponentApplicationOpensslOk() (*bool, bool) {
+	if o == nil || IsNil(o.UrnComponentApplicationOpenssl) {
+		return nil, false
+	}
+	return o.UrnComponentApplicationOpenssl, true
+}
+
+// HasUrnComponentApplicationOpenssl returns a boolean if a field has been set.
+func (o *CreateScanRequestIncludeBrRisks) HasUrnComponentApplicationOpenssl() bool {
+	if o != nil && !IsNil(o.UrnComponentApplicationOpenssl) {
+		return true
+	}
+
+	return false
+}
+
+// SetUrnComponentApplicationOpenssl gets a reference to the given bool and assigns it to the UrnComponentApplicationOpenssl field.
+func (o *CreateScanRequestIncludeBrRisks) SetUrnComponentApplicationOpenssl(v bool) {
+	o.UrnComponentApplicationOpenssl = &v
+}
+
 func (o CreateScanRequestIncludeBrRisks) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -81,6 +115,9 @@ func (o CreateScanRequestIncludeBrRisks) MarshalJSON() ([]byte, error) {
 func (o CreateScanRequestIncludeBrRisks) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["urn:component:application:apache"] = o.UrnComponentApplicationApache
+	if !IsNil(o.UrnComponentApplicationOpenssl) {
+		toSerialize["urn:component:application:openssl"] = o.UrnComponentApplicationOpenssl
+	}
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -125,6 +162,7 @@ func (o *CreateScanRequestIncludeBrRisks) UnmarshalJSON(data []byte) (err error)
 
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "urn:component:application:apache")
+		delete(additionalProperties, "urn:component:application:openssl")
 		o.AdditionalProperties = additionalProperties
 	}
 

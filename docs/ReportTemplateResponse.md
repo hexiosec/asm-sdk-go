@@ -5,7 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | **string** | Report ID | 
-**OrganisationId** | **string** | Organisation ID | 
+**OrganisationId** | **string** | Organisation ID (null for global templates) | 
 **State** | [**ReportTemplateState**](ReportTemplateState.md) |  | 
 **Type** | **string** | Templatable report type (subset of ReportType that use templates) | 
 **DisplayName** | **string** | Report template display name | 

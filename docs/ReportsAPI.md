@@ -373,7 +373,7 @@ Name | Type | Description  | Notes
 
 ## GetReportTemplatesForOrg
 
-> []ReportTemplateResponse GetReportTemplatesForOrg(ctx, orgId).Execute()
+> []ReportTemplateResponse GetReportTemplatesForOrg(ctx, orgId).IncludeGlobal(includeGlobal).Execute()
 
 Get report templates for an organisation
 
@@ -393,10 +393,11 @@ import (
 
 func main() {
 	orgId := "38400000-8cf0-11bd-b23e-10b96e4ef00d" // string | Organisation ID
+	includeGlobal := true // bool | Include global templates (`organisation_id = null`) in addition to organisation templates (optional) (default to false)
 
 	configuration := asm.NewConfiguration()
 	apiClient := asm.NewAPIClient(configuration)
-	resp, r, err := apiClient.ReportsAPI.GetReportTemplatesForOrg(context.Background(), orgId).Execute()
+	resp, r, err := apiClient.ReportsAPI.GetReportTemplatesForOrg(context.Background(), orgId).IncludeGlobal(includeGlobal).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `ReportsAPI.GetReportTemplatesForOrg``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -422,6 +423,7 @@ Other parameters are passed through a pointer to a apiGetReportTemplatesForOrgRe
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
+ **includeGlobal** | **bool** | Include global templates (&#x60;organisation_id &#x3D; null&#x60;) in addition to organisation templates | [default to false]
 
 ### Return type
 

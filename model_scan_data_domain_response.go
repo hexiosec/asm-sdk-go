@@ -1,7 +1,7 @@
 /*
 Hexiosec ASM API
 
-This API reference documents how to programmatically access Hexiosec ASM data, for automation and data extraction purposes.  The Hexiosec ASM API is organised around REST. Our API has resource-oriented URLs which accept query string parameters, and return JSON-encoded responses. We use standard HTTP response codes and verbs, and authentication is provided via a custom header.  This API supports a subset of the functionality available in [Hexiosec ASM](https://hexiosec.com/asm/).  To download a copy of this documentation, please visit [https://asm.hexiosec.com/api/openapi.yml](https://asm.hexiosec.com/api/openapi.yml).  ### API access  Any user can create API keys to use as a credential to access the Hexiosec ASM API. Management of organisations and resources within those organisations is restricted to certain pricing plans. For more information on the features included with your subscription please see the [Hexiosec ASM Pricing](https://hexiosec.com/asm/pricing/)  API access for an organisation can be checked using [GET /v1/orgs/{id}](#get-/v1/orgs/-id-)  ### Versioning  API endpoints are versioned according to their path prefix, which at present is `/api/v1`. Breaking changes will be released under an incremented prefix, whereas minor changes will be incorporated into the existing endpoints as necessary.  ### Pagination  Endpoints that support pagination do so via `limit` and `offset`. The last set of results in a paginated set is the first response for which the number of received entries is less than the requested limit.  ### Expanding Responses  Many objects allow you to request additional information as an expanded response by using the expand request parameter. This parameter only available on certain requests, and is shown in the list of query parameters for the API endpoint.  The list of expandable items is shown in the `expand` parameter specification, and will usually return summary information for the linked resource. Summary entry specifications are shown in the specification of the endpoint response as an optional field. If not requested, this optional field will either be null or omitted from the response. 
+This API reference documents how to programmatically access Hexiosec ASM data, for automation and data extraction purposes.  The Hexiosec ASM API is organised around REST. Our API has resource-oriented URLs which accept query string parameters, and return JSON-encoded responses. We use standard HTTP response codes and verbs, and authentication is provided via a custom header.  This API supports a subset of the functionality available in [Hexiosec ASM](https://hexiosec.com/asm/).  To download a copy of this documentation, please visit [https://asm.hexiosec.com/api/openapi.yml](https://asm.hexiosec.com/api/openapi.yml).  ### API access  Any user can create API keys to use as a credential to access the Hexiosec ASM API. Management of organisations and resources within those organisations is restricted to certain pricing plans. For more information on the features included with your subscription please see the [Hexiosec ASM Pricing](https://hexiosec.com/asm/pricing/)  API access for an organisation can be checked using [GET /v1/orgs/{id}](#get-/v1/orgs/-id-)  ### Versioning  API endpoints are versioned according to their path prefix, which at present is `/api/v1`. Breaking changes will be released under an incremented prefix, whereas minor changes will be incorporated into the existing endpoints as necessary.  ### Pagination  Endpoints that support pagination do so via `limit` and `offset`. The last set of results in a paginated set is the first response for which the number of received entries is less than the requested limit.  ### Expanding Responses  Many objects allow you to request additional information as an expanded response by using the expand request parameter. This parameter is only available on certain requests, and is shown in the list of query parameters for the API endpoint.  The list of expandable items is shown in the `expand` parameter specification, and will usually return summary information for the linked resource. Summary entry specifications are shown in the specification of the endpoint response as an optional field. If not requested, this optional field will either be null or omitted from the response. 
 
 API version: 1.0.0
 Contact: support@hexiosec.com
@@ -44,8 +44,40 @@ type ScanDataDomainResponse struct {
 	Entities []ScanDataNodeResponse `json:"entities"`
 	RiskCounts ScanDataRiskCountsResponse `json:"risk_counts"`
 	Risks []ScanDataRiskResponse `json:"risks,omitempty"`
+	// CAA record
+	CaaRecord *string `json:"caa_record,omitempty"`
+	// Maximum DKIM key size
+	DkimMax *int32 `json:"dkim_max,omitempty"`
+	// Minimum DKIM key size
+	DkimMin *int32 `json:"dkim_min,omitempty"`
+	// DKIM record
+	DkimRecord []string `json:"dkim_record,omitempty"`
+	// DMARC record
+	DmarcRecord []string `json:"dmarc_record,omitempty"`
+	// Whether the domain uses DNS wildcard responses
+	DnsWildcard *bool `json:"dns_wildcard,omitempty"`
 	// Whether the domain is limited or not
 	Limited bool `json:"limited"`
+	// MTA-STS DNS TXT record
+	MtaStsTxtRecord []string `json:"mta_sts_txt_record,omitempty"`
+	// MTA-STS policy
+	MtaStsPolicy []string `json:"mta_sts_policy,omitempty"`
+	// MTA-STS TLS-RPT record
+	MtaStsReport []string `json:"mta_sts_report,omitempty"`
+	// security.txt policy body
+	SecurityTxtPolicy *string `json:"security_txt_policy,omitempty"`
+	// URL the security.txt policy was served from
+	SecurityTxtUrl *string `json:"security_txt_url,omitempty"`
+	// RDAP expiration date
+	RdapExpiration *string `json:"rdap_expiration,omitempty"`
+	// RDAP handle
+	RdapHandle *string `json:"rdap_handle,omitempty"`
+	// RDAP registration date
+	RdapRegistration *string `json:"rdap_registration,omitempty"`
+	// Whether the domain is a root domain
+	RootDomain *bool `json:"root_domain,omitempty"`
+	// SPF record
+	SpfRecord []string `json:"spf_record,omitempty"`
 	// Whether the domain is stale or not
 	Stale bool `json:"stale"`
 	// Whether the domain is a name server or not
@@ -398,6 +430,198 @@ func (o *ScanDataDomainResponse) SetRisks(v []ScanDataRiskResponse) {
 	o.Risks = v
 }
 
+// GetCaaRecord returns the CaaRecord field value if set, zero value otherwise.
+func (o *ScanDataDomainResponse) GetCaaRecord() string {
+	if o == nil || IsNil(o.CaaRecord) {
+		var ret string
+		return ret
+	}
+	return *o.CaaRecord
+}
+
+// GetCaaRecordOk returns a tuple with the CaaRecord field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ScanDataDomainResponse) GetCaaRecordOk() (*string, bool) {
+	if o == nil || IsNil(o.CaaRecord) {
+		return nil, false
+	}
+	return o.CaaRecord, true
+}
+
+// HasCaaRecord returns a boolean if a field has been set.
+func (o *ScanDataDomainResponse) HasCaaRecord() bool {
+	if o != nil && !IsNil(o.CaaRecord) {
+		return true
+	}
+
+	return false
+}
+
+// SetCaaRecord gets a reference to the given string and assigns it to the CaaRecord field.
+func (o *ScanDataDomainResponse) SetCaaRecord(v string) {
+	o.CaaRecord = &v
+}
+
+// GetDkimMax returns the DkimMax field value if set, zero value otherwise.
+func (o *ScanDataDomainResponse) GetDkimMax() int32 {
+	if o == nil || IsNil(o.DkimMax) {
+		var ret int32
+		return ret
+	}
+	return *o.DkimMax
+}
+
+// GetDkimMaxOk returns a tuple with the DkimMax field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ScanDataDomainResponse) GetDkimMaxOk() (*int32, bool) {
+	if o == nil || IsNil(o.DkimMax) {
+		return nil, false
+	}
+	return o.DkimMax, true
+}
+
+// HasDkimMax returns a boolean if a field has been set.
+func (o *ScanDataDomainResponse) HasDkimMax() bool {
+	if o != nil && !IsNil(o.DkimMax) {
+		return true
+	}
+
+	return false
+}
+
+// SetDkimMax gets a reference to the given int32 and assigns it to the DkimMax field.
+func (o *ScanDataDomainResponse) SetDkimMax(v int32) {
+	o.DkimMax = &v
+}
+
+// GetDkimMin returns the DkimMin field value if set, zero value otherwise.
+func (o *ScanDataDomainResponse) GetDkimMin() int32 {
+	if o == nil || IsNil(o.DkimMin) {
+		var ret int32
+		return ret
+	}
+	return *o.DkimMin
+}
+
+// GetDkimMinOk returns a tuple with the DkimMin field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ScanDataDomainResponse) GetDkimMinOk() (*int32, bool) {
+	if o == nil || IsNil(o.DkimMin) {
+		return nil, false
+	}
+	return o.DkimMin, true
+}
+
+// HasDkimMin returns a boolean if a field has been set.
+func (o *ScanDataDomainResponse) HasDkimMin() bool {
+	if o != nil && !IsNil(o.DkimMin) {
+		return true
+	}
+
+	return false
+}
+
+// SetDkimMin gets a reference to the given int32 and assigns it to the DkimMin field.
+func (o *ScanDataDomainResponse) SetDkimMin(v int32) {
+	o.DkimMin = &v
+}
+
+// GetDkimRecord returns the DkimRecord field value if set, zero value otherwise.
+func (o *ScanDataDomainResponse) GetDkimRecord() []string {
+	if o == nil || IsNil(o.DkimRecord) {
+		var ret []string
+		return ret
+	}
+	return o.DkimRecord
+}
+
+// GetDkimRecordOk returns a tuple with the DkimRecord field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ScanDataDomainResponse) GetDkimRecordOk() ([]string, bool) {
+	if o == nil || IsNil(o.DkimRecord) {
+		return nil, false
+	}
+	return o.DkimRecord, true
+}
+
+// HasDkimRecord returns a boolean if a field has been set.
+func (o *ScanDataDomainResponse) HasDkimRecord() bool {
+	if o != nil && !IsNil(o.DkimRecord) {
+		return true
+	}
+
+	return false
+}
+
+// SetDkimRecord gets a reference to the given []string and assigns it to the DkimRecord field.
+func (o *ScanDataDomainResponse) SetDkimRecord(v []string) {
+	o.DkimRecord = v
+}
+
+// GetDmarcRecord returns the DmarcRecord field value if set, zero value otherwise.
+func (o *ScanDataDomainResponse) GetDmarcRecord() []string {
+	if o == nil || IsNil(o.DmarcRecord) {
+		var ret []string
+		return ret
+	}
+	return o.DmarcRecord
+}
+
+// GetDmarcRecordOk returns a tuple with the DmarcRecord field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ScanDataDomainResponse) GetDmarcRecordOk() ([]string, bool) {
+	if o == nil || IsNil(o.DmarcRecord) {
+		return nil, false
+	}
+	return o.DmarcRecord, true
+}
+
+// HasDmarcRecord returns a boolean if a field has been set.
+func (o *ScanDataDomainResponse) HasDmarcRecord() bool {
+	if o != nil && !IsNil(o.DmarcRecord) {
+		return true
+	}
+
+	return false
+}
+
+// SetDmarcRecord gets a reference to the given []string and assigns it to the DmarcRecord field.
+func (o *ScanDataDomainResponse) SetDmarcRecord(v []string) {
+	o.DmarcRecord = v
+}
+
+// GetDnsWildcard returns the DnsWildcard field value if set, zero value otherwise.
+func (o *ScanDataDomainResponse) GetDnsWildcard() bool {
+	if o == nil || IsNil(o.DnsWildcard) {
+		var ret bool
+		return ret
+	}
+	return *o.DnsWildcard
+}
+
+// GetDnsWildcardOk returns a tuple with the DnsWildcard field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ScanDataDomainResponse) GetDnsWildcardOk() (*bool, bool) {
+	if o == nil || IsNil(o.DnsWildcard) {
+		return nil, false
+	}
+	return o.DnsWildcard, true
+}
+
+// HasDnsWildcard returns a boolean if a field has been set.
+func (o *ScanDataDomainResponse) HasDnsWildcard() bool {
+	if o != nil && !IsNil(o.DnsWildcard) {
+		return true
+	}
+
+	return false
+}
+
+// SetDnsWildcard gets a reference to the given bool and assigns it to the DnsWildcard field.
+func (o *ScanDataDomainResponse) SetDnsWildcard(v bool) {
+	o.DnsWildcard = &v
+}
+
 // GetLimited returns the Limited field value
 func (o *ScanDataDomainResponse) GetLimited() bool {
 	if o == nil {
@@ -420,6 +644,326 @@ func (o *ScanDataDomainResponse) GetLimitedOk() (*bool, bool) {
 // SetLimited sets field value
 func (o *ScanDataDomainResponse) SetLimited(v bool) {
 	o.Limited = v
+}
+
+// GetMtaStsTxtRecord returns the MtaStsTxtRecord field value if set, zero value otherwise.
+func (o *ScanDataDomainResponse) GetMtaStsTxtRecord() []string {
+	if o == nil || IsNil(o.MtaStsTxtRecord) {
+		var ret []string
+		return ret
+	}
+	return o.MtaStsTxtRecord
+}
+
+// GetMtaStsTxtRecordOk returns a tuple with the MtaStsTxtRecord field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ScanDataDomainResponse) GetMtaStsTxtRecordOk() ([]string, bool) {
+	if o == nil || IsNil(o.MtaStsTxtRecord) {
+		return nil, false
+	}
+	return o.MtaStsTxtRecord, true
+}
+
+// HasMtaStsTxtRecord returns a boolean if a field has been set.
+func (o *ScanDataDomainResponse) HasMtaStsTxtRecord() bool {
+	if o != nil && !IsNil(o.MtaStsTxtRecord) {
+		return true
+	}
+
+	return false
+}
+
+// SetMtaStsTxtRecord gets a reference to the given []string and assigns it to the MtaStsTxtRecord field.
+func (o *ScanDataDomainResponse) SetMtaStsTxtRecord(v []string) {
+	o.MtaStsTxtRecord = v
+}
+
+// GetMtaStsPolicy returns the MtaStsPolicy field value if set, zero value otherwise.
+func (o *ScanDataDomainResponse) GetMtaStsPolicy() []string {
+	if o == nil || IsNil(o.MtaStsPolicy) {
+		var ret []string
+		return ret
+	}
+	return o.MtaStsPolicy
+}
+
+// GetMtaStsPolicyOk returns a tuple with the MtaStsPolicy field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ScanDataDomainResponse) GetMtaStsPolicyOk() ([]string, bool) {
+	if o == nil || IsNil(o.MtaStsPolicy) {
+		return nil, false
+	}
+	return o.MtaStsPolicy, true
+}
+
+// HasMtaStsPolicy returns a boolean if a field has been set.
+func (o *ScanDataDomainResponse) HasMtaStsPolicy() bool {
+	if o != nil && !IsNil(o.MtaStsPolicy) {
+		return true
+	}
+
+	return false
+}
+
+// SetMtaStsPolicy gets a reference to the given []string and assigns it to the MtaStsPolicy field.
+func (o *ScanDataDomainResponse) SetMtaStsPolicy(v []string) {
+	o.MtaStsPolicy = v
+}
+
+// GetMtaStsReport returns the MtaStsReport field value if set, zero value otherwise.
+func (o *ScanDataDomainResponse) GetMtaStsReport() []string {
+	if o == nil || IsNil(o.MtaStsReport) {
+		var ret []string
+		return ret
+	}
+	return o.MtaStsReport
+}
+
+// GetMtaStsReportOk returns a tuple with the MtaStsReport field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ScanDataDomainResponse) GetMtaStsReportOk() ([]string, bool) {
+	if o == nil || IsNil(o.MtaStsReport) {
+		return nil, false
+	}
+	return o.MtaStsReport, true
+}
+
+// HasMtaStsReport returns a boolean if a field has been set.
+func (o *ScanDataDomainResponse) HasMtaStsReport() bool {
+	if o != nil && !IsNil(o.MtaStsReport) {
+		return true
+	}
+
+	return false
+}
+
+// SetMtaStsReport gets a reference to the given []string and assigns it to the MtaStsReport field.
+func (o *ScanDataDomainResponse) SetMtaStsReport(v []string) {
+	o.MtaStsReport = v
+}
+
+// GetSecurityTxtPolicy returns the SecurityTxtPolicy field value if set, zero value otherwise.
+func (o *ScanDataDomainResponse) GetSecurityTxtPolicy() string {
+	if o == nil || IsNil(o.SecurityTxtPolicy) {
+		var ret string
+		return ret
+	}
+	return *o.SecurityTxtPolicy
+}
+
+// GetSecurityTxtPolicyOk returns a tuple with the SecurityTxtPolicy field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ScanDataDomainResponse) GetSecurityTxtPolicyOk() (*string, bool) {
+	if o == nil || IsNil(o.SecurityTxtPolicy) {
+		return nil, false
+	}
+	return o.SecurityTxtPolicy, true
+}
+
+// HasSecurityTxtPolicy returns a boolean if a field has been set.
+func (o *ScanDataDomainResponse) HasSecurityTxtPolicy() bool {
+	if o != nil && !IsNil(o.SecurityTxtPolicy) {
+		return true
+	}
+
+	return false
+}
+
+// SetSecurityTxtPolicy gets a reference to the given string and assigns it to the SecurityTxtPolicy field.
+func (o *ScanDataDomainResponse) SetSecurityTxtPolicy(v string) {
+	o.SecurityTxtPolicy = &v
+}
+
+// GetSecurityTxtUrl returns the SecurityTxtUrl field value if set, zero value otherwise.
+func (o *ScanDataDomainResponse) GetSecurityTxtUrl() string {
+	if o == nil || IsNil(o.SecurityTxtUrl) {
+		var ret string
+		return ret
+	}
+	return *o.SecurityTxtUrl
+}
+
+// GetSecurityTxtUrlOk returns a tuple with the SecurityTxtUrl field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ScanDataDomainResponse) GetSecurityTxtUrlOk() (*string, bool) {
+	if o == nil || IsNil(o.SecurityTxtUrl) {
+		return nil, false
+	}
+	return o.SecurityTxtUrl, true
+}
+
+// HasSecurityTxtUrl returns a boolean if a field has been set.
+func (o *ScanDataDomainResponse) HasSecurityTxtUrl() bool {
+	if o != nil && !IsNil(o.SecurityTxtUrl) {
+		return true
+	}
+
+	return false
+}
+
+// SetSecurityTxtUrl gets a reference to the given string and assigns it to the SecurityTxtUrl field.
+func (o *ScanDataDomainResponse) SetSecurityTxtUrl(v string) {
+	o.SecurityTxtUrl = &v
+}
+
+// GetRdapExpiration returns the RdapExpiration field value if set, zero value otherwise.
+func (o *ScanDataDomainResponse) GetRdapExpiration() string {
+	if o == nil || IsNil(o.RdapExpiration) {
+		var ret string
+		return ret
+	}
+	return *o.RdapExpiration
+}
+
+// GetRdapExpirationOk returns a tuple with the RdapExpiration field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ScanDataDomainResponse) GetRdapExpirationOk() (*string, bool) {
+	if o == nil || IsNil(o.RdapExpiration) {
+		return nil, false
+	}
+	return o.RdapExpiration, true
+}
+
+// HasRdapExpiration returns a boolean if a field has been set.
+func (o *ScanDataDomainResponse) HasRdapExpiration() bool {
+	if o != nil && !IsNil(o.RdapExpiration) {
+		return true
+	}
+
+	return false
+}
+
+// SetRdapExpiration gets a reference to the given string and assigns it to the RdapExpiration field.
+func (o *ScanDataDomainResponse) SetRdapExpiration(v string) {
+	o.RdapExpiration = &v
+}
+
+// GetRdapHandle returns the RdapHandle field value if set, zero value otherwise.
+func (o *ScanDataDomainResponse) GetRdapHandle() string {
+	if o == nil || IsNil(o.RdapHandle) {
+		var ret string
+		return ret
+	}
+	return *o.RdapHandle
+}
+
+// GetRdapHandleOk returns a tuple with the RdapHandle field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ScanDataDomainResponse) GetRdapHandleOk() (*string, bool) {
+	if o == nil || IsNil(o.RdapHandle) {
+		return nil, false
+	}
+	return o.RdapHandle, true
+}
+
+// HasRdapHandle returns a boolean if a field has been set.
+func (o *ScanDataDomainResponse) HasRdapHandle() bool {
+	if o != nil && !IsNil(o.RdapHandle) {
+		return true
+	}
+
+	return false
+}
+
+// SetRdapHandle gets a reference to the given string and assigns it to the RdapHandle field.
+func (o *ScanDataDomainResponse) SetRdapHandle(v string) {
+	o.RdapHandle = &v
+}
+
+// GetRdapRegistration returns the RdapRegistration field value if set, zero value otherwise.
+func (o *ScanDataDomainResponse) GetRdapRegistration() string {
+	if o == nil || IsNil(o.RdapRegistration) {
+		var ret string
+		return ret
+	}
+	return *o.RdapRegistration
+}
+
+// GetRdapRegistrationOk returns a tuple with the RdapRegistration field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ScanDataDomainResponse) GetRdapRegistrationOk() (*string, bool) {
+	if o == nil || IsNil(o.RdapRegistration) {
+		return nil, false
+	}
+	return o.RdapRegistration, true
+}
+
+// HasRdapRegistration returns a boolean if a field has been set.
+func (o *ScanDataDomainResponse) HasRdapRegistration() bool {
+	if o != nil && !IsNil(o.RdapRegistration) {
+		return true
+	}
+
+	return false
+}
+
+// SetRdapRegistration gets a reference to the given string and assigns it to the RdapRegistration field.
+func (o *ScanDataDomainResponse) SetRdapRegistration(v string) {
+	o.RdapRegistration = &v
+}
+
+// GetRootDomain returns the RootDomain field value if set, zero value otherwise.
+func (o *ScanDataDomainResponse) GetRootDomain() bool {
+	if o == nil || IsNil(o.RootDomain) {
+		var ret bool
+		return ret
+	}
+	return *o.RootDomain
+}
+
+// GetRootDomainOk returns a tuple with the RootDomain field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ScanDataDomainResponse) GetRootDomainOk() (*bool, bool) {
+	if o == nil || IsNil(o.RootDomain) {
+		return nil, false
+	}
+	return o.RootDomain, true
+}
+
+// HasRootDomain returns a boolean if a field has been set.
+func (o *ScanDataDomainResponse) HasRootDomain() bool {
+	if o != nil && !IsNil(o.RootDomain) {
+		return true
+	}
+
+	return false
+}
+
+// SetRootDomain gets a reference to the given bool and assigns it to the RootDomain field.
+func (o *ScanDataDomainResponse) SetRootDomain(v bool) {
+	o.RootDomain = &v
+}
+
+// GetSpfRecord returns the SpfRecord field value if set, zero value otherwise.
+func (o *ScanDataDomainResponse) GetSpfRecord() []string {
+	if o == nil || IsNil(o.SpfRecord) {
+		var ret []string
+		return ret
+	}
+	return o.SpfRecord
+}
+
+// GetSpfRecordOk returns a tuple with the SpfRecord field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ScanDataDomainResponse) GetSpfRecordOk() ([]string, bool) {
+	if o == nil || IsNil(o.SpfRecord) {
+		return nil, false
+	}
+	return o.SpfRecord, true
+}
+
+// HasSpfRecord returns a boolean if a field has been set.
+func (o *ScanDataDomainResponse) HasSpfRecord() bool {
+	if o != nil && !IsNil(o.SpfRecord) {
+		return true
+	}
+
+	return false
+}
+
+// SetSpfRecord gets a reference to the given []string and assigns it to the SpfRecord field.
+func (o *ScanDataDomainResponse) SetSpfRecord(v []string) {
+	o.SpfRecord = v
 }
 
 // GetStale returns the Stale field value
@@ -568,7 +1112,55 @@ func (o ScanDataDomainResponse) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Risks) {
 		toSerialize["risks"] = o.Risks
 	}
+	if !IsNil(o.CaaRecord) {
+		toSerialize["caa_record"] = o.CaaRecord
+	}
+	if !IsNil(o.DkimMax) {
+		toSerialize["dkim_max"] = o.DkimMax
+	}
+	if !IsNil(o.DkimMin) {
+		toSerialize["dkim_min"] = o.DkimMin
+	}
+	if !IsNil(o.DkimRecord) {
+		toSerialize["dkim_record"] = o.DkimRecord
+	}
+	if !IsNil(o.DmarcRecord) {
+		toSerialize["dmarc_record"] = o.DmarcRecord
+	}
+	if !IsNil(o.DnsWildcard) {
+		toSerialize["dns_wildcard"] = o.DnsWildcard
+	}
 	toSerialize["limited"] = o.Limited
+	if !IsNil(o.MtaStsTxtRecord) {
+		toSerialize["mta_sts_txt_record"] = o.MtaStsTxtRecord
+	}
+	if !IsNil(o.MtaStsPolicy) {
+		toSerialize["mta_sts_policy"] = o.MtaStsPolicy
+	}
+	if !IsNil(o.MtaStsReport) {
+		toSerialize["mta_sts_report"] = o.MtaStsReport
+	}
+	if !IsNil(o.SecurityTxtPolicy) {
+		toSerialize["security_txt_policy"] = o.SecurityTxtPolicy
+	}
+	if !IsNil(o.SecurityTxtUrl) {
+		toSerialize["security_txt_url"] = o.SecurityTxtUrl
+	}
+	if !IsNil(o.RdapExpiration) {
+		toSerialize["rdap_expiration"] = o.RdapExpiration
+	}
+	if !IsNil(o.RdapHandle) {
+		toSerialize["rdap_handle"] = o.RdapHandle
+	}
+	if !IsNil(o.RdapRegistration) {
+		toSerialize["rdap_registration"] = o.RdapRegistration
+	}
+	if !IsNil(o.RootDomain) {
+		toSerialize["root_domain"] = o.RootDomain
+	}
+	if !IsNil(o.SpfRecord) {
+		toSerialize["spf_record"] = o.SpfRecord
+	}
 	toSerialize["stale"] = o.Stale
 	toSerialize["name_server"] = o.NameServer
 	toSerialize["seed"] = o.Seed
@@ -644,7 +1236,23 @@ func (o *ScanDataDomainResponse) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "entities")
 		delete(additionalProperties, "risk_counts")
 		delete(additionalProperties, "risks")
+		delete(additionalProperties, "caa_record")
+		delete(additionalProperties, "dkim_max")
+		delete(additionalProperties, "dkim_min")
+		delete(additionalProperties, "dkim_record")
+		delete(additionalProperties, "dmarc_record")
+		delete(additionalProperties, "dns_wildcard")
 		delete(additionalProperties, "limited")
+		delete(additionalProperties, "mta_sts_txt_record")
+		delete(additionalProperties, "mta_sts_policy")
+		delete(additionalProperties, "mta_sts_report")
+		delete(additionalProperties, "security_txt_policy")
+		delete(additionalProperties, "security_txt_url")
+		delete(additionalProperties, "rdap_expiration")
+		delete(additionalProperties, "rdap_handle")
+		delete(additionalProperties, "rdap_registration")
+		delete(additionalProperties, "root_domain")
+		delete(additionalProperties, "spf_record")
 		delete(additionalProperties, "stale")
 		delete(additionalProperties, "name_server")
 		delete(additionalProperties, "seed")

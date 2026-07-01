@@ -1,7 +1,7 @@
 /*
 Hexiosec ASM API
 
-This API reference documents how to programmatically access Hexiosec ASM data, for automation and data extraction purposes.  The Hexiosec ASM API is organised around REST. Our API has resource-oriented URLs which accept query string parameters, and return JSON-encoded responses. We use standard HTTP response codes and verbs, and authentication is provided via a custom header.  This API supports a subset of the functionality available in [Hexiosec ASM](https://hexiosec.com/asm/).  To download a copy of this documentation, please visit [https://asm.hexiosec.com/api/openapi.yml](https://asm.hexiosec.com/api/openapi.yml).  ### API access  Any user can create API keys to use as a credential to access the Hexiosec ASM API. Management of organisations and resources within those organisations is restricted to certain pricing plans. For more information on the features included with your subscription please see the [Hexiosec ASM Pricing](https://hexiosec.com/asm/pricing/)  API access for an organisation can be checked using [GET /v1/orgs/{id}](#get-/v1/orgs/-id-)  ### Versioning  API endpoints are versioned according to their path prefix, which at present is `/api/v1`. Breaking changes will be released under an incremented prefix, whereas minor changes will be incorporated into the existing endpoints as necessary.  ### Pagination  Endpoints that support pagination do so via `limit` and `offset`. The last set of results in a paginated set is the first response for which the number of received entries is less than the requested limit.  ### Expanding Responses  Many objects allow you to request additional information as an expanded response by using the expand request parameter. This parameter only available on certain requests, and is shown in the list of query parameters for the API endpoint.  The list of expandable items is shown in the `expand` parameter specification, and will usually return summary information for the linked resource. Summary entry specifications are shown in the specification of the endpoint response as an optional field. If not requested, this optional field will either be null or omitted from the response. 
+This API reference documents how to programmatically access Hexiosec ASM data, for automation and data extraction purposes.  The Hexiosec ASM API is organised around REST. Our API has resource-oriented URLs which accept query string parameters, and return JSON-encoded responses. We use standard HTTP response codes and verbs, and authentication is provided via a custom header.  This API supports a subset of the functionality available in [Hexiosec ASM](https://hexiosec.com/asm/).  To download a copy of this documentation, please visit [https://asm.hexiosec.com/api/openapi.yml](https://asm.hexiosec.com/api/openapi.yml).  ### API access  Any user can create API keys to use as a credential to access the Hexiosec ASM API. Management of organisations and resources within those organisations is restricted to certain pricing plans. For more information on the features included with your subscription please see the [Hexiosec ASM Pricing](https://hexiosec.com/asm/pricing/)  API access for an organisation can be checked using [GET /v1/orgs/{id}](#get-/v1/orgs/-id-)  ### Versioning  API endpoints are versioned according to their path prefix, which at present is `/api/v1`. Breaking changes will be released under an incremented prefix, whereas minor changes will be incorporated into the existing endpoints as necessary.  ### Pagination  Endpoints that support pagination do so via `limit` and `offset`. The last set of results in a paginated set is the first response for which the number of received entries is less than the requested limit.  ### Expanding Responses  Many objects allow you to request additional information as an expanded response by using the expand request parameter. This parameter is only available on certain requests, and is shown in the list of query parameters for the API endpoint.  The list of expandable items is shown in the `expand` parameter specification, and will usually return summary information for the linked resource. Summary entry specifications are shown in the specification of the endpoint response as an optional field. If not requested, this optional field will either be null or omitted from the response. 
 
 API version: 1.0.0
 Contact: support@hexiosec.com
@@ -19,6 +19,7 @@ import (
 	"net/url"
 	"strings"
 	"reflect"
+	"time"
 	"os"
 )
 
@@ -478,6 +479,156 @@ func (a *ScansAPIService) DeleteScanByIdExecute(r ApiDeleteScanByIdRequest) (*ht
 	}
 
 	return localVarHTTPResponse, nil
+}
+
+type ApiGetDashboardMetricsRequest struct {
+	ctx context.Context
+	ApiService *ScansAPIService
+	getDashboardMetricsRequest *GetDashboardMetricsRequest
+}
+
+// Parameters to fetch dashboard metric rows
+func (r ApiGetDashboardMetricsRequest) GetDashboardMetricsRequest(getDashboardMetricsRequest GetDashboardMetricsRequest) ApiGetDashboardMetricsRequest {
+	r.getDashboardMetricsRequest = &getDashboardMetricsRequest
+	return r
+}
+
+func (r ApiGetDashboardMetricsRequest) Execute() ([]ScanIterationMetricResponse, *http.Response, error) {
+	return r.ApiService.GetDashboardMetricsExecute(r)
+}
+
+/*
+GetDashboardMetrics Get dashboard metric time series for accessible scans
+
+Required role: `scans:read`
+
+Returns time series metric rows for the specified scans.
+The caller must have access to every scan in `scan_ids`.
+
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiGetDashboardMetricsRequest
+*/
+func (a *ScansAPIService) GetDashboardMetrics(ctx context.Context) ApiGetDashboardMetricsRequest {
+	return ApiGetDashboardMetricsRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return []ScanIterationMetricResponse
+func (a *ScansAPIService) GetDashboardMetricsExecute(r ApiGetDashboardMetricsRequest) ([]ScanIterationMetricResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []ScanIterationMetricResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ScansAPIService.GetDashboardMetrics")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/scans/dashboard/metrics"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.getDashboardMetricsRequest == nil {
+		return localVarReturnValue, nil, reportError("getDashboardMetricsRequest is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.getDashboardMetricsRequest
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["APIKey"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["X-Hexiosec-API-Key"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type ApiGetScanByIDRequest struct {
@@ -983,11 +1134,25 @@ type ApiGetScanLinkTagsRequest struct {
 	ctx context.Context
 	ApiService *ScansAPIService
 	id string
+	updatedSince *time.Time
+	includeDeleted *bool
 	limit *float32
 	offset *float32
 	order *string
 	dir *string
 	expand *[]string
+}
+
+// Only return link tags updated at or after this timestamp
+func (r ApiGetScanLinkTagsRequest) UpdatedSince(updatedSince time.Time) ApiGetScanLinkTagsRequest {
+	r.updatedSince = &updatedSince
+	return r
+}
+
+// Include soft deleted link tags
+func (r ApiGetScanLinkTagsRequest) IncludeDeleted(includeDeleted bool) ApiGetScanLinkTagsRequest {
+	r.includeDeleted = &includeDeleted
+	return r
 }
 
 // Maximum number of entries to return
@@ -1067,6 +1232,232 @@ func (a *ScansAPIService) GetScanLinkTagsExecute(r ApiGetScanLinkTagsRequest) ([
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.updatedSince != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "updated_since", r.updatedSince, "form", "")
+	}
+	if r.includeDeleted != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "include_deleted", r.includeDeleted, "form", "")
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
+	}
+	if r.offset != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "offset", r.offset, "form", "")
+	}
+	if r.order != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "order", r.order, "form", "")
+	}
+	if r.dir != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "dir", r.dir, "form", "")
+	}
+	if r.expand != nil {
+		t := *r.expand
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "expand", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "expand", t, "form", "multi")
+		}
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["APIKey"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["X-Hexiosec-API-Key"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetScanNodeTagsRequest struct {
+	ctx context.Context
+	ApiService *ScansAPIService
+	id string
+	updatedSince *time.Time
+	includeDeleted *bool
+	limit *float32
+	offset *float32
+	order *string
+	dir *string
+	expand *[]string
+}
+
+// Only return node tags updated at or after this timestamp
+func (r ApiGetScanNodeTagsRequest) UpdatedSince(updatedSince time.Time) ApiGetScanNodeTagsRequest {
+	r.updatedSince = &updatedSince
+	return r
+}
+
+// Include soft deleted node tags
+func (r ApiGetScanNodeTagsRequest) IncludeDeleted(includeDeleted bool) ApiGetScanNodeTagsRequest {
+	r.includeDeleted = &includeDeleted
+	return r
+}
+
+// Maximum number of entries to return
+func (r ApiGetScanNodeTagsRequest) Limit(limit float32) ApiGetScanNodeTagsRequest {
+	r.limit = &limit
+	return r
+}
+
+// Offset into the list of entries to return
+func (r ApiGetScanNodeTagsRequest) Offset(offset float32) ApiGetScanNodeTagsRequest {
+	r.offset = &offset
+	return r
+}
+
+// Column to order results by
+func (r ApiGetScanNodeTagsRequest) Order(order string) ApiGetScanNodeTagsRequest {
+	r.order = &order
+	return r
+}
+
+// Sort direction
+func (r ApiGetScanNodeTagsRequest) Dir(dir string) ApiGetScanNodeTagsRequest {
+	r.dir = &dir
+	return r
+}
+
+// Fields to expand with additional information
+func (r ApiGetScanNodeTagsRequest) Expand(expand []string) ApiGetScanNodeTagsRequest {
+	r.expand = &expand
+	return r
+}
+
+func (r ApiGetScanNodeTagsRequest) Execute() ([]NodeTagResponse, *http.Response, error) {
+	return r.ApiService.GetScanNodeTagsExecute(r)
+}
+
+/*
+GetScanNodeTags Get node tags for a scan
+
+Required role: `scans:read`
+
+This endpoint requires that the associated organisation has API access enabled.
+If API access is not allowed, the response code will be 403 (Forbidden).
+
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Scan ID
+ @return ApiGetScanNodeTagsRequest
+*/
+func (a *ScansAPIService) GetScanNodeTags(ctx context.Context, id string) ApiGetScanNodeTagsRequest {
+	return ApiGetScanNodeTagsRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return []NodeTagResponse
+func (a *ScansAPIService) GetScanNodeTagsExecute(r ApiGetScanNodeTagsRequest) ([]NodeTagResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []NodeTagResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ScansAPIService.GetScanNodeTags")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/scans/{id}/node_tags"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.updatedSince != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "updated_since", r.updatedSince, "form", "")
+	}
+	if r.includeDeleted != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "include_deleted", r.includeDeleted, "form", "")
+	}
 	if r.limit != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
 	}
@@ -1811,6 +2202,452 @@ func (a *ScansAPIService) GetScansCountExecute(r ApiGetScansCountRequest) (*Inli
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiGetScansForOrgRequest struct {
+	ctx context.Context
+	ApiService *ScansAPIService
+	organisationId *string
+	scope *string
+	limit *float32
+	offset *float32
+	order *string
+	dir *string
+	type_ *[]string
+	expand *[]string
+}
+
+// Organisation ID
+func (r ApiGetScansForOrgRequest) OrganisationId(organisationId string) ApiGetScansForOrgRequest {
+	r.organisationId = &organisationId
+	return r
+}
+
+// Scope of scans to return
+func (r ApiGetScansForOrgRequest) Scope(scope string) ApiGetScansForOrgRequest {
+	r.scope = &scope
+	return r
+}
+
+// Maximum number of entries to return
+func (r ApiGetScansForOrgRequest) Limit(limit float32) ApiGetScansForOrgRequest {
+	r.limit = &limit
+	return r
+}
+
+// Offset into the list of entries to return
+func (r ApiGetScansForOrgRequest) Offset(offset float32) ApiGetScansForOrgRequest {
+	r.offset = &offset
+	return r
+}
+
+// Column to order results by
+func (r ApiGetScansForOrgRequest) Order(order string) ApiGetScansForOrgRequest {
+	r.order = &order
+	return r
+}
+
+// Sort direction
+func (r ApiGetScansForOrgRequest) Dir(dir string) ApiGetScansForOrgRequest {
+	r.dir = &dir
+	return r
+}
+
+// Filter by scan types
+func (r ApiGetScansForOrgRequest) Type_(type_ []string) ApiGetScansForOrgRequest {
+	r.type_ = &type_
+	return r
+}
+
+// Fields to expand with additional information
+func (r ApiGetScansForOrgRequest) Expand(expand []string) ApiGetScansForOrgRequest {
+	r.expand = &expand
+	return r
+}
+
+func (r ApiGetScansForOrgRequest) Execute() ([]ScanResponse, *http.Response, error) {
+	return r.ApiService.GetScansForOrgExecute(r)
+}
+
+/*
+GetScansForOrg Get the Scans for a specified organisation with pagination
+
+Required role:
+- `organisations:read` when `scope=member`
+- `organisations.scans:read` when `scope=organisation`
+
+This endpoint retrieves scans across all scan groups for a given organisation with server-side pagination and sorting.
+`scope=member` limits results to scans in scan groups the user is a member of.
+`scope=organisation` returns all scans in the organisation.
+This endpoint requires that the associated organisation has API access enabled.
+If API access is not allowed, the response code will be 403 (Forbidden).
+
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiGetScansForOrgRequest
+*/
+func (a *ScansAPIService) GetScansForOrg(ctx context.Context) ApiGetScansForOrgRequest {
+	return ApiGetScansForOrgRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return []ScanResponse
+func (a *ScansAPIService) GetScansForOrgExecute(r ApiGetScansForOrgRequest) ([]ScanResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []ScanResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ScansAPIService.GetScansForOrg")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/scans/by-org"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.organisationId == nil {
+		return localVarReturnValue, nil, reportError("organisationId is required and must be specified")
+	}
+
+	parameterAddToHeaderOrQuery(localVarQueryParams, "organisation_id", r.organisationId, "form", "")
+	if r.scope != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "scope", r.scope, "form", "")
+	} else {
+		var defaultValue string = "member"
+		parameterAddToHeaderOrQuery(localVarQueryParams, "scope", defaultValue, "form", "")
+		r.scope = &defaultValue
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
+	} else {
+		var defaultValue float32 = 1000
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", defaultValue, "form", "")
+		r.limit = &defaultValue
+	}
+	if r.offset != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "offset", r.offset, "form", "")
+	} else {
+		var defaultValue float32 = 0
+		parameterAddToHeaderOrQuery(localVarQueryParams, "offset", defaultValue, "form", "")
+		r.offset = &defaultValue
+	}
+	if r.order != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "order", r.order, "form", "")
+	} else {
+		var defaultValue string = "created"
+		parameterAddToHeaderOrQuery(localVarQueryParams, "order", defaultValue, "form", "")
+		r.order = &defaultValue
+	}
+	if r.dir != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "dir", r.dir, "form", "")
+	} else {
+		var defaultValue string = "asc"
+		parameterAddToHeaderOrQuery(localVarQueryParams, "dir", defaultValue, "form", "")
+		r.dir = &defaultValue
+	}
+	if r.type_ != nil {
+		t := *r.type_
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "type", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "type", t, "form", "multi")
+		}
+	}
+	if r.expand != nil {
+		t := *r.expand
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "expand", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "expand", t, "form", "multi")
+		}
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["APIKey"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["X-Hexiosec-API-Key"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetScansForOrgCountRequest struct {
+	ctx context.Context
+	ApiService *ScansAPIService
+	organisationId *string
+	scope *string
+	type_ *[]string
+}
+
+// Organisation ID
+func (r ApiGetScansForOrgCountRequest) OrganisationId(organisationId string) ApiGetScansForOrgCountRequest {
+	r.organisationId = &organisationId
+	return r
+}
+
+// Scope of scans to count
+func (r ApiGetScansForOrgCountRequest) Scope(scope string) ApiGetScansForOrgCountRequest {
+	r.scope = &scope
+	return r
+}
+
+// Filter by scan types
+func (r ApiGetScansForOrgCountRequest) Type_(type_ []string) ApiGetScansForOrgCountRequest {
+	r.type_ = &type_
+	return r
+}
+
+func (r ApiGetScansForOrgCountRequest) Execute() (*InlineObject, *http.Response, error) {
+	return r.ApiService.GetScansForOrgCountExecute(r)
+}
+
+/*
+GetScansForOrgCount Get the count of scans for a specified organisation
+
+Required role:
+- `organisations:read` when `scope=member`
+- `organisations.scans:read` when `scope=organisation`
+
+This endpoint retrieves the total count of scans across all scan groups for a given organisation.
+`scope=member` counts scans in scan groups the user is a member of.
+`scope=organisation` counts all scans in the organisation.
+This endpoint requires that the associated organisation has API access enabled.
+If API access is not allowed, the response code will be 403 (Forbidden).
+
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiGetScansForOrgCountRequest
+*/
+func (a *ScansAPIService) GetScansForOrgCount(ctx context.Context) ApiGetScansForOrgCountRequest {
+	return ApiGetScansForOrgCountRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return InlineObject
+func (a *ScansAPIService) GetScansForOrgCountExecute(r ApiGetScansForOrgCountRequest) (*InlineObject, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *InlineObject
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ScansAPIService.GetScansForOrgCount")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/scans/by-org/count"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.organisationId == nil {
+		return localVarReturnValue, nil, reportError("organisationId is required and must be specified")
+	}
+
+	parameterAddToHeaderOrQuery(localVarQueryParams, "organisation_id", r.organisationId, "form", "")
+	if r.scope != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "scope", r.scope, "form", "")
+	} else {
+		var defaultValue string = "member"
+		parameterAddToHeaderOrQuery(localVarQueryParams, "scope", defaultValue, "form", "")
+		r.scope = &defaultValue
+	}
+	if r.type_ != nil {
+		t := *r.type_
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "type", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "type", t, "form", "multi")
+		}
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["APIKey"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["X-Hexiosec-API-Key"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiGetScreenshotByIdRequest struct {
 	ctx context.Context
 	ApiService *ScansAPIService
@@ -1944,6 +2781,498 @@ func (a *ScansAPIService) GetScreenshotByIdExecute(r ApiGetScreenshotByIdRequest
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetSupplierScansForOrgRequest struct {
+	ctx context.Context
+	ApiService *ScansAPIService
+	organisationId *string
+	limit *float32
+	offset *float32
+	order *string
+	dir *string
+	type_ *[]string
+	search *string
+	searchSeeds *bool
+	includeDisabled *bool
+	includeDeleted *bool
+	expand *[]string
+}
+
+// Organisation ID
+func (r ApiGetSupplierScansForOrgRequest) OrganisationId(organisationId string) ApiGetSupplierScansForOrgRequest {
+	r.organisationId = &organisationId
+	return r
+}
+
+// Maximum number of entries to return
+func (r ApiGetSupplierScansForOrgRequest) Limit(limit float32) ApiGetSupplierScansForOrgRequest {
+	r.limit = &limit
+	return r
+}
+
+// Offset into the list of entries to return
+func (r ApiGetSupplierScansForOrgRequest) Offset(offset float32) ApiGetSupplierScansForOrgRequest {
+	r.offset = &offset
+	return r
+}
+
+// Column to order results by
+func (r ApiGetSupplierScansForOrgRequest) Order(order string) ApiGetSupplierScansForOrgRequest {
+	r.order = &order
+	return r
+}
+
+// Sort direction
+func (r ApiGetSupplierScansForOrgRequest) Dir(dir string) ApiGetSupplierScansForOrgRequest {
+	r.dir = &dir
+	return r
+}
+
+// Filter by scan types
+func (r ApiGetSupplierScansForOrgRequest) Type_(type_ []string) ApiGetSupplierScansForOrgRequest {
+	r.type_ = &type_
+	return r
+}
+
+// Search scans by scan name or seed name
+func (r ApiGetSupplierScansForOrgRequest) Search(search string) ApiGetSupplierScansForOrgRequest {
+	r.search = &search
+	return r
+}
+
+// Include seed names in the search filter
+func (r ApiGetSupplierScansForOrgRequest) SearchSeeds(searchSeeds bool) ApiGetSupplierScansForOrgRequest {
+	r.searchSeeds = &searchSeeds
+	return r
+}
+
+// Include disabled scans
+func (r ApiGetSupplierScansForOrgRequest) IncludeDisabled(includeDisabled bool) ApiGetSupplierScansForOrgRequest {
+	r.includeDisabled = &includeDisabled
+	return r
+}
+
+// Include deleted scans
+func (r ApiGetSupplierScansForOrgRequest) IncludeDeleted(includeDeleted bool) ApiGetSupplierScansForOrgRequest {
+	r.includeDeleted = &includeDeleted
+	return r
+}
+
+// Fields to expand with additional information
+func (r ApiGetSupplierScansForOrgRequest) Expand(expand []string) ApiGetSupplierScansForOrgRequest {
+	r.expand = &expand
+	return r
+}
+
+func (r ApiGetSupplierScansForOrgRequest) Execute() ([]ScanResponse, *http.Response, error) {
+	return r.ApiService.GetSupplierScansForOrgExecute(r)
+}
+
+/*
+GetSupplierScansForOrg Get supplier scans for a specified organisation with pagination
+
+Required role: `organisations:read`
+
+This endpoint retrieves scans from supplier scan groups the user can access for the specified organisation.
+The same scanpicker filters, pagination, sorting, and response shape are used as the organisation scan endpoints.
+This endpoint requires that the associated organisation has API access enabled.
+If API access is not allowed, the response code will be 403 (Forbidden).
+
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiGetSupplierScansForOrgRequest
+*/
+func (a *ScansAPIService) GetSupplierScansForOrg(ctx context.Context) ApiGetSupplierScansForOrgRequest {
+	return ApiGetSupplierScansForOrgRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return []ScanResponse
+func (a *ScansAPIService) GetSupplierScansForOrgExecute(r ApiGetSupplierScansForOrgRequest) ([]ScanResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []ScanResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ScansAPIService.GetSupplierScansForOrg")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/scans/suppliers"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.organisationId == nil {
+		return localVarReturnValue, nil, reportError("organisationId is required and must be specified")
+	}
+
+	parameterAddToHeaderOrQuery(localVarQueryParams, "organisation_id", r.organisationId, "form", "")
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
+	} else {
+		var defaultValue float32 = 1000
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", defaultValue, "form", "")
+		r.limit = &defaultValue
+	}
+	if r.offset != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "offset", r.offset, "form", "")
+	} else {
+		var defaultValue float32 = 0
+		parameterAddToHeaderOrQuery(localVarQueryParams, "offset", defaultValue, "form", "")
+		r.offset = &defaultValue
+	}
+	if r.order != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "order", r.order, "form", "")
+	} else {
+		var defaultValue string = "created"
+		parameterAddToHeaderOrQuery(localVarQueryParams, "order", defaultValue, "form", "")
+		r.order = &defaultValue
+	}
+	if r.dir != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "dir", r.dir, "form", "")
+	} else {
+		var defaultValue string = "asc"
+		parameterAddToHeaderOrQuery(localVarQueryParams, "dir", defaultValue, "form", "")
+		r.dir = &defaultValue
+	}
+	if r.type_ != nil {
+		t := *r.type_
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "type", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "type", t, "form", "multi")
+		}
+	}
+	if r.search != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "search", r.search, "form", "")
+	}
+	if r.searchSeeds != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "search_seeds", r.searchSeeds, "form", "")
+	}
+	if r.includeDisabled != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "include_disabled", r.includeDisabled, "form", "")
+	}
+	if r.includeDeleted != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "include_deleted", r.includeDeleted, "form", "")
+	}
+	if r.expand != nil {
+		t := *r.expand
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "expand", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "expand", t, "form", "multi")
+		}
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["APIKey"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["X-Hexiosec-API-Key"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetSupplierScansForOrgCountRequest struct {
+	ctx context.Context
+	ApiService *ScansAPIService
+	organisationId *string
+	type_ *[]string
+	search *string
+	searchSeeds *bool
+	includeDisabled *bool
+	includeDeleted *bool
+}
+
+// Organisation ID
+func (r ApiGetSupplierScansForOrgCountRequest) OrganisationId(organisationId string) ApiGetSupplierScansForOrgCountRequest {
+	r.organisationId = &organisationId
+	return r
+}
+
+// Filter by scan types
+func (r ApiGetSupplierScansForOrgCountRequest) Type_(type_ []string) ApiGetSupplierScansForOrgCountRequest {
+	r.type_ = &type_
+	return r
+}
+
+// Search scans by scan name or seed name
+func (r ApiGetSupplierScansForOrgCountRequest) Search(search string) ApiGetSupplierScansForOrgCountRequest {
+	r.search = &search
+	return r
+}
+
+// Include seed names in the search filter
+func (r ApiGetSupplierScansForOrgCountRequest) SearchSeeds(searchSeeds bool) ApiGetSupplierScansForOrgCountRequest {
+	r.searchSeeds = &searchSeeds
+	return r
+}
+
+// Include disabled scans
+func (r ApiGetSupplierScansForOrgCountRequest) IncludeDisabled(includeDisabled bool) ApiGetSupplierScansForOrgCountRequest {
+	r.includeDisabled = &includeDisabled
+	return r
+}
+
+// Include deleted scans
+func (r ApiGetSupplierScansForOrgCountRequest) IncludeDeleted(includeDeleted bool) ApiGetSupplierScansForOrgCountRequest {
+	r.includeDeleted = &includeDeleted
+	return r
+}
+
+func (r ApiGetSupplierScansForOrgCountRequest) Execute() (*InlineObject, *http.Response, error) {
+	return r.ApiService.GetSupplierScansForOrgCountExecute(r)
+}
+
+/*
+GetSupplierScansForOrgCount Get the count of supplier scans for a specified organisation
+
+Required role: `organisations:read`
+
+This endpoint retrieves the total count of scans from supplier scan groups the user can access for the specified organisation.
+The same scanpicker filters are used as the organisation scan count endpoint.
+This endpoint requires that the associated organisation has API access enabled.
+If API access is not allowed, the response code will be 403 (Forbidden).
+
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiGetSupplierScansForOrgCountRequest
+*/
+func (a *ScansAPIService) GetSupplierScansForOrgCount(ctx context.Context) ApiGetSupplierScansForOrgCountRequest {
+	return ApiGetSupplierScansForOrgCountRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return InlineObject
+func (a *ScansAPIService) GetSupplierScansForOrgCountExecute(r ApiGetSupplierScansForOrgCountRequest) (*InlineObject, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *InlineObject
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ScansAPIService.GetSupplierScansForOrgCount")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/scans/suppliers/count"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.organisationId == nil {
+		return localVarReturnValue, nil, reportError("organisationId is required and must be specified")
+	}
+
+	parameterAddToHeaderOrQuery(localVarQueryParams, "organisation_id", r.organisationId, "form", "")
+	if r.type_ != nil {
+		t := *r.type_
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "type", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "type", t, "form", "multi")
+		}
+	}
+	if r.search != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "search", r.search, "form", "")
+	}
+	if r.searchSeeds != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "search_seeds", r.searchSeeds, "form", "")
+	}
+	if r.includeDisabled != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "include_disabled", r.includeDisabled, "form", "")
+	}
+	if r.includeDeleted != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "include_deleted", r.includeDeleted, "form", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["APIKey"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["X-Hexiosec-API-Key"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
 			var v ErrorResponse
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

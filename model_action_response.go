@@ -1,7 +1,7 @@
 /*
 Hexiosec ASM API
 
-This API reference documents how to programmatically access Hexiosec ASM data, for automation and data extraction purposes.  The Hexiosec ASM API is organised around REST. Our API has resource-oriented URLs which accept query string parameters, and return JSON-encoded responses. We use standard HTTP response codes and verbs, and authentication is provided via a custom header.  This API supports a subset of the functionality available in [Hexiosec ASM](https://hexiosec.com/asm/).  To download a copy of this documentation, please visit [https://asm.hexiosec.com/api/openapi.yml](https://asm.hexiosec.com/api/openapi.yml).  ### API access  Any user can create API keys to use as a credential to access the Hexiosec ASM API. Management of organisations and resources within those organisations is restricted to certain pricing plans. For more information on the features included with your subscription please see the [Hexiosec ASM Pricing](https://hexiosec.com/asm/pricing/)  API access for an organisation can be checked using [GET /v1/orgs/{id}](#get-/v1/orgs/-id-)  ### Versioning  API endpoints are versioned according to their path prefix, which at present is `/api/v1`. Breaking changes will be released under an incremented prefix, whereas minor changes will be incorporated into the existing endpoints as necessary.  ### Pagination  Endpoints that support pagination do so via `limit` and `offset`. The last set of results in a paginated set is the first response for which the number of received entries is less than the requested limit.  ### Expanding Responses  Many objects allow you to request additional information as an expanded response by using the expand request parameter. This parameter only available on certain requests, and is shown in the list of query parameters for the API endpoint.  The list of expandable items is shown in the `expand` parameter specification, and will usually return summary information for the linked resource. Summary entry specifications are shown in the specification of the endpoint response as an optional field. If not requested, this optional field will either be null or omitted from the response. 
+This API reference documents how to programmatically access Hexiosec ASM data, for automation and data extraction purposes.  The Hexiosec ASM API is organised around REST. Our API has resource-oriented URLs which accept query string parameters, and return JSON-encoded responses. We use standard HTTP response codes and verbs, and authentication is provided via a custom header.  This API supports a subset of the functionality available in [Hexiosec ASM](https://hexiosec.com/asm/).  To download a copy of this documentation, please visit [https://asm.hexiosec.com/api/openapi.yml](https://asm.hexiosec.com/api/openapi.yml).  ### API access  Any user can create API keys to use as a credential to access the Hexiosec ASM API. Management of organisations and resources within those organisations is restricted to certain pricing plans. For more information on the features included with your subscription please see the [Hexiosec ASM Pricing](https://hexiosec.com/asm/pricing/)  API access for an organisation can be checked using [GET /v1/orgs/{id}](#get-/v1/orgs/-id-)  ### Versioning  API endpoints are versioned according to their path prefix, which at present is `/api/v1`. Breaking changes will be released under an incremented prefix, whereas minor changes will be incorporated into the existing endpoints as necessary.  ### Pagination  Endpoints that support pagination do so via `limit` and `offset`. The last set of results in a paginated set is the first response for which the number of received entries is less than the requested limit.  ### Expanding Responses  Many objects allow you to request additional information as an expanded response by using the expand request parameter. This parameter is only available on certain requests, and is shown in the list of query parameters for the API endpoint.  The list of expandable items is shown in the `expand` parameter specification, and will usually return summary information for the linked resource. Summary entry specifications are shown in the specification of the endpoint response as an optional field. If not requested, this optional field will either be null or omitted from the response. 
 
 API version: 1.0.0
 Contact: support@hexiosec.com
@@ -62,6 +62,8 @@ type ActionResponse struct {
 	Links []ActionLinkResponse `json:"links,omitempty"`
 	// Has been replaced with the get risks endpoint
 	LinkIds []string `json:"link_ids,omitempty"`
+	// Has been replaced with the asset_* params
+	// Deprecated
 	Target map[string]interface{} `json:"target,omitempty"`
 	AssigneeUser *UserDetailsResponse `json:"assignee_user,omitempty"`
 	ModifiedByUser *UserDetailsResponse `json:"modified_by_user,omitempty"`
@@ -661,6 +663,7 @@ func (o *ActionResponse) SetLinkIds(v []string) {
 }
 
 // GetTarget returns the Target field value if set, zero value otherwise.
+// Deprecated
 func (o *ActionResponse) GetTarget() map[string]interface{} {
 	if o == nil || IsNil(o.Target) {
 		var ret map[string]interface{}
@@ -671,6 +674,7 @@ func (o *ActionResponse) GetTarget() map[string]interface{} {
 
 // GetTargetOk returns a tuple with the Target field value if set, nil otherwise
 // and a boolean to check if the value has been set.
+// Deprecated
 func (o *ActionResponse) GetTargetOk() (map[string]interface{}, bool) {
 	if o == nil || IsNil(o.Target) {
 		return map[string]interface{}{}, false
@@ -688,6 +692,7 @@ func (o *ActionResponse) HasTarget() bool {
 }
 
 // SetTarget gets a reference to the given map[string]interface{} and assigns it to the Target field.
+// Deprecated
 func (o *ActionResponse) SetTarget(v map[string]interface{}) {
 	o.Target = v
 }

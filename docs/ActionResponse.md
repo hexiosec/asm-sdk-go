@@ -23,7 +23,7 @@ Name | Type | Description | Notes
 **ResolvedAt** | Pointer to **time.Time** | Timestamp at which the action was resolved | [optional] 
 **Links** | Pointer to [**[]ActionLinkResponse**](ActionLinkResponse.md) | Has been replaced with the get risks endpoint | [optional] 
 **LinkIds** | Pointer to **[]string** | Has been replaced with the get risks endpoint | [optional] 
-**Target** | Pointer to **map[string]interface{}** |  | [optional] 
+**Target** | Pointer to **map[string]interface{}** | Has been replaced with the asset_* params | [optional] 
 **AssigneeUser** | Pointer to [**UserDetailsResponse**](UserDetailsResponse.md) |  | [optional] 
 **ModifiedByUser** | Pointer to [**UserDetailsResponse**](UserDetailsResponse.md) |  | [optional] 
 **NoteModifiedByUser** | Pointer to [**UserDetailsResponse**](UserDetailsResponse.md) |  | [optional] 

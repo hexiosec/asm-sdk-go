@@ -1,7 +1,7 @@
 /*
 Hexiosec ASM API
 
-This API reference documents how to programmatically access Hexiosec ASM data, for automation and data extraction purposes.  The Hexiosec ASM API is organised around REST. Our API has resource-oriented URLs which accept query string parameters, and return JSON-encoded responses. We use standard HTTP response codes and verbs, and authentication is provided via a custom header.  This API supports a subset of the functionality available in [Hexiosec ASM](https://hexiosec.com/asm/).  To download a copy of this documentation, please visit [https://asm.hexiosec.com/api/openapi.yml](https://asm.hexiosec.com/api/openapi.yml).  ### API access  Any user can create API keys to use as a credential to access the Hexiosec ASM API. Management of organisations and resources within those organisations is restricted to certain pricing plans. For more information on the features included with your subscription please see the [Hexiosec ASM Pricing](https://hexiosec.com/asm/pricing/)  API access for an organisation can be checked using [GET /v1/orgs/{id}](#get-/v1/orgs/-id-)  ### Versioning  API endpoints are versioned according to their path prefix, which at present is `/api/v1`. Breaking changes will be released under an incremented prefix, whereas minor changes will be incorporated into the existing endpoints as necessary.  ### Pagination  Endpoints that support pagination do so via `limit` and `offset`. The last set of results in a paginated set is the first response for which the number of received entries is less than the requested limit.  ### Expanding Responses  Many objects allow you to request additional information as an expanded response by using the expand request parameter. This parameter only available on certain requests, and is shown in the list of query parameters for the API endpoint.  The list of expandable items is shown in the `expand` parameter specification, and will usually return summary information for the linked resource. Summary entry specifications are shown in the specification of the endpoint response as an optional field. If not requested, this optional field will either be null or omitted from the response. 
+This API reference documents how to programmatically access Hexiosec ASM data, for automation and data extraction purposes.  The Hexiosec ASM API is organised around REST. Our API has resource-oriented URLs which accept query string parameters, and return JSON-encoded responses. We use standard HTTP response codes and verbs, and authentication is provided via a custom header.  This API supports a subset of the functionality available in [Hexiosec ASM](https://hexiosec.com/asm/).  To download a copy of this documentation, please visit [https://asm.hexiosec.com/api/openapi.yml](https://asm.hexiosec.com/api/openapi.yml).  ### API access  Any user can create API keys to use as a credential to access the Hexiosec ASM API. Management of organisations and resources within those organisations is restricted to certain pricing plans. For more information on the features included with your subscription please see the [Hexiosec ASM Pricing](https://hexiosec.com/asm/pricing/)  API access for an organisation can be checked using [GET /v1/orgs/{id}](#get-/v1/orgs/-id-)  ### Versioning  API endpoints are versioned according to their path prefix, which at present is `/api/v1`. Breaking changes will be released under an incremented prefix, whereas minor changes will be incorporated into the existing endpoints as necessary.  ### Pagination  Endpoints that support pagination do so via `limit` and `offset`. The last set of results in a paginated set is the first response for which the number of received entries is less than the requested limit.  ### Expanding Responses  Many objects allow you to request additional information as an expanded response by using the expand request parameter. This parameter is only available on certain requests, and is shown in the list of query parameters for the API endpoint.  The list of expandable items is shown in the `expand` parameter specification, and will usually return summary information for the linked resource. Summary entry specifications are shown in the specification of the endpoint response as an optional field. If not requested, this optional field will either be null or omitted from the response. 
 
 API version: 1.0.0
 Contact: support@hexiosec.com
@@ -26,6 +26,8 @@ type ScanLinkTagResponse struct {
 	LinkId string `json:"link_id"`
 	// Tag ID
 	TagId string `json:"tag_id"`
+	// Whether the link tag has been soft deleted
+	Deleted bool `json:"deleted"`
 	// Timestamp at which the tag was added to the link
 	CreatedAt time.Time `json:"created_at"`
 	// User ID of the creator
@@ -40,6 +42,8 @@ type ScanLinkTagResponse struct {
 	UpdatedByUser *UserDetailsResponse `json:"updated_by_user,omitempty"`
 	// Tag Name
 	TagName *string `json:"tag_name,omitempty"`
+	// Optional tag colour as a hex value
+	Colour *string `json:"colour,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -49,10 +53,11 @@ type _ScanLinkTagResponse ScanLinkTagResponse
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewScanLinkTagResponse(linkId string, tagId string, createdAt time.Time, createdBy string, updatedAt time.Time, updatedBy string) *ScanLinkTagResponse {
+func NewScanLinkTagResponse(linkId string, tagId string, deleted bool, createdAt time.Time, createdBy string, updatedAt time.Time, updatedBy string) *ScanLinkTagResponse {
 	this := ScanLinkTagResponse{}
 	this.LinkId = linkId
 	this.TagId = tagId
+	this.Deleted = deleted
 	this.CreatedAt = createdAt
 	this.CreatedBy = createdBy
 	this.UpdatedAt = updatedAt
@@ -114,6 +119,30 @@ func (o *ScanLinkTagResponse) GetTagIdOk() (*string, bool) {
 // SetTagId sets field value
 func (o *ScanLinkTagResponse) SetTagId(v string) {
 	o.TagId = v
+}
+
+// GetDeleted returns the Deleted field value
+func (o *ScanLinkTagResponse) GetDeleted() bool {
+	if o == nil {
+		var ret bool
+		return ret
+	}
+
+	return o.Deleted
+}
+
+// GetDeletedOk returns a tuple with the Deleted field value
+// and a boolean to check if the value has been set.
+func (o *ScanLinkTagResponse) GetDeletedOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Deleted, true
+}
+
+// SetDeleted sets field value
+func (o *ScanLinkTagResponse) SetDeleted(v bool) {
+	o.Deleted = v
 }
 
 // GetCreatedAt returns the CreatedAt field value
@@ -372,6 +401,38 @@ func (o *ScanLinkTagResponse) SetTagName(v string) {
 	o.TagName = &v
 }
 
+// GetColour returns the Colour field value if set, zero value otherwise.
+func (o *ScanLinkTagResponse) GetColour() string {
+	if o == nil || IsNil(o.Colour) {
+		var ret string
+		return ret
+	}
+	return *o.Colour
+}
+
+// GetColourOk returns a tuple with the Colour field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ScanLinkTagResponse) GetColourOk() (*string, bool) {
+	if o == nil || IsNil(o.Colour) {
+		return nil, false
+	}
+	return o.Colour, true
+}
+
+// HasColour returns a boolean if a field has been set.
+func (o *ScanLinkTagResponse) HasColour() bool {
+	if o != nil && !IsNil(o.Colour) {
+		return true
+	}
+
+	return false
+}
+
+// SetColour gets a reference to the given string and assigns it to the Colour field.
+func (o *ScanLinkTagResponse) SetColour(v string) {
+	o.Colour = &v
+}
+
 func (o ScanLinkTagResponse) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -384,6 +445,7 @@ func (o ScanLinkTagResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["link_id"] = o.LinkId
 	toSerialize["tag_id"] = o.TagId
+	toSerialize["deleted"] = o.Deleted
 	toSerialize["created_at"] = o.CreatedAt
 	toSerialize["created_by"] = o.CreatedBy
 	toSerialize["updated_at"] = o.UpdatedAt
@@ -403,6 +465,9 @@ func (o ScanLinkTagResponse) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.TagName) {
 		toSerialize["tag_name"] = o.TagName
 	}
+	if !IsNil(o.Colour) {
+		toSerialize["colour"] = o.Colour
+	}
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -418,6 +483,7 @@ func (o *ScanLinkTagResponse) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"link_id",
 		"tag_id",
+		"deleted",
 		"created_at",
 		"created_by",
 		"updated_at",
@@ -453,6 +519,7 @@ func (o *ScanLinkTagResponse) UnmarshalJSON(data []byte) (err error) {
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "link_id")
 		delete(additionalProperties, "tag_id")
+		delete(additionalProperties, "deleted")
 		delete(additionalProperties, "created_at")
 		delete(additionalProperties, "created_by")
 		delete(additionalProperties, "updated_at")
@@ -462,6 +529,7 @@ func (o *ScanLinkTagResponse) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "created_by_user")
 		delete(additionalProperties, "updated_by_user")
 		delete(additionalProperties, "tag_name")
+		delete(additionalProperties, "colour")
 		o.AdditionalProperties = additionalProperties
 	}
 

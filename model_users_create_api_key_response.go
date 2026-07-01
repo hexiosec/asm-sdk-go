@@ -1,7 +1,7 @@
 /*
 Hexiosec ASM API
 
-This API reference documents how to programmatically access Hexiosec ASM data, for automation and data extraction purposes.  The Hexiosec ASM API is organised around REST. Our API has resource-oriented URLs which accept query string parameters, and return JSON-encoded responses. We use standard HTTP response codes and verbs, and authentication is provided via a custom header.  This API supports a subset of the functionality available in [Hexiosec ASM](https://hexiosec.com/asm/).  To download a copy of this documentation, please visit [https://asm.hexiosec.com/api/openapi.yml](https://asm.hexiosec.com/api/openapi.yml).  ### API access  Any user can create API keys to use as a credential to access the Hexiosec ASM API. Management of organisations and resources within those organisations is restricted to certain pricing plans. For more information on the features included with your subscription please see the [Hexiosec ASM Pricing](https://hexiosec.com/asm/pricing/)  API access for an organisation can be checked using [GET /v1/orgs/{id}](#get-/v1/orgs/-id-)  ### Versioning  API endpoints are versioned according to their path prefix, which at present is `/api/v1`. Breaking changes will be released under an incremented prefix, whereas minor changes will be incorporated into the existing endpoints as necessary.  ### Pagination  Endpoints that support pagination do so via `limit` and `offset`. The last set of results in a paginated set is the first response for which the number of received entries is less than the requested limit.  ### Expanding Responses  Many objects allow you to request additional information as an expanded response by using the expand request parameter. This parameter only available on certain requests, and is shown in the list of query parameters for the API endpoint.  The list of expandable items is shown in the `expand` parameter specification, and will usually return summary information for the linked resource. Summary entry specifications are shown in the specification of the endpoint response as an optional field. If not requested, this optional field will either be null or omitted from the response. 
+This API reference documents how to programmatically access Hexiosec ASM data, for automation and data extraction purposes.  The Hexiosec ASM API is organised around REST. Our API has resource-oriented URLs which accept query string parameters, and return JSON-encoded responses. We use standard HTTP response codes and verbs, and authentication is provided via a custom header.  This API supports a subset of the functionality available in [Hexiosec ASM](https://hexiosec.com/asm/).  To download a copy of this documentation, please visit [https://asm.hexiosec.com/api/openapi.yml](https://asm.hexiosec.com/api/openapi.yml).  ### API access  Any user can create API keys to use as a credential to access the Hexiosec ASM API. Management of organisations and resources within those organisations is restricted to certain pricing plans. For more information on the features included with your subscription please see the [Hexiosec ASM Pricing](https://hexiosec.com/asm/pricing/)  API access for an organisation can be checked using [GET /v1/orgs/{id}](#get-/v1/orgs/-id-)  ### Versioning  API endpoints are versioned according to their path prefix, which at present is `/api/v1`. Breaking changes will be released under an incremented prefix, whereas minor changes will be incorporated into the existing endpoints as necessary.  ### Pagination  Endpoints that support pagination do so via `limit` and `offset`. The last set of results in a paginated set is the first response for which the number of received entries is less than the requested limit.  ### Expanding Responses  Many objects allow you to request additional information as an expanded response by using the expand request parameter. This parameter is only available on certain requests, and is shown in the list of query parameters for the API endpoint.  The list of expandable items is shown in the `expand` parameter specification, and will usually return summary information for the linked resource. Summary entry specifications are shown in the specification of the endpoint response as an optional field. If not requested, this optional field will either be null or omitted from the response. 
 
 API version: 1.0.0
 Contact: support@hexiosec.com
@@ -13,6 +13,7 @@ package asm
 
 import (
 	"encoding/json"
+	"time"
 	"fmt"
 )
 
@@ -25,8 +26,8 @@ type UsersCreateAPIKeyResponse struct {
 	ApiKey string `json:"api_key"`
 	// API Key description
 	Description string `json:"description"`
-	// Validity duration
-	Lifetime *string `json:"lifetime,omitempty"`
+	// Timestamp at which the API key expires
+	Expires *time.Time `json:"expires,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -99,36 +100,36 @@ func (o *UsersCreateAPIKeyResponse) SetDescription(v string) {
 	o.Description = v
 }
 
-// GetLifetime returns the Lifetime field value if set, zero value otherwise.
-func (o *UsersCreateAPIKeyResponse) GetLifetime() string {
-	if o == nil || IsNil(o.Lifetime) {
-		var ret string
+// GetExpires returns the Expires field value if set, zero value otherwise.
+func (o *UsersCreateAPIKeyResponse) GetExpires() time.Time {
+	if o == nil || IsNil(o.Expires) {
+		var ret time.Time
 		return ret
 	}
-	return *o.Lifetime
+	return *o.Expires
 }
 
-// GetLifetimeOk returns a tuple with the Lifetime field value if set, nil otherwise
+// GetExpiresOk returns a tuple with the Expires field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UsersCreateAPIKeyResponse) GetLifetimeOk() (*string, bool) {
-	if o == nil || IsNil(o.Lifetime) {
+func (o *UsersCreateAPIKeyResponse) GetExpiresOk() (*time.Time, bool) {
+	if o == nil || IsNil(o.Expires) {
 		return nil, false
 	}
-	return o.Lifetime, true
+	return o.Expires, true
 }
 
-// HasLifetime returns a boolean if a field has been set.
-func (o *UsersCreateAPIKeyResponse) HasLifetime() bool {
-	if o != nil && !IsNil(o.Lifetime) {
+// HasExpires returns a boolean if a field has been set.
+func (o *UsersCreateAPIKeyResponse) HasExpires() bool {
+	if o != nil && !IsNil(o.Expires) {
 		return true
 	}
 
 	return false
 }
 
-// SetLifetime gets a reference to the given string and assigns it to the Lifetime field.
-func (o *UsersCreateAPIKeyResponse) SetLifetime(v string) {
-	o.Lifetime = &v
+// SetExpires gets a reference to the given time.Time and assigns it to the Expires field.
+func (o *UsersCreateAPIKeyResponse) SetExpires(v time.Time) {
+	o.Expires = &v
 }
 
 func (o UsersCreateAPIKeyResponse) MarshalJSON() ([]byte, error) {
@@ -143,8 +144,8 @@ func (o UsersCreateAPIKeyResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["api_key"] = o.ApiKey
 	toSerialize["description"] = o.Description
-	if !IsNil(o.Lifetime) {
-		toSerialize["lifetime"] = o.Lifetime
+	if !IsNil(o.Expires) {
+		toSerialize["expires"] = o.Expires
 	}
 
 	for key, value := range o.AdditionalProperties {
@@ -192,7 +193,7 @@ func (o *UsersCreateAPIKeyResponse) UnmarshalJSON(data []byte) (err error) {
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "api_key")
 		delete(additionalProperties, "description")
-		delete(additionalProperties, "lifetime")
+		delete(additionalProperties, "expires")
 		o.AdditionalProperties = additionalProperties
 	}
 

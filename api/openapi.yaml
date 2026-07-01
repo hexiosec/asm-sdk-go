@@ -35,7 +35,7 @@ info:
     ### Expanding Responses
 
     Many objects allow you to request additional information as an expanded response by using the expand request parameter.
-    This parameter only available on certain requests, and is shown in the list of query parameters for the API endpoint.
+    This parameter is only available on certain requests, and is shown in the list of query parameters for the API endpoint.
 
     The list of expandable items is shown in the `expand` parameter specification, and will usually return summary information for the linked resource.
     Summary entry specifications are shown in the specification of the endpoint response as an optional field.
@@ -55,8 +55,12 @@ tags:
   name: organisations
 - description: Scan Group endpoints
   name: scan_groups
+- description: Supply chain risk management endpoints
+  name: suppliers
 - description: Scan endpoints
   name: scans
+- description: Tag endpoints
+  name: tags
 - description: Graph endpoints
   name: graph
 - description: Discovery data endpoints
@@ -90,11 +94,10 @@ paths:
       - auth
   /v1/orgs:
     get:
-      description: |
-        Required role: `organisations:read`
-
-        This endpoint only returns entries for which API access is enabled.
-        In the event the user is not a member of any organisation with API access, an empty array will be returned.
+      description: "Required role: `organisations:read`\n\nThis endpoint only returns\
+        \ entries for which API access is enabled.\nIn the event the user is not a\
+        \ member of any organisation with API access, an empty array will be returned.\
+        \ \n"
       operationId: getOrganisations
       parameters:
       - description: Maximum number of entries to return
@@ -632,6 +635,7 @@ paths:
             enum:
             - node
             - iteration
+            - iteration_errors
             - created_by
             type: string
           type: array
@@ -795,6 +799,459 @@ paths:
         filter settings
       tags:
       - scans
+  /v1/scans/dashboard/metrics:
+    post:
+      description: |
+        Required role: `scans:read`
+
+        Returns time series metric rows for the specified scans.
+        The caller must have access to every scan in `scan_ids`.
+      operationId: getDashboardMetrics
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GetDashboardMetricsRequest"
+        description: Parameters to fetch dashboard metric rows
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ScanIterationMetricResponse"
+                type: array
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+      security:
+      - APIKey: []
+      summary: Get dashboard metric time series for accessible scans
+      tags:
+      - scans
+  /v1/scans/by-org:
+    get:
+      description: |
+        Required role:
+        - `organisations:read` when `scope=member`
+        - `organisations.scans:read` when `scope=organisation`
+
+        This endpoint retrieves scans across all scan groups for a given organisation with server-side pagination and sorting.
+        `scope=member` limits results to scans in scan groups the user is a member of.
+        `scope=organisation` returns all scans in the organisation.
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScansForOrg
+      parameters:
+      - description: Organisation ID
+        explode: true
+        in: query
+        name: organisation_id
+        required: true
+        schema:
+          type: string
+        style: form
+      - description: Scope of scans to return
+        explode: true
+        in: query
+        name: scope
+        required: false
+        schema:
+          default: member
+          enum:
+          - member
+          - organisation
+          type: string
+        style: form
+      - description: Maximum number of entries to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 1000
+          maximum: 1000
+          minimum: 1
+          type: number
+        style: form
+      - description: Offset into the list of entries to return
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          minimum: 0
+          type: number
+        style: form
+      - description: Column to order results by
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          default: created
+          enum:
+          - name
+          - group
+          - type
+          - status
+          - size
+          - created
+          - last_ran
+          - created_by
+          type: string
+        style: form
+      - description: Sort direction
+        explode: true
+        in: query
+        name: dir
+        required: false
+        schema:
+          default: asc
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Filter by scan types
+        explode: true
+        in: query
+        name: type
+        required: false
+        schema:
+          items:
+            enum:
+            - adhoc
+            - continuous_own
+            - continuous_vendor
+            type: string
+          type: array
+        style: form
+      - description: Fields to expand with additional information
+        explode: true
+        in: query
+        name: expand
+        required: false
+        schema:
+          items:
+            enum:
+            - node
+            - iteration
+            - iteration_errors
+            - created_by
+            - scan_group_name
+            type: string
+          type: array
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ScanResponse"
+                type: array
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+      security:
+      - APIKey: []
+      summary: Get the Scans for a specified organisation with pagination
+      tags:
+      - scans
+  /v1/scans/by-org/count:
+    get:
+      description: |
+        Required role:
+        - `organisations:read` when `scope=member`
+        - `organisations.scans:read` when `scope=organisation`
+
+        This endpoint retrieves the total count of scans across all scan groups for a given organisation.
+        `scope=member` counts scans in scan groups the user is a member of.
+        `scope=organisation` counts all scans in the organisation.
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScansForOrgCount
+      parameters:
+      - description: Organisation ID
+        explode: true
+        in: query
+        name: organisation_id
+        required: true
+        schema:
+          type: string
+        style: form
+      - description: Scope of scans to count
+        explode: true
+        in: query
+        name: scope
+        required: false
+        schema:
+          default: member
+          enum:
+          - member
+          - organisation
+          type: string
+        style: form
+      - description: Filter by scan types
+        explode: true
+        in: query
+        name: type
+        required: false
+        schema:
+          items:
+            enum:
+            - adhoc
+            - continuous_own
+            - continuous_vendor
+            type: string
+          type: array
+        style: form
+      responses:
+        "200":
+          $ref: "#/components/responses/CountResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+      security:
+      - APIKey: []
+      summary: Get the count of scans for a specified organisation
+      tags:
+      - scans
+  /v1/scans/suppliers:
+    get:
+      description: |
+        Required role: `organisations:read`
+
+        This endpoint retrieves scans from supplier scan groups the user can access for the specified organisation.
+        The same scanpicker filters, pagination, sorting, and response shape are used as the organisation scan endpoints.
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getSupplierScansForOrg
+      parameters:
+      - description: Organisation ID
+        explode: true
+        in: query
+        name: organisation_id
+        required: true
+        schema:
+          type: string
+        style: form
+      - description: Maximum number of entries to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 1000
+          maximum: 1000
+          minimum: 1
+          type: number
+        style: form
+      - description: Offset into the list of entries to return
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          minimum: 0
+          type: number
+        style: form
+      - description: Column to order results by
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          default: created
+          enum:
+          - name
+          - group
+          - type
+          - status
+          - size
+          - created
+          - last_ran
+          - created_by
+          type: string
+        style: form
+      - description: Sort direction
+        explode: true
+        in: query
+        name: dir
+        required: false
+        schema:
+          default: asc
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Filter by scan types
+        explode: true
+        in: query
+        name: type
+        required: false
+        schema:
+          items:
+            enum:
+            - adhoc
+            - continuous_own
+            - continuous_vendor
+            type: string
+          type: array
+        style: form
+      - description: Search scans by scan name or seed name
+        explode: true
+        in: query
+        name: search
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Include seed names in the search filter
+        explode: true
+        in: query
+        name: search_seeds
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: Include disabled scans
+        explode: true
+        in: query
+        name: include_disabled
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: Include deleted scans
+        explode: true
+        in: query
+        name: include_deleted
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: Fields to expand with additional information
+        explode: true
+        in: query
+        name: expand
+        required: false
+        schema:
+          items:
+            enum:
+            - node
+            - iteration
+            - iteration_errors
+            - created_by
+            - scan_group_name
+            type: string
+          type: array
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ScanResponse"
+                type: array
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+      security:
+      - APIKey: []
+      summary: Get supplier scans for a specified organisation with pagination
+      tags:
+      - scans
+  /v1/scans/suppliers/count:
+    get:
+      description: |
+        Required role: `organisations:read`
+
+        This endpoint retrieves the total count of scans from supplier scan groups the user can access for the specified organisation.
+        The same scanpicker filters are used as the organisation scan count endpoint.
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getSupplierScansForOrgCount
+      parameters:
+      - description: Organisation ID
+        explode: true
+        in: query
+        name: organisation_id
+        required: true
+        schema:
+          type: string
+        style: form
+      - description: Filter by scan types
+        explode: true
+        in: query
+        name: type
+        required: false
+        schema:
+          items:
+            enum:
+            - adhoc
+            - continuous_own
+            - continuous_vendor
+            type: string
+          type: array
+        style: form
+      - description: Search scans by scan name or seed name
+        explode: true
+        in: query
+        name: search
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Include seed names in the search filter
+        explode: true
+        in: query
+        name: search_seeds
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: Include disabled scans
+        explode: true
+        in: query
+        name: include_disabled
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: Include deleted scans
+        explode: true
+        in: query
+        name: include_deleted
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "200":
+          $ref: "#/components/responses/CountResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+      security:
+      - APIKey: []
+      summary: Get the count of supplier scans for a specified organisation
+      tags:
+      - scans
   /v1/scans/{id}:
     delete:
       description: |
@@ -852,6 +1309,7 @@ paths:
             enum:
             - node
             - iteration
+            - iteration_errors
             - created_by
             - groups
             - roles
@@ -1348,6 +1806,23 @@ paths:
         schema:
           type: string
         style: simple
+      - description: Only return link tags updated at or after this timestamp
+        explode: true
+        in: query
+        name: updated_since
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: Include soft deleted link tags
+        explode: true
+        in: query
+        name: include_deleted
+        required: false
+        schema:
+          type: boolean
+        style: form
       - description: Maximum number of entries to return
         explode: true
         in: query
@@ -1394,11 +1869,8 @@ paths:
         schema:
           items:
             enum:
-            - link
-            - tag
-            - created_by
-            - updated_by
             - tag_name
+            - colour
             type: string
           type: array
         style: form
@@ -1418,6 +1890,573 @@ paths:
       summary: Get link tags for a scan
       tags:
       - scans
+  /v1/scans/{id}/node_tags:
+    get:
+      description: |
+        Required role: `scans:read`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getScanNodeTags
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Only return node tags updated at or after this timestamp
+        explode: true
+        in: query
+        name: updated_since
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: Include soft deleted node tags
+        explode: true
+        in: query
+        name: include_deleted
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: Maximum number of entries to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Offset into the list of entries to return
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: number
+        style: form
+      - description: Column to order results by
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          enum:
+          - created_at
+          - updated_at
+          type: string
+        style: form
+      - description: Sort direction
+        explode: true
+        in: query
+        name: dir
+        required: false
+        schema:
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Fields to expand with additional information
+        explode: true
+        in: query
+        name: expand
+        required: false
+        schema:
+          items:
+            enum:
+            - tag_name
+            - colour
+            type: string
+          type: array
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanNodeTagsResponse"
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+      security:
+      - APIKey: []
+      summary: Get node tags for a scan
+      tags:
+      - scans
+  /v1/tags/organisation/{org_id}:
+    get:
+      description: |
+        Required role: `organisations.tags:manage`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getTagsByOrganisationID
+      parameters:
+      - description: Organisation ID
+        explode: false
+        in: path
+        name: org_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: Maximum number of entries to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: integer
+        style: form
+      - description: Offset into the list of entries to return
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: integer
+        style: form
+      - description: Column to order results by
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          enum:
+          - name
+          - created_at
+          - created_by
+          - updated_at
+          - updated_by
+          type: string
+        style: form
+      - description: Sort direction
+        explode: true
+        in: query
+        name: dir
+        required: false
+        schema:
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Filter tags by name
+        explode: true
+        in: query
+        name: name
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Filter tags by creator user ID
+        explode: true
+        in: query
+        name: created_by
+        required: false
+        schema:
+          format: uuid
+          type: string
+        style: form
+      - description: Filter tags by updater user ID
+        explode: true
+        in: query
+        name: updated_by
+        required: false
+        schema:
+          format: uuid
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TagsResponse"
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Get tags for an organisation
+      tags:
+      - tags
+    post:
+      description: |
+        Required role: `organisations.tags:manage`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: createTagByOrganisationID
+      parameters:
+      - description: Organisation ID
+        explode: false
+        in: path
+        name: org_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/createTagByOrganisationID_request"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TagResponse"
+          description: Created response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+      security:
+      - APIKey: []
+      summary: Create a tag for an organisation
+      tags:
+      - tags
+  /v1/tags/organisation/{org_id}/count:
+    get:
+      description: |
+        Required role: `organisations.tags:manage`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: getTagsByOrganisationIDCount
+      parameters:
+      - description: Organisation ID
+        explode: false
+        in: path
+        name: org_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: Filter tags by name
+        explode: true
+        in: query
+        name: name
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Filter tags by creator user ID
+        explode: true
+        in: query
+        name: created_by
+        required: false
+        schema:
+          format: uuid
+          type: string
+        style: form
+      - description: Filter tags by updater user ID
+        explode: true
+        in: query
+        name: updated_by
+        required: false
+        schema:
+          format: uuid
+          type: string
+        style: form
+      responses:
+        "200":
+          $ref: "#/components/responses/CountResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Get tag count for an organisation
+      tags:
+      - tags
+  /v1/tags/organisation/{org_id}/exists:
+    get:
+      description: |
+        Required role: `organisations.tags:manage`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: tagExistsByOrganisationID
+      parameters:
+      - description: Organisation ID
+        explode: false
+        in: path
+        name: org_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: Exact tag name to check
+        explode: true
+        in: query
+        name: name
+        required: true
+        schema:
+          maxLength: 255
+          type: string
+        style: form
+      - description: Optional tag ID to exclude from the existence check
+        explode: true
+        in: query
+        name: exclude_tag_id
+        required: false
+        schema:
+          format: uuid
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: boolean
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Check whether a tag exists for an organisation
+      tags:
+      - tags
+  /v1/tags/organisation/{org_id}/{tag_id}:
+    delete:
+      description: |
+        Required role: `organisations.tags:manage`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: deleteTagByOrganisationID
+      parameters:
+      - description: Organisation ID
+        explode: false
+        in: path
+        name: org_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: Tag ID
+        explode: false
+        in: path
+        name: tag_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Delete a tag for an organisation
+      tags:
+      - tags
+    put:
+      description: |
+        Required role: `organisations.tags:manage`
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: updateTagByOrganisationID
+      parameters:
+      - description: Organisation ID
+        explode: false
+        in: path
+        name: org_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: Tag ID
+        explode: false
+        in: path
+        name: tag_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/createTagByOrganisationID_request"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TagResponse"
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+      security:
+      - APIKey: []
+      summary: Update a tag for an organisation
+      tags:
+      - tags
+  /v1/tags/nodes/{node_id}:
+    post:
+      description: |
+        Required role: `scans:write`
+      operationId: addTagToNode
+      parameters:
+      - description: Node ID
+        explode: false
+        in: path
+        name: node_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/addTagToNode_request"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NodeTagResponse"
+          description: Created response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Add a tag to a node
+      tags:
+      - tags
+  /v1/tags/links/{link_id}/{tag_id}:
+    delete:
+      description: |
+        Required role: `scans:write`
+      operationId: removeTagFromLink
+      parameters:
+      - description: Link ID
+        explode: false
+        in: path
+        name: link_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: Tag ID
+        explode: false
+        in: path
+        name: tag_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Remove a tag from a link
+      tags:
+      - tags
+  /v1/tags/nodes/{node_id}/{tag_id}:
+    delete:
+      description: |
+        Required role: `scans:write`
+      operationId: removeTagFromNode
+      parameters:
+      - description: Node ID
+        explode: false
+        in: path
+        name: node_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: Tag ID
+        explode: false
+        in: path
+        name: tag_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Remove a tag from a node
+      tags:
+      - tags
   /v1/actions:
     get:
       description: |
@@ -1719,6 +2758,72 @@ paths:
       tags:
       - actions
   /users/api_key:
+    get:
+      operationId: listUserAPIKeys
+      parameters:
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 10
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          minimum: 0
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          default: created
+          enum:
+          - id
+          - description
+          - created
+          - expires
+          - last_used
+          - usage_count
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: dir
+        required: false
+        schema:
+          default: desc
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/UsersAPIKeyResponse"
+                type: array
+          description: Valid response
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+      security:
+      - SessionCookie: []
+      summary: Get API keys for the user logged in to the current session
+      tags:
+      - users
     post:
       parameters:
       - description: |
@@ -1754,6 +2859,53 @@ paths:
       security:
       - SessionCookie: []
       summary: Create an API key for the user logged in to the current session
+      tags:
+      - users
+  /users/api_key/count:
+    get:
+      operationId: countUserAPIKeys
+      responses:
+        "200":
+          $ref: "#/components/responses/CountResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+      security:
+      - SessionCookie: []
+      summary: Get API key count for the user logged in to the current session
+      tags:
+      - users
+  /users/api_key/{key_id}:
+    delete:
+      operationId: revokeUserAPIKey
+      parameters:
+      - explode: false
+        in: path
+        name: key_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: false
+        in: header
+        name: X-CSRF-Token
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Valid response
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - SessionCookie: []
+      summary: Revoke an API key for the user logged in to the current session
       tags:
       - users
   /users/preferences:
@@ -3026,7 +4178,8 @@ paths:
         \ ASM app — for example, when a new risk is detected on a service or when\
         \ a domain starts pointing to a new IP.  \n\nFor counts of new and removed\
         \ assets per iteration, see the `/v1/scans/{id}/iterations` endpoint.  \n\n\
-        Read the full user guide for examples and best practices: [docs.hexiosec.com/asm/link-changes-endpoint](https://docs.hexiosec.com/asm/link-changes-endpoint)\n"
+        Read the full user guide for examples and best practices: [docs.hexiosec.com/asm/link-changes-endpoint](https://docs.hexiosec.com/asm/link-changes-endpoint)\
+        \  \n"
       operationId: getScanDataLinkChanges
       parameters:
       - description: Scan ID
@@ -3266,13 +4419,14 @@ paths:
       - graph
   /v1/reports:
     post:
-      description: "Required role: `scans.reports:write`\n\nReport generation is an\
-        \ asynchronous operation. The response will contain the report ID and the\
-        \ report will be generated in the background.\nYou can use the report ID to\
-        \ check the state of the report. The \"state\" property will be set to \"\
-        done\" when the report is ready for download.\n\nThis endpoint requires that\
-        \ the associated organisation has API access enabled. \nIf API access is not\
-        \ allowed, the response code will be 403 (Forbidden).\n"
+      description: "Required role: `scans.reports:write` for single-scan reports.\
+        \ Multi-scan reports require `scans.reports:read` for every scan in `scan_ids`.\n\
+        \nReport generation is an asynchronous operation. The response will contain\
+        \ the report ID and the report will be generated in the background.\nYou can\
+        \ use the report ID to check the state of the report. The \"state\" property\
+        \ will be set to \"done\" when the report is ready for download.\n\n\nThis\
+        \ endpoint requires that the associated organisation has API access enabled.\
+        \ \nIf API access is not allowed, the response code will be 403 (Forbidden).\n"
       operationId: createReport
       requestBody:
         content:
@@ -3712,6 +4866,16 @@ paths:
           format: uuid
           type: string
         style: simple
+      - description: Include global templates (`organisation_id = null`) in addition
+          to organisation templates
+        explode: true
+        in: query
+        name: include_global
+        required: false
+        schema:
+          default: false
+          type: boolean
+        style: form
       responses:
         "200":
           content:
@@ -3730,6 +4894,52 @@ paths:
       summary: Get report templates for an organisation
       tags:
       - reports
+  /v1/definitions/definition:
+    get:
+      description: |
+        Get a single definition by key and subkey for a given language.
+      operationId: getDefinition
+      parameters:
+      - description: Language code (e.g. en_gb)
+        explode: true
+        in: query
+        name: lang
+        required: true
+        schema:
+          type: string
+        style: form
+      - description: Definition key (e.g. urn:issue:mail:policy:missing)
+        explode: true
+        in: query
+        name: key
+        required: true
+        schema:
+          type: string
+        style: form
+      - description: Definition subkey (e.g. description)
+        explode: true
+        in: query
+        name: subkey
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getDefinition_200_response"
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Get Definition
+      tags:
+      - definitions
 components:
   responses:
     CountResponse:
@@ -4051,6 +5261,7 @@ components:
         dns_namelist: true
         scan_group_id: scan_group_id
         include_br_risks:
+          urn:component:application:openssl: true
           urn:component:application:apache: true
         name: name
         calendar_schedule: daily
@@ -4121,6 +5332,247 @@ components:
       required:
       - name
       - type
+    GetDashboardMetricsRequest:
+      example:
+        metric_key: risks_per_primary
+        offset: 0.6027456183070403
+        started_min: 2000-01-23T04:56:07.000+00:00
+        scan_ids:
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        started_max: 2000-01-23T04:56:07.000+00:00
+        limit: 8.928199085564014
+      properties:
+        scan_ids:
+          description: Scan IDs to fetch dashboard metrics for
+          items:
+            format: uuid
+            type: string
+          maxItems: 100
+          minItems: 1
+          type: array
+        metric_key:
+          $ref: "#/components/schemas/DashboardMetricKey"
+        started_min:
+          description: Inclusive lower bound for iteration started time
+          format: date-time
+          type: string
+        started_max:
+          description: Inclusive upper bound for iteration started time
+          format: date-time
+          type: string
+        limit:
+          description: Maximum number of entries to return
+          maximum: 100
+          minimum: 1
+          type: number
+        offset:
+          default: 0
+          description: Offset into the list of entries to return
+          minimum: 0
+          type: number
+      required:
+      - limit
+      - metric_key
+      - scan_ids
+    DashboardMetricKey:
+      enum:
+      - risks_per_primary
+      - kev_count
+      - average_epss
+      - time_to_resolve
+      - time_open
+      - risk_count
+      - health_score
+      type: string
+    ScanIterationMetricValuesResponse:
+      example:
+        high: 1.4658129805029452
+        critical: 6.027456183070403
+        mail: 9.301444243932576
+        low: 5.637376656633329
+        overall: 0.8008281904610115
+        vulnerabilities: 3.616076749251911
+        websites: 2.3021358869347655
+        medium: 5.962133916683182
+        network: 7.061401241503109
+      properties:
+        overall:
+          nullable: true
+          type: number
+        critical:
+          nullable: true
+          type: number
+        high:
+          nullable: true
+          type: number
+        medium:
+          nullable: true
+          type: number
+        low:
+          nullable: true
+          type: number
+        websites:
+          nullable: true
+          type: number
+        network:
+          nullable: true
+          type: number
+        mail:
+          nullable: true
+          type: number
+        vulnerabilities:
+          nullable: true
+          type: number
+    ScanIterationMetricComponentsResponse:
+      example:
+        mins:
+          high: 1.4658129805029452
+          critical: 6.027456183070403
+          mail: 9.301444243932576
+          low: 5.637376656633329
+          overall: 0.8008281904610115
+          vulnerabilities: 3.616076749251911
+          websites: 2.3021358869347655
+          medium: 5.962133916683182
+          network: 7.061401241503109
+        counts:
+          high: 1.4658129805029452
+          critical: 6.027456183070403
+          mail: 9.301444243932576
+          low: 5.637376656633329
+          overall: 0.8008281904610115
+          vulnerabilities: 3.616076749251911
+          websites: 2.3021358869347655
+          medium: 5.962133916683182
+          network: 7.061401241503109
+        primary_count: 2.027123023002322
+        maxs:
+          high: 1.4658129805029452
+          critical: 6.027456183070403
+          mail: 9.301444243932576
+          low: 5.637376656633329
+          overall: 0.8008281904610115
+          vulnerabilities: 3.616076749251911
+          websites: 2.3021358869347655
+          medium: 5.962133916683182
+          network: 7.061401241503109
+        sums:
+          high: 1.4658129805029452
+          critical: 6.027456183070403
+          mail: 9.301444243932576
+          low: 5.637376656633329
+          overall: 0.8008281904610115
+          vulnerabilities: 3.616076749251911
+          websites: 2.3021358869347655
+          medium: 5.962133916683182
+          network: 7.061401241503109
+      properties:
+        counts:
+          $ref: "#/components/schemas/ScanIterationMetricValuesResponse"
+        sums:
+          $ref: "#/components/schemas/ScanIterationMetricValuesResponse"
+        mins:
+          $ref: "#/components/schemas/ScanIterationMetricValuesResponse"
+        maxs:
+          $ref: "#/components/schemas/ScanIterationMetricValuesResponse"
+        primary_count:
+          type: number
+    ScanIterationMetricResponse:
+      example:
+        metric_key: risks_per_primary
+        components:
+          mins:
+            high: 1.4658129805029452
+            critical: 6.027456183070403
+            mail: 9.301444243932576
+            low: 5.637376656633329
+            overall: 0.8008281904610115
+            vulnerabilities: 3.616076749251911
+            websites: 2.3021358869347655
+            medium: 5.962133916683182
+            network: 7.061401241503109
+          counts:
+            high: 1.4658129805029452
+            critical: 6.027456183070403
+            mail: 9.301444243932576
+            low: 5.637376656633329
+            overall: 0.8008281904610115
+            vulnerabilities: 3.616076749251911
+            websites: 2.3021358869347655
+            medium: 5.962133916683182
+            network: 7.061401241503109
+          primary_count: 2.027123023002322
+          maxs:
+            high: 1.4658129805029452
+            critical: 6.027456183070403
+            mail: 9.301444243932576
+            low: 5.637376656633329
+            overall: 0.8008281904610115
+            vulnerabilities: 3.616076749251911
+            websites: 2.3021358869347655
+            medium: 5.962133916683182
+            network: 7.061401241503109
+          sums:
+            high: 1.4658129805029452
+            critical: 6.027456183070403
+            mail: 9.301444243932576
+            low: 5.637376656633329
+            overall: 0.8008281904610115
+            vulnerabilities: 3.616076749251911
+            websites: 2.3021358869347655
+            medium: 5.962133916683182
+            network: 7.061401241503109
+        created: 2000-01-23T04:56:07.000+00:00
+        values:
+          high: 1.4658129805029452
+          critical: 6.027456183070403
+          mail: 9.301444243932576
+          low: 5.637376656633329
+          overall: 0.8008281904610115
+          vulnerabilities: 3.616076749251911
+          websites: 2.3021358869347655
+          medium: 5.962133916683182
+          network: 7.061401241503109
+        started: 2000-01-23T04:56:07.000+00:00
+        id: id
+        scan_id: scan_id
+        iteration_id: iteration_id
+      properties:
+        id:
+          description: Scan iteration metric row ID
+          type: string
+        scan_id:
+          description: Scan ID
+          type: string
+        iteration_id:
+          description: Scan iteration ID
+          type: string
+        started:
+          description: Timestamp at which the scan iteration started
+          format: date-time
+          type: string
+        metric_key:
+          $ref: "#/components/schemas/DashboardMetricKey"
+        values:
+          $ref: "#/components/schemas/ScanIterationMetricValuesResponse"
+        components:
+          $ref: "#/components/schemas/ScanIterationMetricComponentsResponse"
+        created:
+          description: Timestamp at which the metric row was created
+          format: date-time
+          type: string
+      required:
+      - created
+      - id
+      - iteration_id
+      - metric_key
+      - scan_id
+      - started
+      - values
     SeedsResponse:
       items:
         $ref: "#/components/schemas/SeedsResponse_inner"
@@ -4187,6 +5639,7 @@ components:
           family_name: family_name
           email: email
         deep_page_depth: 6.027456183070403
+        scan_group_name: scan_group_name
         organisation_id: organisation_id
         include_br_risks: "{}"
         iteration: "{}"
@@ -4226,6 +5679,9 @@ components:
           type: string
         scan_group_id:
           description: Scan Group ID
+          type: string
+        scan_group_name:
+          description: Scan Group name if requested
           type: string
         type:
           $ref: "#/components/schemas/ScanType"
@@ -4476,6 +5932,7 @@ components:
       - total
     TagResponse:
       example:
+        colour: colour
         updated_at: 2000-01-23T04:56:07.000+00:00
         org_id: org_id
         name: name
@@ -4493,6 +5950,10 @@ components:
         name:
           description: Tag name
           type: string
+        colour:
+          description: Optional tag colour as a hex value
+          type: string
+          nullable: true
         created_at:
           description: Timestamp at which the tag was created
           format: date-time
@@ -4592,9 +6053,7 @@ components:
       - valid_to
     ScanLinkTagResponse:
       example:
-        updated_at: 2000-01-23T04:56:07.000+00:00
         tag_name: tag_name
-        updated_by: updated_by
         link:
           metadata: "{}"
           from_id: from_id
@@ -4609,16 +6068,7 @@ components:
           scan_id: scan_id
           updated: 2000-01-23T04:56:07.000+00:00
           hash: hash
-        tag_id: tag_id
         created_at: 2000-01-23T04:56:07.000+00:00
-        tag:
-          updated_at: 2000-01-23T04:56:07.000+00:00
-          org_id: org_id
-          name: name
-          updated_by: updated_by
-          created_at: 2000-01-23T04:56:07.000+00:00
-          id: id
-          created_by: created_by
         created_by: created_by
         updated_by_user:
           name: name
@@ -4633,6 +6083,20 @@ components:
           given_name: given_name
           family_name: family_name
           email: email
+        colour: colour
+        deleted: true
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        updated_by: updated_by
+        tag_id: tag_id
+        tag:
+          colour: colour
+          updated_at: 2000-01-23T04:56:07.000+00:00
+          org_id: org_id
+          name: name
+          updated_by: updated_by
+          created_at: 2000-01-23T04:56:07.000+00:00
+          id: id
+          created_by: created_by
       properties:
         link_id:
           description: Link ID
@@ -4640,6 +6104,9 @@ components:
         tag_id:
           description: Tag ID
           type: string
+        deleted:
+          description: Whether the link tag has been soft deleted
+          type: boolean
         created_at:
           description: Timestamp at which the tag was added to the link
           format: date-time
@@ -4665,9 +6132,14 @@ components:
         tag_name:
           description: Tag Name
           type: string
+        colour:
+          description: Optional tag colour as a hex value
+          type: string
+          nullable: true
       required:
       - created_at
       - created_by
+      - deleted
       - link_id
       - tag_id
       - updated_at
@@ -4676,6 +6148,64 @@ components:
       items:
         $ref: "#/components/schemas/ScanLinkTagResponse"
       type: array
+    ScanNodeTagsResponse:
+      items:
+        $ref: "#/components/schemas/NodeTagResponse"
+      type: array
+    TagsResponse:
+      items:
+        $ref: "#/components/schemas/TagResponse"
+      type: array
+    NodeTagResponse:
+      example:
+        colour: colour
+        deleted: true
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        tag_name: tag_name
+        updated_by: updated_by
+        tag_id: tag_id
+        created_at: 2000-01-23T04:56:07.000+00:00
+        created_by: created_by
+        node_id: node_id
+      properties:
+        node_id:
+          description: Node ID
+          type: string
+        tag_id:
+          description: Tag ID
+          type: string
+        deleted:
+          description: Whether the node tag has been soft deleted
+          type: boolean
+        created_at:
+          description: Timestamp at which the tag was added to the node
+          format: date-time
+          type: string
+        created_by:
+          description: User ID of the creator
+          type: string
+        updated_at:
+          description: Timestamp at which the node tag was last updated
+          format: date-time
+          type: string
+        updated_by:
+          description: User ID of the last updater
+          type: string
+        tag_name:
+          description: Tag Name
+          type: string
+        colour:
+          description: Optional tag colour as a hex value
+          type: string
+          nullable: true
+      required:
+      - created_at
+      - created_by
+      - deleted
+      - node_id
+      - tag_id
+      - updated_at
+      - updated_by
     ActionResponse:
       example:
         note: note
@@ -4694,7 +6224,7 @@ components:
         description: description
         asset_id: asset_id
         out_of_scope: true
-        target: "{}"
+        target: ""
         remediation: remediation
         note_modified_by_user:
           name: name
@@ -4798,7 +6328,10 @@ components:
             type: string
           type: array
         target:
-          type: object
+          allOf:
+          - $ref: "#/components/schemas/ActionNodeResponse"
+          deprecated: true
+          description: Has been replaced with the asset_* params
         assignee_user:
           $ref: "#/components/schemas/UserDetailsResponse"
         modified_by_user:
@@ -4969,8 +6502,8 @@ components:
       - lifetime
     UsersCreateAPIKeyResponse:
       example:
+        expires: 2000-01-23T04:56:07.000+00:00
         api_key: api_key
-        lifetime: 168h
         description: Test API key
       properties:
         api_key:
@@ -4980,13 +6513,48 @@ components:
           description: API Key description
           example: Test API key
           type: string
-        lifetime:
-          description: Validity duration
-          example: 168h
+        expires:
+          description: Timestamp at which the API key expires
+          format: date-time
           type: string
       required:
       - api_key
       - description
+    UsersAPIKeyResponse:
+      example:
+        expires: 2000-01-23T04:56:07.000+00:00
+        usage_count: 0
+        created: 2000-01-23T04:56:07.000+00:00
+        last_used: 2000-01-23T04:56:07.000+00:00
+        description: description
+        id: id
+      properties:
+        id:
+          description: API Key ID
+          type: string
+        description:
+          description: API Key description
+          type: string
+        created:
+          description: Timestamp at which the API key was created
+          format: date-time
+          type: string
+        expires:
+          description: Timestamp at which the API key expires
+          format: date-time
+          type: string
+        last_used:
+          description: Timestamp at which the API key was used most recently
+          format: date-time
+          type: string
+        usage_count:
+          description: Number of times the API key has been used
+          type: integer
+      required:
+      - created
+      - description
+      - id
+      - usage_count
     UserDetailsResponse:
       example:
         name: name
@@ -5017,6 +6585,27 @@ components:
       example:
         seed: true
         last_seen: 2000-01-23T04:56:07.000+00:00
+        root_domain: true
+        caa_record: caa_record
+        dns_wildcard: true
+        stale: true
+        dkim_record:
+        - dkim_record
+        - dkim_record
+        security_txt_policy: security_txt_policy
+        alias: ""
+        dkim_max: 2
+        asns:
+        - name: name
+          id: id
+        - name: name
+          id: id
+        id: id
+        security_txt_url: security_txt_url
+        mta_sts_policy:
+        - mta_sts_policy
+        - mta_sts_policy
+        rdap_expiration: rdap_expiration
         limited: true
         created: 2000-01-23T04:56:07.000+00:00
         cloud_regions:
@@ -5034,6 +6623,7 @@ components:
           id: id
         - name: name
           id: id
+        rdap_handle: rdap_handle
         risk_counts:
           high: 5
           critical: 5
@@ -5085,7 +6675,6 @@ components:
           name: name
           category: category
           epss_percentile: 6.027456183070403
-        stale: true
         name_server: true
         certificates:
         - name: name
@@ -5097,21 +6686,26 @@ components:
           id: id
         - name: name
           id: id
+        dkim_min: 7
         name: name
-        alias:
-          name: name
-          id: id
-        asns:
-        - name: name
-          id: id
-        - name: name
-          id: id
-        id: id
+        mta_sts_report:
+        - mta_sts_report
+        - mta_sts_report
+        rdap_registration: rdap_registration
+        dmarc_record:
+        - dmarc_record
+        - dmarc_record
+        spf_record:
+        - spf_record
+        - spf_record
         dns_destinations:
         - name: name
           id: id
         - name: name
           id: id
+        mta_sts_txt_record:
+        - mta_sts_txt_record
+        - mta_sts_txt_record
       properties:
         id:
           description: Domain ID
@@ -5126,7 +6720,9 @@ components:
             $ref: "#/components/schemas/ScanDataNodeResponse"
           type: array
         alias:
-          $ref: "#/components/schemas/ScanDataNodeResponse"
+          allOf:
+          - $ref: "#/components/schemas/ScanDataNodeResponse"
+          description: CNAME Domain
         ips:
           description: IPs
           items:
@@ -5163,9 +6759,69 @@ components:
           items:
             $ref: "#/components/schemas/ScanDataRiskResponse"
           type: array
+        caa_record:
+          description: CAA record
+          type: string
+        dkim_max:
+          description: Maximum DKIM key size
+          type: integer
+        dkim_min:
+          description: Minimum DKIM key size
+          type: integer
+        dkim_record:
+          description: DKIM record
+          items:
+            type: string
+          type: array
+        dmarc_record:
+          description: DMARC record
+          items:
+            type: string
+          type: array
+        dns_wildcard:
+          description: Whether the domain uses DNS wildcard responses
+          type: boolean
         limited:
           description: Whether the domain is limited or not
           type: boolean
+        mta_sts_txt_record:
+          description: MTA-STS DNS TXT record
+          items:
+            type: string
+          type: array
+        mta_sts_policy:
+          description: MTA-STS policy
+          items:
+            type: string
+          type: array
+        mta_sts_report:
+          description: MTA-STS TLS-RPT record
+          items:
+            type: string
+          type: array
+        security_txt_policy:
+          description: security.txt policy body
+          type: string
+        security_txt_url:
+          description: URL the security.txt policy was served from
+          type: string
+        rdap_expiration:
+          description: RDAP expiration date
+          type: string
+        rdap_handle:
+          description: RDAP handle
+          type: string
+        rdap_registration:
+          description: RDAP registration date
+          type: string
+        root_domain:
+          description: Whether the domain is a root domain
+          type: boolean
+        spf_record:
+          description: SPF record
+          items:
+            type: string
+          type: array
         stale:
           description: Whether the domain is stale or not
           type: boolean
@@ -6242,6 +7898,7 @@ components:
         type: summary
         display_name: display_name
         iteration_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        organisation_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         download_url: download_url
         template_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -6256,6 +7913,10 @@ components:
           type: string
         scan_id:
           description: Scan ID
+          format: uuid
+          type: string
+        organisation_id:
+          description: Organisation ID for organisation-scoped reports
           format: uuid
           type: string
         scan_name:
@@ -6298,9 +7959,6 @@ components:
       - created
       - display_name
       - id
-      - iteration_id
-      - scan_id
-      - scan_name
       - state
       - type
       - updated
@@ -6353,9 +8011,10 @@ components:
           format: uuid
           type: string
         organisation_id:
-          description: Organisation ID
+          description: Organisation ID (null for global templates)
           format: uuid
           type: string
+          nullable: true
         state:
           $ref: "#/components/schemas/ReportTemplateState"
         type:
@@ -6404,6 +8063,9 @@ components:
         urn:component:application:apache:
           description: Include backported resolvable risks for Apache
           type: boolean
+        urn:component:application:openssl:
+          description: Include backported resolvable risks for OpenSSL
+          type: boolean
     updateScanById_request:
       properties:
         name:
@@ -6431,6 +8093,24 @@ components:
           type: string
         include_br_risks:
           $ref: "#/components/schemas/updateScanById_request_include_br_risks"
+    createTagByOrganisationID_request:
+      properties:
+        name:
+          maxLength: 255
+          type: string
+        colour:
+          maxLength: 7
+          type: string
+          nullable: true
+      required:
+      - name
+    addTagToNode_request:
+      properties:
+        tag_id:
+          format: uuid
+          type: string
+      required:
+      - tag_id
     updateUserPreferences_request:
       description: Free-form object containing user attributes to be merged
       properties:
@@ -6447,12 +8127,22 @@ components:
       oneOf:
       - $ref: "#/components/schemas/CreateSummaryReportBody"
       - $ref: "#/components/schemas/CreateExcelSummaryReportBody"
+    getDefinition_200_response:
+      example:
+        definition: definition
+      properties:
+        definition:
+          type: string
     CreateScanRequest_include_br_risks:
       example:
+        urn:component:application:openssl: true
         urn:component:application:apache: true
       properties:
         urn:component:application:apache:
           description: Include backported resolvable risks for Apache
+          type: boolean
+        urn:component:application:openssl:
+          description: Include backported resolvable risks for OpenSSL
           type: boolean
       required:
       - urn:component:application:apache

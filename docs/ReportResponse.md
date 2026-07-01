@@ -5,9 +5,10 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | **string** | Report ID | 
-**ScanId** | **string** | Scan ID | 
-**ScanName** | **string** | Scan name | 
-**IterationId** | **string** | Iteration ID | 
+**ScanId** | Pointer to **string** | Scan ID | [optional] 
+**OrganisationId** | Pointer to **string** | Organisation ID for organisation-scoped reports | [optional] 
+**ScanName** | Pointer to **string** | Scan name | [optional] 
+**IterationId** | Pointer to **string** | Iteration ID | [optional] 
 **State** | [**ReportState**](ReportState.md) |  | 
 **Type** | [**ReportType**](ReportType.md) |  | 
 **DisplayName** | **string** | Report display name | 
@@ -22,7 +23,7 @@ Name | Type | Description | Notes
 
 ### NewReportResponse
 
-`func NewReportResponse(id string, scanId string, scanName string, iterationId string, state ReportState, type_ ReportType, displayName string, created time.Time, updated time.Time, ) *ReportResponse`
+`func NewReportResponse(id string, state ReportState, type_ ReportType, displayName string, created time.Time, updated time.Time, ) *ReportResponse`
 
 NewReportResponse instantiates a new ReportResponse object
 This constructor will assign default values to properties that have it defined,
@@ -76,6 +77,36 @@ and a boolean to check if the value has been set.
 
 SetScanId sets ScanId field to given value.
 
+### HasScanId
+
+`func (o *ReportResponse) HasScanId() bool`
+
+HasScanId returns a boolean if a field has been set.
+
+### GetOrganisationId
+
+`func (o *ReportResponse) GetOrganisationId() string`
+
+GetOrganisationId returns the OrganisationId field if non-nil, zero value otherwise.
+
+### GetOrganisationIdOk
+
+`func (o *ReportResponse) GetOrganisationIdOk() (*string, bool)`
+
+GetOrganisationIdOk returns a tuple with the OrganisationId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetOrganisationId
+
+`func (o *ReportResponse) SetOrganisationId(v string)`
+
+SetOrganisationId sets OrganisationId field to given value.
+
+### HasOrganisationId
+
+`func (o *ReportResponse) HasOrganisationId() bool`
+
+HasOrganisationId returns a boolean if a field has been set.
 
 ### GetScanName
 
@@ -96,6 +127,11 @@ and a boolean to check if the value has been set.
 
 SetScanName sets ScanName field to given value.
 
+### HasScanName
+
+`func (o *ReportResponse) HasScanName() bool`
+
+HasScanName returns a boolean if a field has been set.
 
 ### GetIterationId
 
@@ -116,6 +152,11 @@ and a boolean to check if the value has been set.
 
 SetIterationId sets IterationId field to given value.
 
+### HasIterationId
+
+`func (o *ReportResponse) HasIterationId() bool`
+
+HasIterationId returns a boolean if a field has been set.
 
 ### GetState
 

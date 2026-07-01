@@ -6,7 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **ApiKey** | **string** | API Key | 
 **Description** | **string** | API Key description | 
-**Lifetime** | Pointer to **string** | Validity duration | [optional] 
+**Expires** | Pointer to **time.Time** | Timestamp at which the API key expires | [optional] 
 
 ## Methods
 
@@ -67,30 +67,30 @@ and a boolean to check if the value has been set.
 SetDescription sets Description field to given value.
 
 
-### GetLifetime
+### GetExpires
 
-`func (o *UsersCreateAPIKeyResponse) GetLifetime() string`
+`func (o *UsersCreateAPIKeyResponse) GetExpires() time.Time`
 
-GetLifetime returns the Lifetime field if non-nil, zero value otherwise.
+GetExpires returns the Expires field if non-nil, zero value otherwise.
 
-### GetLifetimeOk
+### GetExpiresOk
 
-`func (o *UsersCreateAPIKeyResponse) GetLifetimeOk() (*string, bool)`
+`func (o *UsersCreateAPIKeyResponse) GetExpiresOk() (*time.Time, bool)`
 
-GetLifetimeOk returns a tuple with the Lifetime field if it's non-nil, zero value otherwise
+GetExpiresOk returns a tuple with the Expires field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetLifetime
+### SetExpires
 
-`func (o *UsersCreateAPIKeyResponse) SetLifetime(v string)`
+`func (o *UsersCreateAPIKeyResponse) SetExpires(v time.Time)`
 
-SetLifetime sets Lifetime field to given value.
+SetExpires sets Expires field to given value.
 
-### HasLifetime
+### HasExpires
 
-`func (o *UsersCreateAPIKeyResponse) HasLifetime() bool`
+`func (o *UsersCreateAPIKeyResponse) HasExpires() bool`
 
-HasLifetime returns a boolean if a field has been set.
+HasExpires returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

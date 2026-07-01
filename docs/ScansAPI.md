@@ -7,14 +7,20 @@ Method | HTTP request | Description
 [**AddScanSeedById**](ScansAPI.md#AddScanSeedById) | **Post** /v1/scans/{id}/seeds | Add a seed to a scan by ID
 [**CreateScan**](ScansAPI.md#CreateScan) | **Post** /v1/scans | Create a scan
 [**DeleteScanById**](ScansAPI.md#DeleteScanById) | **Delete** /v1/scans/{id} | Delete a scan by ID
+[**GetDashboardMetrics**](ScansAPI.md#GetDashboardMetrics) | **Post** /v1/scans/dashboard/metrics | Get dashboard metric time series for accessible scans
 [**GetScanByID**](ScansAPI.md#GetScanByID) | **Get** /v1/scans/{id} | Get a scan by ID
 [**GetScanIterationProgress**](ScansAPI.md#GetScanIterationProgress) | **Get** /v1/scans/{scan_id}/iterations/{iteration_id}/progress | Get the progress for the provided iteration
 [**GetScanIterationsById**](ScansAPI.md#GetScanIterationsById) | **Get** /v1/scans/{id}/iterations | Get the Iterations for a specified scan
 [**GetScanLinkTags**](ScansAPI.md#GetScanLinkTags) | **Get** /v1/scans/{id}/link_tags | Get link tags for a scan
+[**GetScanNodeTags**](ScansAPI.md#GetScanNodeTags) | **Get** /v1/scans/{id}/node_tags | Get node tags for a scan
 [**GetScanSeedsById**](ScansAPI.md#GetScanSeedsById) | **Get** /v1/scans/{id}/seeds | Get the seeds for a scan by ID
 [**GetScans**](ScansAPI.md#GetScans) | **Get** /v1/scans | Get the Scans for a specified scan group
 [**GetScansCount**](ScansAPI.md#GetScansCount) | **Get** /v1/scans/count | Get the count of Scans for a specified scan group according to the filter settings
+[**GetScansForOrg**](ScansAPI.md#GetScansForOrg) | **Get** /v1/scans/by-org | Get the Scans for a specified organisation with pagination
+[**GetScansForOrgCount**](ScansAPI.md#GetScansForOrgCount) | **Get** /v1/scans/by-org/count | Get the count of scans for a specified organisation
 [**GetScreenshotById**](ScansAPI.md#GetScreenshotById) | **Get** /v1/scans/{scan_id}/screenshots/{id} | Get a web presence screenshot by ID
+[**GetSupplierScansForOrg**](ScansAPI.md#GetSupplierScansForOrg) | **Get** /v1/scans/suppliers | Get supplier scans for a specified organisation with pagination
+[**GetSupplierScansForOrgCount**](ScansAPI.md#GetSupplierScansForOrgCount) | **Get** /v1/scans/suppliers/count | Get the count of supplier scans for a specified organisation
 [**RemoveScanSeedById**](ScansAPI.md#RemoveScanSeedById) | **Delete** /v1/scans/{id}/seeds/{seed_id} | Remove a seed from a scan by ID
 [**RemoveSeedTag**](ScansAPI.md#RemoveSeedTag) | **Delete** /v1/scans/{id}/seeds/{seed_id}/tags/{tag_name} | Remove a tag from a seed
 [**TriggerRescanByScanId**](ScansAPI.md#TriggerRescanByScanId) | **Post** /v1/scans/{id}/rescan | Trigger rescan by scan ID
@@ -222,6 +228,72 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetDashboardMetrics
+
+> []ScanIterationMetricResponse GetDashboardMetrics(ctx).GetDashboardMetricsRequest(getDashboardMetricsRequest).Execute()
+
+Get dashboard metric time series for accessible scans
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	asm "github.com/hexiosec/asm-sdk-go"
+)
+
+func main() {
+	getDashboardMetricsRequest := *asm.NewGetDashboardMetricsRequest([]string{"ScanIds_example"}, asm.DashboardMetricKey("risks_per_primary"), float32(123)) // GetDashboardMetricsRequest | Parameters to fetch dashboard metric rows
+
+	configuration := asm.NewConfiguration()
+	apiClient := asm.NewAPIClient(configuration)
+	resp, r, err := apiClient.ScansAPI.GetDashboardMetrics(context.Background()).GetDashboardMetricsRequest(getDashboardMetricsRequest).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `ScansAPI.GetDashboardMetrics``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetDashboardMetrics`: []ScanIterationMetricResponse
+	fmt.Fprintf(os.Stdout, "Response from `ScansAPI.GetDashboardMetrics`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetDashboardMetricsRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **getDashboardMetricsRequest** | [**GetDashboardMetricsRequest**](GetDashboardMetricsRequest.md) | Parameters to fetch dashboard metric rows | 
+
+### Return type
+
+[**[]ScanIterationMetricResponse**](ScanIterationMetricResponse.md)
+
+### Authorization
+
+[APIKey](../README.md#APIKey)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
 - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
@@ -454,7 +526,7 @@ Name | Type | Description  | Notes
 
 ## GetScanLinkTags
 
-> []ScanLinkTagResponse GetScanLinkTags(ctx, id).Limit(limit).Offset(offset).Order(order).Dir(dir).Expand(expand).Execute()
+> []ScanLinkTagResponse GetScanLinkTags(ctx, id).UpdatedSince(updatedSince).IncludeDeleted(includeDeleted).Limit(limit).Offset(offset).Order(order).Dir(dir).Expand(expand).Execute()
 
 Get link tags for a scan
 
@@ -469,11 +541,14 @@ import (
 	"context"
 	"fmt"
 	"os"
+    "time"
 	asm "github.com/hexiosec/asm-sdk-go"
 )
 
 func main() {
 	id := "id_example" // string | Scan ID
+	updatedSince := time.Now() // time.Time | Only return link tags updated at or after this timestamp (optional)
+	includeDeleted := true // bool | Include soft deleted link tags (optional)
 	limit := float32(8.14) // float32 | Maximum number of entries to return (optional)
 	offset := float32(8.14) // float32 | Offset into the list of entries to return (optional)
 	order := "order_example" // string | Column to order results by (optional)
@@ -482,7 +557,7 @@ func main() {
 
 	configuration := asm.NewConfiguration()
 	apiClient := asm.NewAPIClient(configuration)
-	resp, r, err := apiClient.ScansAPI.GetScanLinkTags(context.Background(), id).Limit(limit).Offset(offset).Order(order).Dir(dir).Expand(expand).Execute()
+	resp, r, err := apiClient.ScansAPI.GetScanLinkTags(context.Background(), id).UpdatedSince(updatedSince).IncludeDeleted(includeDeleted).Limit(limit).Offset(offset).Order(order).Dir(dir).Expand(expand).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `ScansAPI.GetScanLinkTags``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -508,6 +583,8 @@ Other parameters are passed through a pointer to a apiGetScanLinkTagsRequest str
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
+ **updatedSince** | **time.Time** | Only return link tags updated at or after this timestamp | 
+ **includeDeleted** | **bool** | Include soft deleted link tags | 
  **limit** | **float32** | Maximum number of entries to return | 
  **offset** | **float32** | Offset into the list of entries to return | 
  **order** | **string** | Column to order results by | 
@@ -517,6 +594,91 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**[]ScanLinkTagResponse**](ScanLinkTagResponse.md)
+
+### Authorization
+
+[APIKey](../README.md#APIKey)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetScanNodeTags
+
+> []NodeTagResponse GetScanNodeTags(ctx, id).UpdatedSince(updatedSince).IncludeDeleted(includeDeleted).Limit(limit).Offset(offset).Order(order).Dir(dir).Expand(expand).Execute()
+
+Get node tags for a scan
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+    "time"
+	asm "github.com/hexiosec/asm-sdk-go"
+)
+
+func main() {
+	id := "id_example" // string | Scan ID
+	updatedSince := time.Now() // time.Time | Only return node tags updated at or after this timestamp (optional)
+	includeDeleted := true // bool | Include soft deleted node tags (optional)
+	limit := float32(8.14) // float32 | Maximum number of entries to return (optional)
+	offset := float32(8.14) // float32 | Offset into the list of entries to return (optional)
+	order := "order_example" // string | Column to order results by (optional)
+	dir := "dir_example" // string | Sort direction (optional)
+	expand := []string{"Expand_example"} // []string | Fields to expand with additional information (optional)
+
+	configuration := asm.NewConfiguration()
+	apiClient := asm.NewAPIClient(configuration)
+	resp, r, err := apiClient.ScansAPI.GetScanNodeTags(context.Background(), id).UpdatedSince(updatedSince).IncludeDeleted(includeDeleted).Limit(limit).Offset(offset).Order(order).Dir(dir).Expand(expand).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `ScansAPI.GetScanNodeTags``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetScanNodeTags`: []NodeTagResponse
+	fmt.Fprintf(os.Stdout, "Response from `ScansAPI.GetScanNodeTags`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Scan ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetScanNodeTagsRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **updatedSince** | **time.Time** | Only return node tags updated at or after this timestamp | 
+ **includeDeleted** | **bool** | Include soft deleted node tags | 
+ **limit** | **float32** | Maximum number of entries to return | 
+ **offset** | **float32** | Offset into the list of entries to return | 
+ **order** | **string** | Column to order results by | 
+ **dir** | **string** | Sort direction | 
+ **expand** | **[]string** | Fields to expand with additional information | 
+
+### Return type
+
+[**[]NodeTagResponse**](NodeTagResponse.md)
 
 ### Authorization
 
@@ -764,6 +926,156 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
+## GetScansForOrg
+
+> []ScanResponse GetScansForOrg(ctx).OrganisationId(organisationId).Scope(scope).Limit(limit).Offset(offset).Order(order).Dir(dir).Type_(type_).Expand(expand).Execute()
+
+Get the Scans for a specified organisation with pagination
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	asm "github.com/hexiosec/asm-sdk-go"
+)
+
+func main() {
+	organisationId := "organisationId_example" // string | Organisation ID
+	scope := "scope_example" // string | Scope of scans to return (optional) (default to "member")
+	limit := float32(8.14) // float32 | Maximum number of entries to return (optional) (default to 1000)
+	offset := float32(8.14) // float32 | Offset into the list of entries to return (optional) (default to 0)
+	order := "order_example" // string | Column to order results by (optional) (default to "created")
+	dir := "dir_example" // string | Sort direction (optional) (default to "asc")
+	type_ := []string{"Type_example"} // []string | Filter by scan types (optional)
+	expand := []string{"Expand_example"} // []string | Fields to expand with additional information (optional)
+
+	configuration := asm.NewConfiguration()
+	apiClient := asm.NewAPIClient(configuration)
+	resp, r, err := apiClient.ScansAPI.GetScansForOrg(context.Background()).OrganisationId(organisationId).Scope(scope).Limit(limit).Offset(offset).Order(order).Dir(dir).Type_(type_).Expand(expand).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `ScansAPI.GetScansForOrg``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetScansForOrg`: []ScanResponse
+	fmt.Fprintf(os.Stdout, "Response from `ScansAPI.GetScansForOrg`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetScansForOrgRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **organisationId** | **string** | Organisation ID | 
+ **scope** | **string** | Scope of scans to return | [default to &quot;member&quot;]
+ **limit** | **float32** | Maximum number of entries to return | [default to 1000]
+ **offset** | **float32** | Offset into the list of entries to return | [default to 0]
+ **order** | **string** | Column to order results by | [default to &quot;created&quot;]
+ **dir** | **string** | Sort direction | [default to &quot;asc&quot;]
+ **type_** | **[]string** | Filter by scan types | 
+ **expand** | **[]string** | Fields to expand with additional information | 
+
+### Return type
+
+[**[]ScanResponse**](ScanResponse.md)
+
+### Authorization
+
+[APIKey](../README.md#APIKey)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetScansForOrgCount
+
+> InlineObject GetScansForOrgCount(ctx).OrganisationId(organisationId).Scope(scope).Type_(type_).Execute()
+
+Get the count of scans for a specified organisation
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	asm "github.com/hexiosec/asm-sdk-go"
+)
+
+func main() {
+	organisationId := "organisationId_example" // string | Organisation ID
+	scope := "scope_example" // string | Scope of scans to count (optional) (default to "member")
+	type_ := []string{"Type_example"} // []string | Filter by scan types (optional)
+
+	configuration := asm.NewConfiguration()
+	apiClient := asm.NewAPIClient(configuration)
+	resp, r, err := apiClient.ScansAPI.GetScansForOrgCount(context.Background()).OrganisationId(organisationId).Scope(scope).Type_(type_).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `ScansAPI.GetScansForOrgCount``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetScansForOrgCount`: InlineObject
+	fmt.Fprintf(os.Stdout, "Response from `ScansAPI.GetScansForOrgCount`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetScansForOrgCountRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **organisationId** | **string** | Organisation ID | 
+ **scope** | **string** | Scope of scans to count | [default to &quot;member&quot;]
+ **type_** | **[]string** | Filter by scan types | 
+
+### Return type
+
+[**InlineObject**](InlineObject.md)
+
+### Authorization
+
+[APIKey](../README.md#APIKey)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## GetScreenshotById
 
 > *os.File GetScreenshotById(ctx, id, scanId).Execute()
@@ -831,6 +1143,168 @@ Name | Type | Description  | Notes
 
 - **Content-Type**: Not defined
 - **Accept**: image/webp, application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetSupplierScansForOrg
+
+> []ScanResponse GetSupplierScansForOrg(ctx).OrganisationId(organisationId).Limit(limit).Offset(offset).Order(order).Dir(dir).Type_(type_).Search(search).SearchSeeds(searchSeeds).IncludeDisabled(includeDisabled).IncludeDeleted(includeDeleted).Expand(expand).Execute()
+
+Get supplier scans for a specified organisation with pagination
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	asm "github.com/hexiosec/asm-sdk-go"
+)
+
+func main() {
+	organisationId := "organisationId_example" // string | Organisation ID
+	limit := float32(8.14) // float32 | Maximum number of entries to return (optional) (default to 1000)
+	offset := float32(8.14) // float32 | Offset into the list of entries to return (optional) (default to 0)
+	order := "order_example" // string | Column to order results by (optional) (default to "created")
+	dir := "dir_example" // string | Sort direction (optional) (default to "asc")
+	type_ := []string{"Type_example"} // []string | Filter by scan types (optional)
+	search := "search_example" // string | Search scans by scan name or seed name (optional)
+	searchSeeds := true // bool | Include seed names in the search filter (optional)
+	includeDisabled := true // bool | Include disabled scans (optional)
+	includeDeleted := true // bool | Include deleted scans (optional)
+	expand := []string{"Expand_example"} // []string | Fields to expand with additional information (optional)
+
+	configuration := asm.NewConfiguration()
+	apiClient := asm.NewAPIClient(configuration)
+	resp, r, err := apiClient.ScansAPI.GetSupplierScansForOrg(context.Background()).OrganisationId(organisationId).Limit(limit).Offset(offset).Order(order).Dir(dir).Type_(type_).Search(search).SearchSeeds(searchSeeds).IncludeDisabled(includeDisabled).IncludeDeleted(includeDeleted).Expand(expand).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `ScansAPI.GetSupplierScansForOrg``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetSupplierScansForOrg`: []ScanResponse
+	fmt.Fprintf(os.Stdout, "Response from `ScansAPI.GetSupplierScansForOrg`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetSupplierScansForOrgRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **organisationId** | **string** | Organisation ID | 
+ **limit** | **float32** | Maximum number of entries to return | [default to 1000]
+ **offset** | **float32** | Offset into the list of entries to return | [default to 0]
+ **order** | **string** | Column to order results by | [default to &quot;created&quot;]
+ **dir** | **string** | Sort direction | [default to &quot;asc&quot;]
+ **type_** | **[]string** | Filter by scan types | 
+ **search** | **string** | Search scans by scan name or seed name | 
+ **searchSeeds** | **bool** | Include seed names in the search filter | 
+ **includeDisabled** | **bool** | Include disabled scans | 
+ **includeDeleted** | **bool** | Include deleted scans | 
+ **expand** | **[]string** | Fields to expand with additional information | 
+
+### Return type
+
+[**[]ScanResponse**](ScanResponse.md)
+
+### Authorization
+
+[APIKey](../README.md#APIKey)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetSupplierScansForOrgCount
+
+> InlineObject GetSupplierScansForOrgCount(ctx).OrganisationId(organisationId).Type_(type_).Search(search).SearchSeeds(searchSeeds).IncludeDisabled(includeDisabled).IncludeDeleted(includeDeleted).Execute()
+
+Get the count of supplier scans for a specified organisation
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	asm "github.com/hexiosec/asm-sdk-go"
+)
+
+func main() {
+	organisationId := "organisationId_example" // string | Organisation ID
+	type_ := []string{"Type_example"} // []string | Filter by scan types (optional)
+	search := "search_example" // string | Search scans by scan name or seed name (optional)
+	searchSeeds := true // bool | Include seed names in the search filter (optional)
+	includeDisabled := true // bool | Include disabled scans (optional)
+	includeDeleted := true // bool | Include deleted scans (optional)
+
+	configuration := asm.NewConfiguration()
+	apiClient := asm.NewAPIClient(configuration)
+	resp, r, err := apiClient.ScansAPI.GetSupplierScansForOrgCount(context.Background()).OrganisationId(organisationId).Type_(type_).Search(search).SearchSeeds(searchSeeds).IncludeDisabled(includeDisabled).IncludeDeleted(includeDeleted).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `ScansAPI.GetSupplierScansForOrgCount``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetSupplierScansForOrgCount`: InlineObject
+	fmt.Fprintf(os.Stdout, "Response from `ScansAPI.GetSupplierScansForOrgCount`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetSupplierScansForOrgCountRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **organisationId** | **string** | Organisation ID | 
+ **type_** | **[]string** | Filter by scan types | 
+ **search** | **string** | Search scans by scan name or seed name | 
+ **searchSeeds** | **bool** | Include seed names in the search filter | 
+ **includeDisabled** | **bool** | Include disabled scans | 
+ **includeDeleted** | **bool** | Include deleted scans | 
+
+### Return type
+
+[**InlineObject**](InlineObject.md)
+
+### Authorization
+
+[APIKey](../README.md#APIKey)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

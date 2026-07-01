@@ -1,7 +1,7 @@
 /*
 Hexiosec ASM API
 
-This API reference documents how to programmatically access Hexiosec ASM data, for automation and data extraction purposes.  The Hexiosec ASM API is organised around REST. Our API has resource-oriented URLs which accept query string parameters, and return JSON-encoded responses. We use standard HTTP response codes and verbs, and authentication is provided via a custom header.  This API supports a subset of the functionality available in [Hexiosec ASM](https://hexiosec.com/asm/).  To download a copy of this documentation, please visit [https://asm.hexiosec.com/api/openapi.yml](https://asm.hexiosec.com/api/openapi.yml).  ### API access  Any user can create API keys to use as a credential to access the Hexiosec ASM API. Management of organisations and resources within those organisations is restricted to certain pricing plans. For more information on the features included with your subscription please see the [Hexiosec ASM Pricing](https://hexiosec.com/asm/pricing/)  API access for an organisation can be checked using [GET /v1/orgs/{id}](#get-/v1/orgs/-id-)  ### Versioning  API endpoints are versioned according to their path prefix, which at present is `/api/v1`. Breaking changes will be released under an incremented prefix, whereas minor changes will be incorporated into the existing endpoints as necessary.  ### Pagination  Endpoints that support pagination do so via `limit` and `offset`. The last set of results in a paginated set is the first response for which the number of received entries is less than the requested limit.  ### Expanding Responses  Many objects allow you to request additional information as an expanded response by using the expand request parameter. This parameter only available on certain requests, and is shown in the list of query parameters for the API endpoint.  The list of expandable items is shown in the `expand` parameter specification, and will usually return summary information for the linked resource. Summary entry specifications are shown in the specification of the endpoint response as an optional field. If not requested, this optional field will either be null or omitted from the response. 
+This API reference documents how to programmatically access Hexiosec ASM data, for automation and data extraction purposes.  The Hexiosec ASM API is organised around REST. Our API has resource-oriented URLs which accept query string parameters, and return JSON-encoded responses. We use standard HTTP response codes and verbs, and authentication is provided via a custom header.  This API supports a subset of the functionality available in [Hexiosec ASM](https://hexiosec.com/asm/).  To download a copy of this documentation, please visit [https://asm.hexiosec.com/api/openapi.yml](https://asm.hexiosec.com/api/openapi.yml).  ### API access  Any user can create API keys to use as a credential to access the Hexiosec ASM API. Management of organisations and resources within those organisations is restricted to certain pricing plans. For more information on the features included with your subscription please see the [Hexiosec ASM Pricing](https://hexiosec.com/asm/pricing/)  API access for an organisation can be checked using [GET /v1/orgs/{id}](#get-/v1/orgs/-id-)  ### Versioning  API endpoints are versioned according to their path prefix, which at present is `/api/v1`. Breaking changes will be released under an incremented prefix, whereas minor changes will be incorporated into the existing endpoints as necessary.  ### Pagination  Endpoints that support pagination do so via `limit` and `offset`. The last set of results in a paginated set is the first response for which the number of received entries is less than the requested limit.  ### Expanding Responses  Many objects allow you to request additional information as an expanded response by using the expand request parameter. This parameter is only available on certain requests, and is shown in the list of query parameters for the API endpoint.  The list of expandable items is shown in the `expand` parameter specification, and will usually return summary information for the linked resource. Summary entry specifications are shown in the specification of the endpoint response as an optional field. If not requested, this optional field will either be null or omitted from the response. 
 
 API version: 1.0.0
 Contact: support@hexiosec.com
@@ -28,6 +28,8 @@ type TagResponse struct {
 	OrgId string `json:"org_id"`
 	// Tag name
 	Name string `json:"name"`
+	// Optional tag colour as a hex value
+	Colour *string `json:"colour,omitempty"`
 	// Timestamp at which the tag was created
 	CreatedAt time.Time `json:"created_at"`
 	// User ID of the creator
@@ -135,6 +137,38 @@ func (o *TagResponse) GetNameOk() (*string, bool) {
 // SetName sets field value
 func (o *TagResponse) SetName(v string) {
 	o.Name = v
+}
+
+// GetColour returns the Colour field value if set, zero value otherwise.
+func (o *TagResponse) GetColour() string {
+	if o == nil || IsNil(o.Colour) {
+		var ret string
+		return ret
+	}
+	return *o.Colour
+}
+
+// GetColourOk returns a tuple with the Colour field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *TagResponse) GetColourOk() (*string, bool) {
+	if o == nil || IsNil(o.Colour) {
+		return nil, false
+	}
+	return o.Colour, true
+}
+
+// HasColour returns a boolean if a field has been set.
+func (o *TagResponse) HasColour() bool {
+	if o != nil && !IsNil(o.Colour) {
+		return true
+	}
+
+	return false
+}
+
+// SetColour gets a reference to the given string and assigns it to the Colour field.
+func (o *TagResponse) SetColour(v string) {
+	o.Colour = &v
 }
 
 // GetCreatedAt returns the CreatedAt field value
@@ -246,6 +280,9 @@ func (o TagResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize["id"] = o.Id
 	toSerialize["org_id"] = o.OrgId
 	toSerialize["name"] = o.Name
+	if !IsNil(o.Colour) {
+		toSerialize["colour"] = o.Colour
+	}
 	toSerialize["created_at"] = o.CreatedAt
 	toSerialize["created_by"] = o.CreatedBy
 	toSerialize["updated_at"] = o.UpdatedAt
@@ -302,6 +339,7 @@ func (o *TagResponse) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "id")
 		delete(additionalProperties, "org_id")
 		delete(additionalProperties, "name")
+		delete(additionalProperties, "colour")
 		delete(additionalProperties, "created_at")
 		delete(additionalProperties, "created_by")
 		delete(additionalProperties, "updated_at")

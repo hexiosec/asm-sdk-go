@@ -6,6 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **LinkId** | **string** | Link ID | 
 **TagId** | **string** | Tag ID | 
+**Deleted** | **bool** | Whether the link tag has been soft deleted | 
 **CreatedAt** | **time.Time** | Timestamp at which the tag was added to the link | 
 **CreatedBy** | **string** | User ID of the creator | 
 **UpdatedAt** | **time.Time** | Timestamp at which the link tag was last updated | 
@@ -15,12 +16,13 @@ Name | Type | Description | Notes
 **CreatedByUser** | Pointer to [**UserDetailsResponse**](UserDetailsResponse.md) |  | [optional] 
 **UpdatedByUser** | Pointer to [**UserDetailsResponse**](UserDetailsResponse.md) |  | [optional] 
 **TagName** | Pointer to **string** | Tag Name | [optional] 
+**Colour** | Pointer to **string** | Optional tag colour as a hex value | [optional] 
 
 ## Methods
 
 ### NewScanLinkTagResponse
 
-`func NewScanLinkTagResponse(linkId string, tagId string, createdAt time.Time, createdBy string, updatedAt time.Time, updatedBy string, ) *ScanLinkTagResponse`
+`func NewScanLinkTagResponse(linkId string, tagId string, deleted bool, createdAt time.Time, createdBy string, updatedAt time.Time, updatedBy string, ) *ScanLinkTagResponse`
 
 NewScanLinkTagResponse instantiates a new ScanLinkTagResponse object
 This constructor will assign default values to properties that have it defined,
@@ -73,6 +75,26 @@ and a boolean to check if the value has been set.
 `func (o *ScanLinkTagResponse) SetTagId(v string)`
 
 SetTagId sets TagId field to given value.
+
+
+### GetDeleted
+
+`func (o *ScanLinkTagResponse) GetDeleted() bool`
+
+GetDeleted returns the Deleted field if non-nil, zero value otherwise.
+
+### GetDeletedOk
+
+`func (o *ScanLinkTagResponse) GetDeletedOk() (*bool, bool)`
+
+GetDeletedOk returns a tuple with the Deleted field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetDeleted
+
+`func (o *ScanLinkTagResponse) SetDeleted(v bool)`
+
+SetDeleted sets Deleted field to given value.
 
 
 ### GetCreatedAt
@@ -279,6 +301,31 @@ SetTagName sets TagName field to given value.
 `func (o *ScanLinkTagResponse) HasTagName() bool`
 
 HasTagName returns a boolean if a field has been set.
+
+### GetColour
+
+`func (o *ScanLinkTagResponse) GetColour() string`
+
+GetColour returns the Colour field if non-nil, zero value otherwise.
+
+### GetColourOk
+
+`func (o *ScanLinkTagResponse) GetColourOk() (*string, bool)`
+
+GetColourOk returns a tuple with the Colour field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetColour
+
+`func (o *ScanLinkTagResponse) SetColour(v string)`
+
+SetColour sets Colour field to given value.
+
+### HasColour
+
+`func (o *ScanLinkTagResponse) HasColour() bool`
+
+HasColour returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

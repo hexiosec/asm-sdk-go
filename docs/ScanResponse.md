@@ -7,6 +7,7 @@ Name | Type | Description | Notes
 **Id** | **string** | Scan ID | 
 **Name** | **string** | Scan name | 
 **ScanGroupId** | Pointer to **string** | Scan Group ID | [optional] 
+**ScanGroupName** | Pointer to **string** | Scan Group name if requested | [optional] 
 **Type** | [**ScanType**](ScanType.md) |  | 
 **Enabled** | **bool** | Scan enabled | 
 **Deleted** | **bool** | Scan deleted | 
@@ -114,6 +115,31 @@ SetScanGroupId sets ScanGroupId field to given value.
 `func (o *ScanResponse) HasScanGroupId() bool`
 
 HasScanGroupId returns a boolean if a field has been set.
+
+### GetScanGroupName
+
+`func (o *ScanResponse) GetScanGroupName() string`
+
+GetScanGroupName returns the ScanGroupName field if non-nil, zero value otherwise.
+
+### GetScanGroupNameOk
+
+`func (o *ScanResponse) GetScanGroupNameOk() (*string, bool)`
+
+GetScanGroupNameOk returns a tuple with the ScanGroupName field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetScanGroupName
+
+`func (o *ScanResponse) SetScanGroupName(v string)`
+
+SetScanGroupName sets ScanGroupName field to given value.
+
+### HasScanGroupName
+
+`func (o *ScanResponse) HasScanGroupName() bool`
+
+HasScanGroupName returns a boolean if a field has been set.
 
 ### GetType
 
