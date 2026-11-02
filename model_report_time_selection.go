@@ -25,6 +25,9 @@ type ReportTimeSelection struct {
 	From *time.Time `json:"from,omitempty"`
 	// To time (ISO 8601)
 	To *time.Time `json:"to,omitempty"`
+	// Include data from the first scan iteration through to report generation time.
+	AllTime *bool `json:"all_time,omitempty"`
+	RelativeDuration *ReportTimeSelectionRelativeDuration `json:"relative_duration,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -111,6 +114,70 @@ func (o *ReportTimeSelection) SetTo(v time.Time) {
 	o.To = &v
 }
 
+// GetAllTime returns the AllTime field value if set, zero value otherwise.
+func (o *ReportTimeSelection) GetAllTime() bool {
+	if o == nil || IsNil(o.AllTime) {
+		var ret bool
+		return ret
+	}
+	return *o.AllTime
+}
+
+// GetAllTimeOk returns a tuple with the AllTime field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ReportTimeSelection) GetAllTimeOk() (*bool, bool) {
+	if o == nil || IsNil(o.AllTime) {
+		return nil, false
+	}
+	return o.AllTime, true
+}
+
+// HasAllTime returns a boolean if a field has been set.
+func (o *ReportTimeSelection) HasAllTime() bool {
+	if o != nil && !IsNil(o.AllTime) {
+		return true
+	}
+
+	return false
+}
+
+// SetAllTime gets a reference to the given bool and assigns it to the AllTime field.
+func (o *ReportTimeSelection) SetAllTime(v bool) {
+	o.AllTime = &v
+}
+
+// GetRelativeDuration returns the RelativeDuration field value if set, zero value otherwise.
+func (o *ReportTimeSelection) GetRelativeDuration() ReportTimeSelectionRelativeDuration {
+	if o == nil || IsNil(o.RelativeDuration) {
+		var ret ReportTimeSelectionRelativeDuration
+		return ret
+	}
+	return *o.RelativeDuration
+}
+
+// GetRelativeDurationOk returns a tuple with the RelativeDuration field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ReportTimeSelection) GetRelativeDurationOk() (*ReportTimeSelectionRelativeDuration, bool) {
+	if o == nil || IsNil(o.RelativeDuration) {
+		return nil, false
+	}
+	return o.RelativeDuration, true
+}
+
+// HasRelativeDuration returns a boolean if a field has been set.
+func (o *ReportTimeSelection) HasRelativeDuration() bool {
+	if o != nil && !IsNil(o.RelativeDuration) {
+		return true
+	}
+
+	return false
+}
+
+// SetRelativeDuration gets a reference to the given ReportTimeSelectionRelativeDuration and assigns it to the RelativeDuration field.
+func (o *ReportTimeSelection) SetRelativeDuration(v ReportTimeSelectionRelativeDuration) {
+	o.RelativeDuration = &v
+}
+
 func (o ReportTimeSelection) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -126,6 +193,12 @@ func (o ReportTimeSelection) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.To) {
 		toSerialize["to"] = o.To
+	}
+	if !IsNil(o.AllTime) {
+		toSerialize["all_time"] = o.AllTime
+	}
+	if !IsNil(o.RelativeDuration) {
+		toSerialize["relative_duration"] = o.RelativeDuration
 	}
 
 	for key, value := range o.AdditionalProperties {
@@ -151,6 +224,8 @@ func (o *ReportTimeSelection) UnmarshalJSON(data []byte) (err error) {
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "from")
 		delete(additionalProperties, "to")
+		delete(additionalProperties, "all_time")
+		delete(additionalProperties, "relative_duration")
 		o.AdditionalProperties = additionalProperties
 	}
 

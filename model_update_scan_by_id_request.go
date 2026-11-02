@@ -31,6 +31,7 @@ type UpdateScanByIdRequest struct {
 	// The frequency of scan iteration  i.e. \"daily\", \"weekly\", \"monthly\", \"quarterly\", \"yearly\" 
 	CalendarSchedule *string `json:"calendar_schedule,omitempty"`
 	IncludeBrRisks *UpdateScanByIdRequestIncludeBrRisks `json:"include_br_risks,omitempty"`
+	AutoReports *AutoReports `json:"auto_reports,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -245,6 +246,38 @@ func (o *UpdateScanByIdRequest) SetIncludeBrRisks(v UpdateScanByIdRequestInclude
 	o.IncludeBrRisks = &v
 }
 
+// GetAutoReports returns the AutoReports field value if set, zero value otherwise.
+func (o *UpdateScanByIdRequest) GetAutoReports() AutoReports {
+	if o == nil || IsNil(o.AutoReports) {
+		var ret AutoReports
+		return ret
+	}
+	return *o.AutoReports
+}
+
+// GetAutoReportsOk returns a tuple with the AutoReports field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *UpdateScanByIdRequest) GetAutoReportsOk() (*AutoReports, bool) {
+	if o == nil || IsNil(o.AutoReports) {
+		return nil, false
+	}
+	return o.AutoReports, true
+}
+
+// HasAutoReports returns a boolean if a field has been set.
+func (o *UpdateScanByIdRequest) HasAutoReports() bool {
+	if o != nil && !IsNil(o.AutoReports) {
+		return true
+	}
+
+	return false
+}
+
+// SetAutoReports gets a reference to the given AutoReports and assigns it to the AutoReports field.
+func (o *UpdateScanByIdRequest) SetAutoReports(v AutoReports) {
+	o.AutoReports = &v
+}
+
 func (o UpdateScanByIdRequest) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -272,6 +305,9 @@ func (o UpdateScanByIdRequest) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.IncludeBrRisks) {
 		toSerialize["include_br_risks"] = o.IncludeBrRisks
+	}
+	if !IsNil(o.AutoReports) {
+		toSerialize["auto_reports"] = o.AutoReports
 	}
 
 	for key, value := range o.AdditionalProperties {
@@ -301,6 +337,7 @@ func (o *UpdateScanByIdRequest) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "ignore_ip_nodes")
 		delete(additionalProperties, "calendar_schedule")
 		delete(additionalProperties, "include_br_risks")
+		delete(additionalProperties, "auto_reports")
 		o.AdditionalProperties = additionalProperties
 	}
 

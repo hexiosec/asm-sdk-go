@@ -190,7 +190,7 @@ func (r ApiDeleteReportRequest) Execute() (*http.Response, error) {
 /*
 DeleteReport Delete a report
 
-Required role: `scans.reports:write`
+Required role: `scans.reports:manage` for single-scan reports. Multi-scan reports require `scans.reports:read` on every included scan and `organisations:manage` on the owning organisation.
 
 This endpoint requires that the associated organisation has API access enabled.
 If API access is not allowed, the response code will be 403 (Forbidden).
@@ -321,7 +321,7 @@ func (r ApiGetReportRequest) Execute() (*ReportResponse, *http.Response, error) 
 /*
 GetReport Get a report
 
-Required role: `scans.reports:read`
+Required role: `scans.reports:read` on the scan. Multi-scan reports require report-read access to every included scan and access to the owning organisation.
 
 The "state" property will be set to "done" when the report is ready for download.
 
@@ -486,7 +486,7 @@ func (r ApiGetReportCountForOrgRequest) Execute() (*InlineObject, *http.Response
 /*
 GetReportCountForOrg Get report count for an organisation
 
-Required role: `scans.reports:read`
+Required role: `scans.reports:read` on the scan. Multi-scan reports require report-read access to every included scan and access to the owning organisation.
 
 This endpoint requires that the associated organisation has API access enabled.
 If API access is not allowed, the response code will be 403 (Forbidden).
@@ -1016,7 +1016,7 @@ func (r ApiGetReportsForOrgRequest) Execute() ([]ReportResponse, *http.Response,
 /*
 GetReportsForOrg Get reports for an organisation
 
-Required role: `scans.reports:read`
+Required role: `scans.reports:read` on the scan. Multi-scan reports require report-read access to every included scan and access to the owning organisation.
 
 The "download_url" property will be blank as it is time-limited, and should be obtained when needed via `GET /v1/reports/{id}`.
 

@@ -5,6 +5,9 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | **string** | Report ID | 
+**ScanIds** | Pointer to **[]string** | IDs of included scans, in the same order as scan_names | [optional] 
+**ScanNames** | Pointer to **[]string** | Names of the scans included in the report | [optional] 
+**ScanCount** | Pointer to **int32** | Number of scans included in the report | [optional] 
 **ScanId** | Pointer to **string** | Scan ID | [optional] 
 **OrganisationId** | Pointer to **string** | Organisation ID for organisation-scoped reports | [optional] 
 **ScanName** | Pointer to **string** | Scan name | [optional] 
@@ -17,7 +20,7 @@ Name | Type | Description | Notes
 **Created** | **time.Time** | Report created date | 
 **Updated** | **time.Time** | Report last updated date | 
 **DownloadUrl** | Pointer to **string** | Will only be present when the report is done. Expires after 60s. | [optional] 
-**CanManage** | Pointer to **bool** | User has \&quot;scans.reports:manage\&quot; role for this report | [optional] 
+**CanManage** | Pointer to **bool** | Whether the user may delete this report. Multi-scan reports require report-read access to every included scan and management of the owning organisation. | [optional] 
 
 ## Methods
 
@@ -57,6 +60,81 @@ and a boolean to check if the value has been set.
 
 SetId sets Id field to given value.
 
+
+### GetScanIds
+
+`func (o *ReportResponse) GetScanIds() []string`
+
+GetScanIds returns the ScanIds field if non-nil, zero value otherwise.
+
+### GetScanIdsOk
+
+`func (o *ReportResponse) GetScanIdsOk() (*[]string, bool)`
+
+GetScanIdsOk returns a tuple with the ScanIds field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetScanIds
+
+`func (o *ReportResponse) SetScanIds(v []string)`
+
+SetScanIds sets ScanIds field to given value.
+
+### HasScanIds
+
+`func (o *ReportResponse) HasScanIds() bool`
+
+HasScanIds returns a boolean if a field has been set.
+
+### GetScanNames
+
+`func (o *ReportResponse) GetScanNames() []string`
+
+GetScanNames returns the ScanNames field if non-nil, zero value otherwise.
+
+### GetScanNamesOk
+
+`func (o *ReportResponse) GetScanNamesOk() (*[]string, bool)`
+
+GetScanNamesOk returns a tuple with the ScanNames field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetScanNames
+
+`func (o *ReportResponse) SetScanNames(v []string)`
+
+SetScanNames sets ScanNames field to given value.
+
+### HasScanNames
+
+`func (o *ReportResponse) HasScanNames() bool`
+
+HasScanNames returns a boolean if a field has been set.
+
+### GetScanCount
+
+`func (o *ReportResponse) GetScanCount() int32`
+
+GetScanCount returns the ScanCount field if non-nil, zero value otherwise.
+
+### GetScanCountOk
+
+`func (o *ReportResponse) GetScanCountOk() (*int32, bool)`
+
+GetScanCountOk returns a tuple with the ScanCount field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetScanCount
+
+`func (o *ReportResponse) SetScanCount(v int32)`
+
+SetScanCount sets ScanCount field to given value.
+
+### HasScanCount
+
+`func (o *ReportResponse) HasScanCount() bool`
+
+HasScanCount returns a boolean if a field has been set.
 
 ### GetScanId
 

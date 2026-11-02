@@ -9,9 +9,9 @@ Name | Type | Description | Notes
 **Name** | **string** | Report display name | 
 **SendEmail** | Pointer to **bool** | Send email notification when report is ready | [optional] 
 **TimeZone** | **string** | IANA Time zone | 
-**ExecutiveSummary** | Pointer to **string** | Executive summary | [optional] 
+**ExecutiveSummary** | Pointer to **string** | Executive summary displayed on the initial tab | [optional] 
 **TimeSelection** | Pointer to [**ReportTimeSelection**](ReportTimeSelection.md) |  | [optional] 
-**Branded** | Pointer to **bool** | Display organisation logo in report header. Requires feature to be enabled for the organisation. | [optional] 
+**Branded** | Pointer to **bool** | Display organisation logo on the initial tab. Requires feature to be enabled for the organisation. | [optional] 
 
 ## Methods
 

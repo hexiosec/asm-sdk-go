@@ -160,6 +160,7 @@ paths:
             - created_by
             type: string
           type: array
+          default: null
         style: form
       responses:
         "200":
@@ -169,6 +170,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/OrganisationResponse"
                 type: array
+                default: null
           description: Valid response
         "400":
           $ref: "#/components/responses/BadRequest"
@@ -208,6 +210,7 @@ paths:
             - created_by
             type: string
           type: array
+          default: null
         style: form
       responses:
         "200":
@@ -308,6 +311,34 @@ paths:
       summary: Get an organisation asset by key
       tags:
       - organisations
+  /organisations/join_free_org:
+    post:
+      description: |
+        Required role: `organisations:create`
+
+        This endpoint auto-joins the requesting user to a single eligible free-tier organisation based on email domain and returns the most recent continuous scan.
+      operationId: joinFreeOrganisation
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/joinFreeOrganisation_200_response"
+          description: Valid response
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/joinFreeOrganisation_400_response"
+          description: Join request failed
+        "403":
+          $ref: "#/components/responses/Forbidden"
+      security:
+      - APIKey: []
+      summary: Join an existing free organisation and return its current continuous
+        scan
+      tags:
+      - organisations
   /v1/scan_groups:
     get:
       description: |
@@ -385,6 +416,7 @@ paths:
             - created_by
             type: string
           type: array
+          default: null
         style: form
       responses:
         "200":
@@ -394,6 +426,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/ScanGroupResponse"
                 type: array
+                default: null
           description: Valid response
         "400":
           $ref: "#/components/responses/BadRequest"
@@ -496,6 +529,7 @@ paths:
             - created_by
             type: string
           type: array
+          default: null
         style: form
       responses:
         "200":
@@ -585,6 +619,7 @@ paths:
             - continuous_vendor
             type: string
           type: array
+          default: null
         style: form
       - description: Maximum number of entries to return
         explode: true
@@ -637,8 +672,10 @@ paths:
             - iteration
             - iteration_errors
             - created_by
+            - tags
             type: string
           type: array
+          default: null
         style: form
       - description: Search string
         explode: true
@@ -655,6 +692,21 @@ paths:
         required: false
         schema:
           type: boolean
+        style: form
+      - description: Filter scans by tag names
+        explode: true
+        in: query
+        name: tags
+        required: false
+        schema:
+          items:
+            maxLength: 255
+            minLength: 1
+            type: string
+          maxItems: 50
+          type: array
+          uniqueItems: true
+          default: null
         style: form
       - description: Include disabled scans
         explode: true
@@ -680,6 +732,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/ScanResponse"
                 type: array
+                default: null
           description: Valid response
         "400":
           $ref: "#/components/responses/BadRequest"
@@ -753,6 +806,7 @@ paths:
             - continuous_vendor
             type: string
           type: array
+          default: null
         style: form
       - description: Search string
         explode: true
@@ -769,6 +823,21 @@ paths:
         required: false
         schema:
           type: boolean
+        style: form
+      - description: Filter scans by tag names
+        explode: true
+        in: query
+        name: tags
+        required: false
+        schema:
+          items:
+            maxLength: 255
+            minLength: 1
+            type: string
+          maxItems: 50
+          type: array
+          uniqueItems: true
+          default: null
         style: form
       - description: Include disabled scans
         explode: true
@@ -822,6 +891,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/ScanIterationMetricResponse"
                 type: array
+                default: null
           description: Valid response
         "400":
           $ref: "#/components/responses/BadRequest"
@@ -853,6 +923,15 @@ paths:
         required: true
         schema:
           type: string
+        style: form
+      - description: Include accessible supplier scans in organisation results
+        explode: true
+        in: query
+        name: include_supplier_scans
+        required: false
+        schema:
+          default: false
+          type: boolean
         style: form
       - description: Scope of scans to return
         explode: true
@@ -930,6 +1009,54 @@ paths:
             - continuous_vendor
             type: string
           type: array
+          default: null
+        style: form
+      - description: Filter scans by tag names
+        explode: true
+        in: query
+        name: tags
+        required: false
+        schema:
+          items:
+            maxLength: 255
+            minLength: 1
+            type: string
+          maxItems: 50
+          type: array
+          uniqueItems: true
+          default: null
+        style: form
+      - description: Search scan names or seed names
+        explode: true
+        in: query
+        name: search
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Include seed names in search
+        explode: true
+        in: query
+        name: search_seeds
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: Include disabled scans
+        explode: true
+        in: query
+        name: include_disabled
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: Include deleted scans
+        explode: true
+        in: query
+        name: include_deleted
+        required: false
+        schema:
+          type: boolean
         style: form
       - description: Fields to expand with additional information
         explode: true
@@ -944,8 +1071,10 @@ paths:
             - iteration_errors
             - created_by
             - scan_group_name
+            - tags
             type: string
           type: array
+          default: null
         style: form
       responses:
         "200":
@@ -955,6 +1084,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/ScanResponse"
                 type: array
+                default: null
           description: Valid response
         "400":
           $ref: "#/components/responses/BadRequest"
@@ -987,6 +1117,15 @@ paths:
         schema:
           type: string
         style: form
+      - description: Include accessible supplier scans in organisation results
+        explode: true
+        in: query
+        name: include_supplier_scans
+        required: false
+        schema:
+          default: false
+          type: boolean
+        style: form
       - description: Scope of scans to count
         explode: true
         in: query
@@ -1012,6 +1151,54 @@ paths:
             - continuous_vendor
             type: string
           type: array
+          default: null
+        style: form
+      - description: Filter scans by tag names
+        explode: true
+        in: query
+        name: tags
+        required: false
+        schema:
+          items:
+            maxLength: 255
+            minLength: 1
+            type: string
+          maxItems: 50
+          type: array
+          uniqueItems: true
+          default: null
+        style: form
+      - description: Search scan names or seed names
+        explode: true
+        in: query
+        name: search
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Include seed names in search
+        explode: true
+        in: query
+        name: search_seeds
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: Include disabled scans
+        explode: true
+        in: query
+        name: include_disabled
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: Include deleted scans
+        explode: true
+        in: query
+        name: include_deleted
+        required: false
+        schema:
+          type: boolean
         style: form
       responses:
         "200":
@@ -1108,6 +1295,22 @@ paths:
             - continuous_vendor
             type: string
           type: array
+          default: null
+        style: form
+      - description: Filter scans by tag names
+        explode: true
+        in: query
+        name: tags
+        required: false
+        schema:
+          items:
+            maxLength: 255
+            minLength: 1
+            type: string
+          maxItems: 50
+          type: array
+          uniqueItems: true
+          default: null
         style: form
       - description: Search scans by scan name or seed name
         explode: true
@@ -1154,8 +1357,10 @@ paths:
             - iteration_errors
             - created_by
             - scan_group_name
+            - tags
             type: string
           type: array
+          default: null
         style: form
       responses:
         "200":
@@ -1165,6 +1370,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/ScanResponse"
                 type: array
+                default: null
           description: Valid response
         "400":
           $ref: "#/components/responses/BadRequest"
@@ -1207,6 +1413,22 @@ paths:
             - continuous_vendor
             type: string
           type: array
+          default: null
+        style: form
+      - description: Filter scans by tag names
+        explode: true
+        in: query
+        name: tags
+        required: false
+        schema:
+          items:
+            maxLength: 255
+            minLength: 1
+            type: string
+          maxItems: 50
+          type: array
+          uniqueItems: true
+          default: null
         style: form
       - description: Search scans by scan name or seed name
         explode: true
@@ -1316,6 +1538,7 @@ paths:
             - organisation_id
             type: string
           type: array
+          default: null
         style: form
       responses:
         "200":
@@ -1433,6 +1656,7 @@ paths:
             - tags
             type: string
           type: array
+          default: null
         style: form
       responses:
         "200":
@@ -1639,6 +1863,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/ScanIterationResponse"
                 type: array
+                default: null
           description: Valid response
         "400":
           $ref: "#/components/responses/BadRequest"
@@ -1873,6 +2098,7 @@ paths:
             - colour
             type: string
           type: array
+          default: null
         style: form
       responses:
         "200":
@@ -1974,6 +2200,7 @@ paths:
             - colour
             type: string
           type: array
+          default: null
         style: form
       responses:
         "200":
@@ -1994,7 +2221,7 @@ paths:
   /v1/tags/organisation/{org_id}:
     get:
       description: |
-        Required role: `organisations.tags:manage`
+        Required role: `organisations.tags:view`
 
         This endpoint requires that the associated organisation has API access enabled.
         If API access is not allowed, the response code will be 403 (Forbidden).
@@ -2457,6 +2684,364 @@ paths:
       summary: Remove a tag from a node
       tags:
       - tags
+  /v1/tags/scans/{scan_id}:
+    get:
+      description: |
+        Required role: `scans.scan_tags:read`
+      operationId: getScanTagsByScanID
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: scan_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: Only return scan tags updated at or after this timestamp
+        explode: true
+        in: query
+        name: updated_since
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: Maximum number of entries to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: integer
+        style: form
+      - description: Offset into the list of entries to return
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: integer
+        style: form
+      - description: Column to order results by
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          enum:
+          - created_at
+          - updated_at
+          type: string
+        style: form
+      - description: Sort direction
+        explode: true
+        in: query
+        name: dir
+        required: false
+        schema:
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Fields to expand with additional information
+        explode: true
+        in: query
+        name: expand
+        required: false
+        schema:
+          items:
+            enum:
+            - tag_name
+            - colour
+            type: string
+          type: array
+          default: null
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanTagsResponse"
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Get tags for a scan
+      tags:
+      - tags
+    post:
+      description: |
+        Required role: `scans.scan_tags:write`
+      operationId: addTagToScan
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: scan_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/addTagToScan_request"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanTagResponse"
+          description: Created response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Add a tag to a scan
+      tags:
+      - tags
+  /v1/tags/scans/{scan_id}/{tag_id}:
+    delete:
+      description: |
+        Required role: `scans.scan_tags:write`
+      operationId: removeTagFromScan
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: scan_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: Tag ID
+        explode: false
+        in: path
+        name: tag_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Remove a tag from a scan
+      tags:
+      - tags
+  /v1/tags/supplier_scans/{supplier_scan_group_id}:
+    get:
+      description: |
+        Required role: `organisations:read`
+      operationId: getSupplierScanTagsBySupplierScanGroupID
+      parameters:
+      - description: Supplier Scan Group ID
+        explode: false
+        in: path
+        name: supplier_scan_group_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: Scan ID
+        explode: true
+        in: query
+        name: scan_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: form
+      - description: Only return supplier scan tags updated at or after this timestamp
+        explode: true
+        in: query
+        name: updated_since
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: Maximum number of entries to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: integer
+        style: form
+      - description: Offset into the list of entries to return
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: integer
+        style: form
+      - description: Column to order results by
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          enum:
+          - created_at
+          - updated_at
+          type: string
+        style: form
+      - description: Sort direction
+        explode: true
+        in: query
+        name: dir
+        required: false
+        schema:
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Fields to expand with additional information
+        explode: true
+        in: query
+        name: expand
+        required: false
+        schema:
+          items:
+            enum:
+            - tag_name
+            - colour
+            type: string
+          type: array
+          default: null
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SupplierScanTagsResponse"
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Get tags for a supplier scan group
+      tags:
+      - tags
+    post:
+      description: |
+        Required role: `supplier:manage`
+      operationId: addTagToSupplierScan
+      parameters:
+      - description: Supplier Scan Group ID
+        explode: false
+        in: path
+        name: supplier_scan_group_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/addTagToSupplierScan_request"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SupplierScanTagResponse"
+          description: Created response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Add a tag to a supplier scan group
+      tags:
+      - tags
+  /v1/tags/supplier_scans/{supplier_scan_group_id}/{tag_id}:
+    delete:
+      description: |
+        Required role: `supplier:manage`
+      operationId: removeTagFromSupplierScan
+      parameters:
+      - description: Supplier Scan Group ID
+        explode: false
+        in: path
+        name: supplier_scan_group_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: Tag ID
+        explode: false
+        in: path
+        name: tag_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: Scan ID
+        explode: true
+        in: query
+        name: scan_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: form
+      responses:
+        "204":
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Remove a tag from a supplier scan group
+      tags:
+      - tags
   /v1/actions:
     get:
       description: |
@@ -2548,6 +3133,7 @@ paths:
             - note_modified_by
             type: string
           type: array
+          default: null
         style: form
       - deprecated: true
         description: "If set, return actions with out_of_scope set to false DEPRECATED\
@@ -2585,6 +3171,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/ActionResponse"
                 type: array
+                default: null
           description: Valid response
         "400":
           $ref: "#/components/responses/BadRequest"
@@ -2642,6 +3229,7 @@ paths:
             - note_modified_by
             type: string
           type: array
+          default: null
         style: form
       - description: Language of text
         explode: true
@@ -2744,6 +3332,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/ScanDataRiskResponse"
                 type: array
+                default: null
           description: Valid response
         "400":
           $ref: "#/components/responses/BadRequest"
@@ -2814,6 +3403,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/UsersAPIKeyResponse"
                 type: array
+                default: null
           description: Valid response
         "401":
           $ref: "#/components/responses/Unauthorized"
@@ -2938,26 +3528,26 @@ paths:
   /v1/users:
     get:
       description: |
-        Required role: `organisations:read` or `scan_groups:read`
+        Required role: `organisations.users:read`
 
-         Either an Organisation ID or ScanGroup ID must be specified.
+        An organisation ID must be specified
       operationId: getUsers
       parameters:
       - description: Organisation ID
         explode: true
         in: query
         name: organisation_id
-        required: false
+        required: true
         schema:
           type: string
         style: form
-      - description: Scan Group ID
+      - description: Include disabled users when requesting users for an organisation
         explode: true
         in: query
-        name: scan_group_id
+        name: include_disabled
         required: false
         schema:
-          type: string
+          type: boolean
         style: form
       responses:
         "200":
@@ -2967,6 +3557,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/UserResponse"
                 type: array
+                default: null
           description: Valid response
         "400":
           $ref: "#/components/responses/BadRequest"
@@ -2974,7 +3565,87 @@ paths:
           $ref: "#/components/responses/Forbidden"
       security:
       - APIKey: []
-      summary: Get the users in an organisation or scan group
+      summary: Get the users in an organisation
+      tags:
+      - users
+  /v1/users/scan_group/{scan_group_id}:
+    get:
+      description: |
+        Required role: `scan_groups.users:read`
+      operationId: getUsersByScanGroup
+      parameters:
+      - description: Scan Group ID
+        explode: false
+        in: path
+        name: scan_group_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/UserSummaryResponse"
+                type: array
+                default: null
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+      security:
+      - APIKey: []
+      summary: Get the users in a scan group
+      tags:
+      - users
+  /v1/users/marketing_preferences:
+    get:
+      operationId: getUserMarketingPreferences
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketingPreferencesResponse"
+          description: Valid response
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+      security:
+      - APIKey: []
+      summary: Get marketing email preferences for the user logged in to the current
+        session
+      tags:
+      - users
+    patch:
+      operationId: updateUserMarketingPreferences
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMarketingPreferencesRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketingPreferencesResponse"
+          description: Valid response
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+      security:
+      - APIKey: []
+      summary: Update marketing email preferences for the user logged in to the current
+        session
       tags:
       - users
   /v1/scan_data/{scan_id}/domains/count:
@@ -3003,6 +3674,7 @@ paths:
           items:
             type: string
           type: array
+          default: null
         style: form
       responses:
         "200":
@@ -3049,6 +3721,7 @@ paths:
           items:
             type: string
           type: array
+          default: null
         style: form
       - description: Maximum number of entries to return
         explode: true
@@ -3106,6 +3779,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/ScanDataDomainResponse"
                 type: array
+                default: null
           description: Valid response
         "400":
           $ref: "#/components/responses/BadRequest"
@@ -3149,6 +3823,7 @@ paths:
           items:
             type: string
           type: array
+          default: null
         style: form
       responses:
         "200":
@@ -3195,6 +3870,7 @@ paths:
           items:
             type: string
           type: array
+          default: null
         style: form
       - description: Maximum number of entries to return
         explode: true
@@ -3252,6 +3928,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/ScanDataIPResponse"
                 type: array
+                default: null
           description: Valid response
         "400":
           $ref: "#/components/responses/BadRequest"
@@ -3295,6 +3972,7 @@ paths:
           items:
             type: string
           type: array
+          default: null
         style: form
       responses:
         "200":
@@ -3341,6 +4019,7 @@ paths:
           items:
             type: string
           type: array
+          default: null
         style: form
       - description: Maximum number of entries to return
         explode: true
@@ -3398,6 +4077,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/ScanDataWebPresenceResponse"
                 type: array
+                default: null
           description: Valid response
         "400":
           $ref: "#/components/responses/BadRequest"
@@ -3443,6 +4123,7 @@ paths:
           items:
             type: string
           type: array
+          default: null
         style: form
       responses:
         "200":
@@ -3489,6 +4170,7 @@ paths:
           items:
             type: string
           type: array
+          default: null
         style: form
       responses:
         "200":
@@ -3537,6 +4219,7 @@ paths:
           items:
             type: string
           type: array
+          default: null
         style: form
       - description: Maximum number of entries to return
         explode: true
@@ -3594,6 +4277,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/ScanDataOutOfScopeDomainResponse"
                 type: array
+                default: null
           description: Valid response
         "400":
           $ref: "#/components/responses/BadRequest"
@@ -3637,6 +4321,7 @@ paths:
           items:
             type: string
           type: array
+          default: null
         style: form
       - description: Maximum number of entries to return
         explode: true
@@ -3694,6 +4379,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/ScanDataOutOfScopeDomainResponse"
                 type: array
+                default: null
           description: Valid response
         "400":
           $ref: "#/components/responses/BadRequest"
@@ -3737,6 +4423,7 @@ paths:
           items:
             type: string
           type: array
+          default: null
         style: form
       responses:
         "200":
@@ -3783,6 +4470,7 @@ paths:
           items:
             type: string
           type: array
+          default: null
         style: form
       - description: Maximum number of entries to return
         explode: true
@@ -3840,6 +4528,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/ScanDataComponentResponse"
                 type: array
+                default: null
           description: Valid response
         "400":
           $ref: "#/components/responses/BadRequest"
@@ -3883,6 +4572,7 @@ paths:
           items:
             type: string
           type: array
+          default: null
         style: form
       responses:
         "200":
@@ -3929,6 +4619,7 @@ paths:
           items:
             type: string
           type: array
+          default: null
         style: form
       - description: Maximum number of entries to return
         explode: true
@@ -3986,6 +4677,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/ScanDataServiceResponse"
                 type: array
+                default: null
           description: Valid response
         "400":
           $ref: "#/components/responses/BadRequest"
@@ -4029,6 +4721,7 @@ paths:
           items:
             type: string
           type: array
+          default: null
         style: form
       - description: List of risk Node IDs to filter by
         explode: true
@@ -4039,6 +4732,7 @@ paths:
           items:
             type: string
           type: array
+          default: null
         style: form
       responses:
         "200":
@@ -4085,6 +4779,7 @@ paths:
           items:
             type: string
           type: array
+          default: null
         style: form
       - description: List of risk Node IDs to filter by
         explode: true
@@ -4095,6 +4790,7 @@ paths:
           items:
             type: string
           type: array
+          default: null
         style: form
       - description: Maximum number of entries to return
         explode: true
@@ -4152,6 +4848,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/ScanDataRiskResponse"
                 type: array
+                default: null
           description: Valid response
         "400":
           $ref: "#/components/responses/BadRequest"
@@ -4231,6 +4928,7 @@ paths:
             - WITHIN
             type: string
           type: array
+          default: null
         style: form
       - description: Filter by from node type
         explode: true
@@ -4259,6 +4957,7 @@ paths:
             - Asset
             type: string
           type: array
+          default: null
         style: form
       - description: Filter by to node type
         explode: true
@@ -4287,6 +4986,7 @@ paths:
             - Asset
             type: string
           type: array
+          default: null
         style: form
       - description: Filter by risk severity
         explode: true
@@ -4299,6 +4999,7 @@ paths:
             minimum: 0
             type: integer
           type: array
+          default: null
         style: form
       - description: Include transient link changes. A transient link is one that
           was added and then removed within the timeframe of the changes.
@@ -4370,6 +5071,57 @@ paths:
       summary: Get link changes by Scan ID and iteration(s)
       tags:
       - scan_data
+  /v1/graph/nodes/bulk/{scan_id}:
+    patch:
+      description: |
+        Required role: `scans:write`
+
+        This endpoint allows you to update multiple nodes for a scan in one request by:
+          - marking nodes as secondary/primary assets
+          - adding tags to nodes
+          - removing tags from nodes
+
+        **Note:**
+          - Only **Domain**, **IPv4** or **IPv6** nodes can be bulk updated.
+          - If `mark_as_secondary` is set and `node_ids` contains a seed node, the request is rejected. Seed nodes can still be used with `add_tags` and `remove_tags`.
+          - A maximum of **50** node IDs can be updated per request.
+          - Node IDs that do not exist, or do not belong to the scan, cause the request to fail.
+          - Tag operations require the organisation tier tags feature.
+          - `mark_as_secondary`, `add_tags`, and `remove_tags` are all optional. If omitted, the request is treated as a no-op and returns `204`.
+
+        This endpoint requires that the associated organisation has API access enabled.
+        If API access is not allowed, the response code will be 403 (Forbidden).
+      operationId: bulkUpdateNodesByScanId
+      parameters:
+      - description: Scan ID
+        explode: false
+        in: path
+        name: scan_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkUpdateNodesRequest"
+        description: Parameters to update nodes in bulk
+        required: true
+      responses:
+        "204":
+          description: Nodes updated
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security:
+      - APIKey: []
+      summary: Bulk update nodes
+      tags:
+      - graph
   /v1/graph/nodes/{id}:
     patch:
       description: "Required role: `scans:write`\n\nThis endpoint allows you to set\
@@ -4441,8 +5193,19 @@ paths:
                   time_zone: Europe/London
                   executive_summary: This is an executive summary
                   time_selection:
-                    from: 1970-01-01T00:00:00Z
-                    to: 1970-01-01T00:00:00Z
+                    all_time: true
+                  branded: false
+              summary_relative_duration:
+                value:
+                  type: summary
+                  scan_id: 123e4567-e89b-12d3-a456-426614174000
+                  name: My Relative Report
+                  send_email: false
+                  time_zone: Europe/London
+                  executive_summary: This is an executive summary
+                  time_selection:
+                    relative_duration:
+                      months: 3
                   branded: false
               excel_summary:
                 value:
@@ -4472,7 +5235,7 @@ paths:
   /v1/reports/{id}:
     delete:
       description: |
-        Required role: `scans.reports:write`
+        Required role: `scans.reports:manage` for single-scan reports. Multi-scan reports require `scans.reports:read` on every included scan and `organisations:manage` on the owning organisation.
 
         This endpoint requires that the associated organisation has API access enabled.
         If API access is not allowed, the response code will be 403 (Forbidden).
@@ -4501,7 +5264,7 @@ paths:
       - reports
     get:
       description: |
-        Required role: `scans.reports:read`
+        Required role: `scans.reports:read` on the scan. Multi-scan reports require report-read access to every included scan and access to the owning organisation.
 
         The "state" property will be set to "done" when the report is ready for download.
 
@@ -4624,6 +5387,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/ReportResponse"
                 type: array
+                default: null
           description: Valid responses
         "403":
           $ref: "#/components/responses/Forbidden"
@@ -4692,7 +5456,7 @@ paths:
   /v1/reports/organisation/{org_id}:
     get:
       description: |
-        Required role: `scans.reports:read`
+        Required role: `scans.reports:read` on the scan. Multi-scan reports require report-read access to every included scan and access to the owning organisation.
 
         The "download_url" property will be blank as it is time-limited, and should be obtained when needed via `GET /v1/reports/{id}`.
 
@@ -4781,6 +5545,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/ReportResponse"
                 type: array
+                default: null
           description: Valid responses
         "403":
           $ref: "#/components/responses/Forbidden"
@@ -4794,7 +5559,7 @@ paths:
   /v1/reports/organisation/{org_id}/count:
     get:
       description: |
-        Required role: `scans.reports:read`
+        Required role: `scans.reports:read` on the scan. Multi-scan reports require report-read access to every included scan and access to the owning organisation.
 
         This endpoint requires that the associated organisation has API access enabled.
         If API access is not allowed, the response code will be 403 (Forbidden).
@@ -4884,6 +5649,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/ReportTemplateResponse"
                 type: array
+                default: null
           description: Valid responses
         "403":
           $ref: "#/components/responses/Forbidden"
@@ -4989,28 +5755,28 @@ components:
       example:
         authenticated: true
         scheme: session
-        roles:
-        - files:list
-        - files:create
         groups:
         - groups
         - groups
+        roles:
+        - files:list
+        - files:create
         csrf: session
         attributes: "{}"
         user:
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          email: email
+          name: name
+          family_name: family_name
+          given_name: given_name
           last_ip: last_ip
           created: 2000-01-23T04:56:07.000+00:00
-          totp_enabled: true
-          given_name: given_name
-          enabled: true
-          name: name
-          attributes: "{}"
-          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          sso_subject: sso_subject
-          family_name: family_name
           updated: 2000-01-23T04:56:07.000+00:00
-          email: email
+          sso_subject: sso_subject
+          attributes: "{}"
+          enabled: true
           default_organisation_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          totp_enabled: true
       properties:
         authenticated:
           description: True if the chosen authentication scheme has passed.
@@ -5025,6 +5791,7 @@ components:
           items:
             type: string
           type: array
+          default: null
         roles:
           description: List of roles granted to the current user
           example:
@@ -5033,6 +5800,7 @@ components:
           items:
             type: string
           type: array
+          default: null
         csrf:
           description: CSRF token to use with POST/PUT/PATCH/DELETE requests which
             use session authentication.
@@ -5047,37 +5815,37 @@ components:
       - authenticated
     OrganisationResponse:
       example:
+        id: id
+        name: name
+        tier: tier
+        attributes: "{}"
         owner_id: owner_id
-        created: 2000-01-23T04:56:07.000+00:00
         email_suffixes:
         - email_suffixes
         - email_suffixes
+        deleted: true
+        created: 2000-01-23T04:56:07.000+00:00
+        created_by: created_by
+        updated: 2000-01-23T04:56:07.000+00:00
+        updated_by: updated_by
         roles:
         - roles
         - roles
         groups:
         - groups
         - groups
-        created_by: created_by
         owner_user:
-          name: name
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          name: name
           given_name: given_name
           family_name: family_name
           email: email
         created_by_user:
-          name: name
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          name: name
           given_name: given_name
           family_name: family_name
           email: email
-        deleted: true
-        tier: tier
-        name: name
-        updated_by: updated_by
-        attributes: "{}"
-        id: id
-        updated: 2000-01-23T04:56:07.000+00:00
       properties:
         id:
           description: Organisation ID
@@ -5099,6 +5867,7 @@ components:
           items:
             type: string
           type: array
+          default: null
         deleted:
           description: True if the organisation has been marked as deleted
           type: boolean
@@ -5123,6 +5892,7 @@ components:
             description: Role name
             type: string
           type: array
+          default: null
         groups:
           description: Groups assigned to the current user for this organisation if
             requested
@@ -5130,6 +5900,7 @@ components:
             description: Group name
             type: string
           type: array
+          default: null
         owner_user:
           $ref: "#/components/schemas/UserDetailsResponse"
         created_by_user:
@@ -5156,29 +5927,29 @@ components:
       - asset
     ScanGroupResponse:
       example:
+        id: id
         organisation_id: organisation_id
-        deleted: true
+        name: name
         created: 2000-01-23T04:56:07.000+00:00
+        created_by: created_by
+        updated: 2000-01-23T04:56:07.000+00:00
+        updated_by: updated_by
+        deleted: true
         roles:
         - roles
         - roles
-        name: name
-        updated_by: updated_by
         groups:
         - groups
         - groups
-        id: id
-        created_by: created_by
-        updated: 2000-01-23T04:56:07.000+00:00
-        updated_by_user:
-          name: name
+        created_by_user:
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          name: name
           given_name: given_name
           family_name: family_name
           email: email
-        created_by_user:
-          name: name
+        updated_by_user:
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          name: name
           given_name: given_name
           family_name: family_name
           email: email
@@ -5215,6 +5986,7 @@ components:
             description: Role name
             type: string
           type: array
+          default: null
         groups:
           description: Groups assigned to the current user for this scan group if
             requested
@@ -5222,6 +5994,7 @@ components:
             description: Group name
             type: string
           type: array
+          default: null
         created_by_user:
           $ref: "#/components/schemas/UserDetailsResponse"
         updated_by_user:
@@ -5244,8 +6017,8 @@ components:
           type: string
     ScanGroupCreateRequestBody:
       example:
-        organisation_id: organisation_id
         name: name
+        organisation_id: organisation_id
       properties:
         name:
           description: Scan Group Name
@@ -5258,15 +6031,15 @@ components:
       - organisation_id
     CreateScanRequest:
       example:
-        dns_namelist: true
-        scan_group_id: scan_group_id
-        include_br_risks:
-          urn:component:application:openssl: true
-          urn:component:application:apache: true
         name: name
-        calendar_schedule: daily
+        scan_group_id: scan_group_id
         type: adhoc
+        dns_namelist: true
         ignore_ip_nodes: true
+        calendar_schedule: daily
+        include_br_risks:
+          urn:component:application:apache: true
+          urn:component:application:openssl: true
       properties:
         name:
           description: Scan name
@@ -5299,6 +6072,132 @@ components:
       - name
       - scan_group_id
       - type
+    AutoReportBaseConfig:
+      properties:
+        enabled:
+          type: boolean
+        send_email:
+          type: boolean
+    AutoReportSummaryConfig:
+      example:
+        enabled: true
+        send_email: true
+        executive_summary: executive_summary
+        time_zone: time_zone
+        time_selection:
+          from: 1970-01-01T00:00:00Z
+          to: 1970-01-01T00:00:00Z
+          all_time: true
+          relative_duration:
+            days: 1
+            weeks: 1
+            months: 1
+        branded: true
+      properties:
+        enabled:
+          type: boolean
+        send_email:
+          type: boolean
+        executive_summary:
+          maxLength: 3000
+          type: string
+        time_zone:
+          maxLength: 50
+          type: string
+        time_selection:
+          $ref: "#/components/schemas/ReportTimeSelection"
+        branded:
+          type: boolean
+    AutoReportExcelSummaryConfig:
+      example:
+        enabled: true
+        send_email: true
+        executive_summary: executive_summary
+        time_zone: time_zone
+        branded: true
+      properties:
+        enabled:
+          type: boolean
+        send_email:
+          type: boolean
+        executive_summary:
+          maxLength: 3000
+          type: string
+        time_zone:
+          maxLength: 50
+          type: string
+        branded:
+          type: boolean
+    AutoReportTemplatedDocxConfig:
+      example:
+        enabled: true
+        send_email: true
+        template_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        executive_summary: executive_summary
+        time_zone: time_zone
+        include_placeholders: true
+      properties:
+        enabled:
+          type: boolean
+        send_email:
+          type: boolean
+        template_id:
+          format: uuid
+          type: string
+        executive_summary:
+          maxLength: 3000
+          type: string
+        time_zone:
+          maxLength: 50
+          type: string
+        include_placeholders:
+          type: boolean
+    AutoReports:
+      additionalProperties: false
+      example:
+        summary:
+          enabled: true
+          send_email: true
+          executive_summary: executive_summary
+          time_zone: time_zone
+          time_selection:
+            from: 1970-01-01T00:00:00Z
+            to: 1970-01-01T00:00:00Z
+            all_time: true
+            relative_duration:
+              days: 1
+              weeks: 1
+              months: 1
+          branded: true
+        excel_summary:
+          enabled: true
+          send_email: true
+          executive_summary: executive_summary
+          time_zone: time_zone
+          branded: true
+        docx_templated:
+          enabled: true
+          send_email: true
+          template_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          executive_summary: executive_summary
+          time_zone: time_zone
+          include_placeholders: true
+        osint_docx_templated:
+          enabled: true
+          send_email: true
+          template_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          executive_summary: executive_summary
+          time_zone: time_zone
+          include_placeholders: true
+      properties:
+        summary:
+          $ref: "#/components/schemas/AutoReportSummaryConfig"
+        excel_summary:
+          $ref: "#/components/schemas/AutoReportExcelSummaryConfig"
+        docx_templated:
+          $ref: "#/components/schemas/AutoReportTemplatedDocxConfig"
+        osint_docx_templated:
+          $ref: "#/components/schemas/AutoReportTemplatedDocxConfig"
     CreateScanSeedRequest:
       example:
         name: name
@@ -5329,22 +6228,23 @@ components:
           maxItems: 5
           type: array
           uniqueItems: true
+          default: null
       required:
       - name
       - type
     GetDashboardMetricsRequest:
       example:
-        metric_key: risks_per_primary
-        offset: 0.6027456183070403
-        started_min: 2000-01-23T04:56:07.000+00:00
         scan_ids:
         - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        metric_key: risks_per_primary
+        started_min: 2000-01-23T04:56:07.000+00:00
         started_max: 2000-01-23T04:56:07.000+00:00
         limit: 8.928199085564014
+        offset: 0.6027456183070403
       properties:
         scan_ids:
           description: Scan IDs to fetch dashboard metrics for
@@ -5354,6 +6254,7 @@ components:
           maxItems: 100
           minItems: 1
           type: array
+          default: null
         metric_key:
           $ref: "#/components/schemas/DashboardMetricKey"
         started_min:
@@ -5390,15 +6291,15 @@ components:
       type: string
     ScanIterationMetricValuesResponse:
       example:
-        high: 1.4658129805029452
-        critical: 6.027456183070403
-        mail: 9.301444243932576
-        low: 5.637376656633329
         overall: 0.8008281904610115
-        vulnerabilities: 3.616076749251911
-        websites: 2.3021358869347655
+        critical: 6.027456183070403
+        high: 1.4658129805029452
         medium: 5.962133916683182
+        low: 5.637376656633329
+        websites: 2.3021358869347655
         network: 7.061401241503109
+        mail: 9.301444243932576
+        vulnerabilities: 3.616076749251911
       properties:
         overall:
           nullable: true
@@ -5429,47 +6330,47 @@ components:
           type: number
     ScanIterationMetricComponentsResponse:
       example:
-        mins:
-          high: 1.4658129805029452
-          critical: 6.027456183070403
-          mail: 9.301444243932576
-          low: 5.637376656633329
-          overall: 0.8008281904610115
-          vulnerabilities: 3.616076749251911
-          websites: 2.3021358869347655
-          medium: 5.962133916683182
-          network: 7.061401241503109
         counts:
-          high: 1.4658129805029452
-          critical: 6.027456183070403
-          mail: 9.301444243932576
-          low: 5.637376656633329
           overall: 0.8008281904610115
-          vulnerabilities: 3.616076749251911
-          websites: 2.3021358869347655
-          medium: 5.962133916683182
-          network: 7.061401241503109
-        primary_count: 2.027123023002322
-        maxs:
-          high: 1.4658129805029452
           critical: 6.027456183070403
-          mail: 9.301444243932576
-          low: 5.637376656633329
-          overall: 0.8008281904610115
-          vulnerabilities: 3.616076749251911
-          websites: 2.3021358869347655
+          high: 1.4658129805029452
           medium: 5.962133916683182
+          low: 5.637376656633329
+          websites: 2.3021358869347655
           network: 7.061401241503109
+          mail: 9.301444243932576
+          vulnerabilities: 3.616076749251911
         sums:
-          high: 1.4658129805029452
-          critical: 6.027456183070403
-          mail: 9.301444243932576
-          low: 5.637376656633329
           overall: 0.8008281904610115
-          vulnerabilities: 3.616076749251911
-          websites: 2.3021358869347655
+          critical: 6.027456183070403
+          high: 1.4658129805029452
           medium: 5.962133916683182
+          low: 5.637376656633329
+          websites: 2.3021358869347655
           network: 7.061401241503109
+          mail: 9.301444243932576
+          vulnerabilities: 3.616076749251911
+        mins:
+          overall: 0.8008281904610115
+          critical: 6.027456183070403
+          high: 1.4658129805029452
+          medium: 5.962133916683182
+          low: 5.637376656633329
+          websites: 2.3021358869347655
+          network: 7.061401241503109
+          mail: 9.301444243932576
+          vulnerabilities: 3.616076749251911
+        maxs:
+          overall: 0.8008281904610115
+          critical: 6.027456183070403
+          high: 1.4658129805029452
+          medium: 5.962133916683182
+          low: 5.637376656633329
+          websites: 2.3021358869347655
+          network: 7.061401241503109
+          mail: 9.301444243932576
+          vulnerabilities: 3.616076749251911
+        primary_count: 2.027123023002322
       properties:
         counts:
           $ref: "#/components/schemas/ScanIterationMetricValuesResponse"
@@ -5483,64 +6384,64 @@ components:
           type: number
     ScanIterationMetricResponse:
       example:
-        metric_key: risks_per_primary
-        components:
-          mins:
-            high: 1.4658129805029452
-            critical: 6.027456183070403
-            mail: 9.301444243932576
-            low: 5.637376656633329
-            overall: 0.8008281904610115
-            vulnerabilities: 3.616076749251911
-            websites: 2.3021358869347655
-            medium: 5.962133916683182
-            network: 7.061401241503109
-          counts:
-            high: 1.4658129805029452
-            critical: 6.027456183070403
-            mail: 9.301444243932576
-            low: 5.637376656633329
-            overall: 0.8008281904610115
-            vulnerabilities: 3.616076749251911
-            websites: 2.3021358869347655
-            medium: 5.962133916683182
-            network: 7.061401241503109
-          primary_count: 2.027123023002322
-          maxs:
-            high: 1.4658129805029452
-            critical: 6.027456183070403
-            mail: 9.301444243932576
-            low: 5.637376656633329
-            overall: 0.8008281904610115
-            vulnerabilities: 3.616076749251911
-            websites: 2.3021358869347655
-            medium: 5.962133916683182
-            network: 7.061401241503109
-          sums:
-            high: 1.4658129805029452
-            critical: 6.027456183070403
-            mail: 9.301444243932576
-            low: 5.637376656633329
-            overall: 0.8008281904610115
-            vulnerabilities: 3.616076749251911
-            websites: 2.3021358869347655
-            medium: 5.962133916683182
-            network: 7.061401241503109
-        created: 2000-01-23T04:56:07.000+00:00
-        values:
-          high: 1.4658129805029452
-          critical: 6.027456183070403
-          mail: 9.301444243932576
-          low: 5.637376656633329
-          overall: 0.8008281904610115
-          vulnerabilities: 3.616076749251911
-          websites: 2.3021358869347655
-          medium: 5.962133916683182
-          network: 7.061401241503109
-        started: 2000-01-23T04:56:07.000+00:00
         id: id
         scan_id: scan_id
         iteration_id: iteration_id
+        started: 2000-01-23T04:56:07.000+00:00
+        metric_key: risks_per_primary
+        values:
+          overall: 0.8008281904610115
+          critical: 6.027456183070403
+          high: 1.4658129805029452
+          medium: 5.962133916683182
+          low: 5.637376656633329
+          websites: 2.3021358869347655
+          network: 7.061401241503109
+          mail: 9.301444243932576
+          vulnerabilities: 3.616076749251911
+        components:
+          counts:
+            overall: 0.8008281904610115
+            critical: 6.027456183070403
+            high: 1.4658129805029452
+            medium: 5.962133916683182
+            low: 5.637376656633329
+            websites: 2.3021358869347655
+            network: 7.061401241503109
+            mail: 9.301444243932576
+            vulnerabilities: 3.616076749251911
+          sums:
+            overall: 0.8008281904610115
+            critical: 6.027456183070403
+            high: 1.4658129805029452
+            medium: 5.962133916683182
+            low: 5.637376656633329
+            websites: 2.3021358869347655
+            network: 7.061401241503109
+            mail: 9.301444243932576
+            vulnerabilities: 3.616076749251911
+          mins:
+            overall: 0.8008281904610115
+            critical: 6.027456183070403
+            high: 1.4658129805029452
+            medium: 5.962133916683182
+            low: 5.637376656633329
+            websites: 2.3021358869347655
+            network: 7.061401241503109
+            mail: 9.301444243932576
+            vulnerabilities: 3.616076749251911
+          maxs:
+            overall: 0.8008281904610115
+            critical: 6.027456183070403
+            high: 1.4658129805029452
+            medium: 5.962133916683182
+            low: 5.637376656633329
+            websites: 2.3021358869347655
+            network: 7.061401241503109
+            mail: 9.301444243932576
+            vulnerabilities: 3.616076749251911
+          primary_count: 2.027123023002322
+        created: 2000-01-23T04:56:07.000+00:00
       properties:
         id:
           description: Scan iteration metric row ID
@@ -5577,17 +6478,18 @@ components:
       items:
         $ref: "#/components/schemas/SeedsResponse_inner"
       type: array
+      default: null
     NodeResponse:
       example:
-        metadata: "{}"
-        deleted: true
-        last_seen: 2000-01-23T04:56:07.000+00:00
-        created: 2000-01-23T04:56:07.000+00:00
         id: id
         scan_id: scan_id
         label: label
-        updated: 2000-01-23T04:56:07.000+00:00
+        deleted: true
         hash: hash
+        metadata: "{}"
+        created: 2000-01-23T04:56:07.000+00:00
+        updated: 2000-01-23T04:56:07.000+00:00
+        last_seen: 2000-01-23T04:56:07.000+00:00
       properties:
         id:
           type: string
@@ -5622,54 +6524,92 @@ components:
       - updated
     ScanResponse:
       example:
+        id: id
+        name: name
         scan_group_id: scan_group_id
-        monitor_next: 2000-01-23T04:56:07.000+00:00
-        roles:
-        - role: role
-          group_id: group_id
-        - role: role
-          group_id: group_id
+        scan_group_name: scan_group_name
+        tags:
+        - tags
+        - tags
         type: adhoc
         enabled: true
-        insights_generated: 2000-01-23T04:56:07.000+00:00
+        deleted: true
+        created: 2000-01-23T04:56:07.000+00:00
+        created_by: created_by
+        updated: 2000-01-23T04:56:07.000+00:00
+        node: "{}"
+        iteration: "{}"
         created_by_user:
-          name: name
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          name: name
           given_name: given_name
           family_name: family_name
           email: email
-        deep_page_depth: 6.027456183070403
-        scan_group_name: scan_group_name
-        organisation_id: organisation_id
-        include_br_risks: "{}"
-        iteration: "{}"
-        id: id
-        ignore_ip_nodes: true
-        shallow_page_depth: 0.8008281904610115
-        insights: "{}"
-        created: 2000-01-23T04:56:07.000+00:00
-        seeds: 1.4658129805029452
-        groups:
-        - created: 2000-01-23T04:56:07.000+00:00
-          name: name
-          attributes: "{}"
-          id: id
-          priority: 5.962133916683182
-          type: type
-        - created: 2000-01-23T04:56:07.000+00:00
-          name: name
-          attributes: "{}"
-          id: id
-          priority: 5.962133916683182
-          type: type
         monitor: true
-        created_by: created_by
         monitor_schedule: monitor_schedule
-        node: "{}"
-        deleted: true
+        monitor_next: 2000-01-23T04:56:07.000+00:00
+        shallow_page_depth: 0.8008281904610115
+        deep_page_depth: 6.027456183070403
         dns_namelist: true
-        name: name
-        updated: 2000-01-23T04:56:07.000+00:00
+        ignore_ip_nodes: true
+        include_br_risks: "{}"
+        auto_reports:
+          summary:
+            enabled: true
+            send_email: true
+            executive_summary: executive_summary
+            time_zone: time_zone
+            time_selection:
+              from: 1970-01-01T00:00:00Z
+              to: 1970-01-01T00:00:00Z
+              all_time: true
+              relative_duration:
+                days: 1
+                weeks: 1
+                months: 1
+            branded: true
+          excel_summary:
+            enabled: true
+            send_email: true
+            executive_summary: executive_summary
+            time_zone: time_zone
+            branded: true
+          docx_templated:
+            enabled: true
+            send_email: true
+            template_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            executive_summary: executive_summary
+            time_zone: time_zone
+            include_placeholders: true
+          osint_docx_templated:
+            enabled: true
+            send_email: true
+            template_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            executive_summary: executive_summary
+            time_zone: time_zone
+            include_placeholders: true
+        insights_generated: 2000-01-23T04:56:07.000+00:00
+        insights: "{}"
+        seeds: 2.3021358869347655
+        groups:
+        - id: id
+          name: name
+          created: 2000-01-23T04:56:07.000+00:00
+          priority: 7.061401241503109
+          type: type
+          attributes: "{}"
+        - id: id
+          name: name
+          created: 2000-01-23T04:56:07.000+00:00
+          priority: 7.061401241503109
+          type: type
+          attributes: "{}"
+        roles:
+        - group_id: group_id
+          role: role
+        - group_id: group_id
+          role: role
+        organisation_id: organisation_id
       properties:
         id:
           description: Scan ID
@@ -5683,6 +6623,12 @@ components:
         scan_group_name:
           description: Scan Group name if requested
           type: string
+        tags:
+          description: Scan tags by name if requested
+          items:
+            type: string
+          type: array
+          default: null
         type:
           $ref: "#/components/schemas/ScanType"
         enabled:
@@ -5735,6 +6681,8 @@ components:
         include_br_risks:
           description: Config for backported resolvable risks
           type: object
+        auto_reports:
+          $ref: "#/components/schemas/AutoReports"
         insights_generated:
           description: Timestamp at which the insights were generated
           format: date-time
@@ -5750,15 +6698,18 @@ components:
           items:
             $ref: "#/components/schemas/Group"
           type: array
+          default: null
         roles:
           description: Permission roles the user has for this scan if requested
           items:
             $ref: "#/components/schemas/Role"
           type: array
+          default: null
         organisation_id:
           description: Organisation ID the scan belongs to if requested
           type: string
       required:
+      - auto_reports
       - created
       - created_by
       - deleted
@@ -5770,22 +6721,22 @@ components:
       - updated
     ScanIterationResponse:
       example:
-        limited: true
-        scores: "{}"
-        insights: "{}"
-        created: 2000-01-23T04:56:07.000+00:00
-        merged: false
-        started: 2000-01-23T04:56:07.000+00:00
-        completed: 2000-01-23T04:56:07.000+00:00
-        issues: "{}"
-        insights_generated: 2000-01-23T04:56:07.000+00:00
-        completed_time: 2000-01-23T04:56:07.000+00:00
-        stats: "{}"
         id: id
         scan_id: scan_id
         state: created
+        created: 2000-01-23T04:56:07.000+00:00
         updated: 2000-01-23T04:56:07.000+00:00
+        started: 2000-01-23T04:56:07.000+00:00
+        completed: 2000-01-23T04:56:07.000+00:00
+        completed_time: 2000-01-23T04:56:07.000+00:00
+        limited: true
         summary_generated: 2000-01-23T04:56:07.000+00:00
+        scores: "{}"
+        issues: "{}"
+        stats: "{}"
+        insights_generated: 2000-01-23T04:56:07.000+00:00
+        insights: "{}"
+        merged: false
       properties:
         id:
           description: Scan Iteration ID
@@ -5866,8 +6817,8 @@ components:
       - updated
     UpdateNodeRequest:
       example:
-        mark_as_secondary: true
         remove_from_scope: true
+        mark_as_secondary: true
         ignore_ips: true
       properties:
         remove_from_scope:
@@ -5883,6 +6834,60 @@ components:
         ignore_ips:
           description: Ignore IPs for the node
           type: boolean
+    BulkUpdateNodesRequest:
+      example:
+        node_ids:
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        mark_as_secondary: true
+        add_tags:
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        remove_tags:
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+      properties:
+        node_ids:
+          items:
+            format: uuid
+            type: string
+          maxItems: 50
+          minItems: 1
+          type: array
+          default: null
+        mark_as_secondary:
+          description: Mark nodes as secondary assets if they are primary assets.
+            Or undo this action if they have previously been marked as secondary.
+          type: boolean
+        add_tags:
+          description: Tag IDs to add to each node in this request.
+          items:
+            format: uuid
+            type: string
+          maxItems: 50
+          type: array
+          uniqueItems: true
+          default: null
+        remove_tags:
+          description: Tag IDs to remove from each node in this request.
+          items:
+            format: uuid
+            type: string
+          maxItems: 50
+          type: array
+          uniqueItems: true
+          default: null
+      required:
+      - node_ids
     ScanType:
       description: Scan type
       enum:
@@ -5892,14 +6897,14 @@ components:
       type: string
     ScanProgressResponse:
       example:
-        in_progress: 1.4658129805029452
-        total: 7.061401241503109
         idle: 0.8008281904610115
         queued: 6.027456183070403
+        in_progress: 1.4658129805029452
+        done: 5.962133916683182
         failed: 5.637376656633329
         error: 2.3021358869347655
+        total: 7.061401241503109
         complete: 9.301444243932576
-        done: 5.962133916683182
         errors: 3.616076749251911
       properties:
         idle:
@@ -5932,14 +6937,14 @@ components:
       - total
     TagResponse:
       example:
-        colour: colour
-        updated_at: 2000-01-23T04:56:07.000+00:00
+        id: id
         org_id: org_id
         name: name
-        updated_by: updated_by
+        colour: colour
         created_at: 2000-01-23T04:56:07.000+00:00
-        id: id
         created_by: created_by
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        updated_by: updated_by
       properties:
         id:
           description: Tag ID
@@ -5978,19 +6983,19 @@ components:
       - updated_by
     ScanLinkResponse:
       example:
-        metadata: "{}"
-        from_id: from_id
-        last_seen: 2000-01-23T04:56:07.000+00:00
-        created: 2000-01-23T04:56:07.000+00:00
-        to_id: to_id
-        valid_from: 2000-01-23T04:56:07.000+00:00
-        label: label
-        deleted: true
-        valid_to: 2000-01-23T04:56:07.000+00:00
         id: id
+        from_id: from_id
+        to_id: to_id
         scan_id: scan_id
-        updated: 2000-01-23T04:56:07.000+00:00
+        label: label
         hash: hash
+        created: 2000-01-23T04:56:07.000+00:00
+        updated: 2000-01-23T04:56:07.000+00:00
+        last_seen: 2000-01-23T04:56:07.000+00:00
+        valid_from: 2000-01-23T04:56:07.000+00:00
+        valid_to: 2000-01-23T04:56:07.000+00:00
+        metadata: "{}"
+        deleted: true
       properties:
         id:
           description: Link ID
@@ -6053,50 +7058,50 @@ components:
       - valid_to
     ScanLinkTagResponse:
       example:
-        tag_name: tag_name
-        link:
-          metadata: "{}"
-          from_id: from_id
-          last_seen: 2000-01-23T04:56:07.000+00:00
-          created: 2000-01-23T04:56:07.000+00:00
-          to_id: to_id
-          valid_from: 2000-01-23T04:56:07.000+00:00
-          label: label
-          deleted: true
-          valid_to: 2000-01-23T04:56:07.000+00:00
-          id: id
-          scan_id: scan_id
-          updated: 2000-01-23T04:56:07.000+00:00
-          hash: hash
+        link_id: link_id
+        tag_id: tag_id
+        deleted: true
         created_at: 2000-01-23T04:56:07.000+00:00
         created_by: created_by
-        updated_by_user:
-          name: name
-          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          given_name: given_name
-          family_name: family_name
-          email: email
-        link_id: link_id
-        created_by_user:
-          name: name
-          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          given_name: given_name
-          family_name: family_name
-          email: email
-        colour: colour
-        deleted: true
         updated_at: 2000-01-23T04:56:07.000+00:00
         updated_by: updated_by
-        tag_id: tag_id
+        link:
+          id: id
+          from_id: from_id
+          to_id: to_id
+          scan_id: scan_id
+          label: label
+          hash: hash
+          created: 2000-01-23T04:56:07.000+00:00
+          updated: 2000-01-23T04:56:07.000+00:00
+          last_seen: 2000-01-23T04:56:07.000+00:00
+          valid_from: 2000-01-23T04:56:07.000+00:00
+          valid_to: 2000-01-23T04:56:07.000+00:00
+          metadata: "{}"
+          deleted: true
         tag:
-          colour: colour
-          updated_at: 2000-01-23T04:56:07.000+00:00
+          id: id
           org_id: org_id
           name: name
-          updated_by: updated_by
+          colour: colour
           created_at: 2000-01-23T04:56:07.000+00:00
-          id: id
           created_by: created_by
+          updated_at: 2000-01-23T04:56:07.000+00:00
+          updated_by: updated_by
+        created_by_user:
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          name: name
+          given_name: given_name
+          family_name: family_name
+          email: email
+        updated_by_user:
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          name: name
+          given_name: given_name
+          family_name: family_name
+          email: email
+        tag_name: tag_name
+        colour: colour
       properties:
         link_id:
           description: Link ID
@@ -6148,25 +7153,28 @@ components:
       items:
         $ref: "#/components/schemas/ScanLinkTagResponse"
       type: array
+      default: null
     ScanNodeTagsResponse:
       items:
         $ref: "#/components/schemas/NodeTagResponse"
       type: array
+      default: null
     TagsResponse:
       items:
         $ref: "#/components/schemas/TagResponse"
       type: array
+      default: null
     NodeTagResponse:
       example:
-        colour: colour
-        deleted: true
-        updated_at: 2000-01-23T04:56:07.000+00:00
-        tag_name: tag_name
-        updated_by: updated_by
+        node_id: node_id
         tag_id: tag_id
+        deleted: true
         created_at: 2000-01-23T04:56:07.000+00:00
         created_by: created_by
-        node_id: node_id
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        updated_by: updated_by
+        tag_name: tag_name
+        colour: colour
       properties:
         node_id:
           description: Node ID
@@ -6206,52 +7214,157 @@ components:
       - tag_id
       - updated_at
       - updated_by
+    ScanTagResponse:
+      example:
+        scan_id: scan_id
+        tag_id: tag_id
+        created_at: 2000-01-23T04:56:07.000+00:00
+        created_by: created_by
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        updated_by: updated_by
+        tag_name: tag_name
+        colour: colour
+      properties:
+        scan_id:
+          description: Scan ID
+          type: string
+        tag_id:
+          description: Tag ID
+          type: string
+        created_at:
+          description: Timestamp at which the tag was added to the scan
+          format: date-time
+          type: string
+        created_by:
+          description: User ID of the creator
+          type: string
+        updated_at:
+          description: Timestamp at which the scan tag was last updated
+          format: date-time
+          type: string
+        updated_by:
+          description: User ID of the last updater
+          type: string
+        tag_name:
+          description: Tag Name
+          type: string
+        colour:
+          description: Optional tag colour as a hex value
+          type: string
+          nullable: true
+      required:
+      - created_at
+      - created_by
+      - scan_id
+      - tag_id
+      - updated_at
+      - updated_by
+    ScanTagsResponse:
+      items:
+        $ref: "#/components/schemas/ScanTagResponse"
+      type: array
+      default: null
+    SupplierScanTagResponse:
+      example:
+        supplier_scan_group_id: supplier_scan_group_id
+        scan_id: scan_id
+        tag_id: tag_id
+        created_at: 2000-01-23T04:56:07.000+00:00
+        created_by: created_by
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        updated_by: updated_by
+        tag_name: tag_name
+        colour: colour
+      properties:
+        supplier_scan_group_id:
+          description: Supplier Scan Group ID
+          type: string
+        scan_id:
+          description: Scan ID
+          type: string
+        tag_id:
+          description: Tag ID
+          type: string
+        created_at:
+          description: Timestamp at which the tag was added to the supplier scan group
+          format: date-time
+          type: string
+        created_by:
+          description: User ID of the creator
+          type: string
+        updated_at:
+          description: Timestamp at which the supplier scan tag was last updated
+          format: date-time
+          type: string
+        updated_by:
+          description: User ID of the last updater
+          type: string
+        tag_name:
+          description: Tag Name
+          type: string
+        colour:
+          description: Optional tag colour as a hex value
+          type: string
+          nullable: true
+      required:
+      - created_at
+      - created_by
+      - scan_id
+      - supplier_scan_group_id
+      - tag_id
+      - updated_at
+      - updated_by
+    SupplierScanTagsResponse:
+      items:
+        $ref: "#/components/schemas/SupplierScanTagResponse"
+      type: array
+      default: null
     ActionResponse:
       example:
-        note: note
-        is_secondary: true
-        link_ids:
-        - link_ids
-        - link_ids
-        assignee_user:
-          name: name
-          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          given_name: given_name
-          family_name: family_name
-          email: email
-        created: 2000-01-23T04:56:07.000+00:00
-        rule: rule
-        description: description
+        id: id
+        node_id: node_id
+        scan_id: scan_id
         asset_id: asset_id
-        out_of_scope: true
-        target: ""
-        remediation: remediation
-        note_modified_by_user:
-          name: name
-          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          given_name: given_name
-          family_name: family_name
-          email: email
-        asset_name: asset_name
-        resolved_at: 2000-01-23T04:56:07.000+00:00
         asset_type: asset_type
+        asset_name: asset_name
+        rule: rule
+        state: unplanned
         name: name
+        description: description
+        remediation: remediation
+        note: note
+        created: 2000-01-23T04:56:07.000+00:00
         modified: 2000-01-23T04:56:07.000+00:00
+        out_of_scope: true
+        is_secondary: true
+        resolved_at: 2000-01-23T04:56:07.000+00:00
         links:
         - link_from: "{}"
           link_to: "{}"
         - link_from: "{}"
           link_to: "{}"
-        modified_by_user:
-          name: name
+        link_ids:
+        - link_ids
+        - link_ids
+        target: ""
+        assignee_user:
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          name: name
           given_name: given_name
           family_name: family_name
           email: email
-        id: id
-        scan_id: scan_id
-        state: unplanned
-        node_id: node_id
+        modified_by_user:
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          name: name
+          given_name: given_name
+          family_name: family_name
+          email: email
+        note_modified_by_user:
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          name: name
+          given_name: given_name
+          family_name: family_name
+          email: email
       properties:
         id:
           description: Action ID
@@ -6318,15 +7431,19 @@ components:
           format: date-time
           type: string
         links:
+          deprecated: true
           description: Has been replaced with the get risks endpoint
           items:
             $ref: "#/components/schemas/ActionLinkResponse"
           type: array
+          default: null
         link_ids:
+          deprecated: true
           description: Has been replaced with the get risks endpoint
           items:
             type: string
           type: array
+          default: null
         target:
           allOf:
           - $ref: "#/components/schemas/ActionNodeResponse"
@@ -6358,19 +7475,19 @@ components:
       type: object
     UserRowResponse:
       example:
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        email: email
+        name: name
+        family_name: family_name
+        given_name: given_name
         last_ip: last_ip
         created: 2000-01-23T04:56:07.000+00:00
-        totp_enabled: true
-        given_name: given_name
-        enabled: true
-        name: name
-        attributes: "{}"
-        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-        sso_subject: sso_subject
-        family_name: family_name
         updated: 2000-01-23T04:56:07.000+00:00
-        email: email
+        sso_subject: sso_subject
+        attributes: "{}"
+        enabled: true
         default_organisation_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        totp_enabled: true
       properties:
         id:
           format: uuid
@@ -6405,40 +7522,40 @@ components:
           type: boolean
     UserResponse:
       example:
-        sso_user: true
-        totp_enabled: true
-        scan_groups:
-        - organisation_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          roles:
-          - roles
-          - roles
-          name: name
-          groups:
-          - groups
-          - groups
-          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          is_default: true
-        - organisation_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          roles:
-          - roles
-          - roles
-          name: name
-          groups:
-          - groups
-          - groups
-          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          is_default: true
-        roles:
-        - roles
-        - roles
-        name: name
-        groups:
-        - groups
-        - groups
         id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        name: name
         email: email
         enabled: true
         last_session_updated: 2000-01-23T04:56:07.000+00:00
+        totp_enabled: true
+        sso_user: true
+        groups:
+        - groups
+        - groups
+        roles:
+        - roles
+        - roles
+        scan_groups:
+        - id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          organisation_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          name: name
+          is_default: true
+          groups:
+          - groups
+          - groups
+          roles:
+          - roles
+          - roles
+        - id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          organisation_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          name: name
+          is_default: true
+          groups:
+          - groups
+          - groups
+          roles:
+          - roles
+          - roles
       properties:
         id:
           format: uuid
@@ -6464,17 +7581,20 @@ components:
           items:
             type: string
           type: array
+          default: null
         roles:
           description: Roles the user has in the organisation / scan group
           items:
             type: string
           type: array
+          default: null
         scan_groups:
           description: Scan Groups the user is apart of in the organisation (if the
             organisation is requested)
           items:
             $ref: "#/components/schemas/UserResponse_scan_groups_inner"
           type: array
+          default: null
       required:
       - email
       - enabled
@@ -6483,10 +7603,52 @@ components:
       - name
       - roles
       - totp_enabled
+    UserSummaryResponse:
+      example:
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        name: name
+        email: email
+      properties:
+        id:
+          format: uuid
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+      required:
+      - email
+      - id
+      - name
+    MarketingPreferencesResponse:
+      example:
+        product_marketing: true
+        vendor_marketing: true
+      properties:
+        product_marketing:
+          description: Whether the user is subscribed to product marketing emails
+          type: boolean
+        vendor_marketing:
+          description: Whether the user is subscribed to vendor marketing emails
+          type: boolean
+      required:
+      - product_marketing
+      - vendor_marketing
+    UpdateMarketingPreferencesRequest:
+      example:
+        product_marketing: true
+        vendor_marketing: true
+      properties:
+        product_marketing:
+          description: Subscribe or unsubscribe the user from product marketing emails
+          type: boolean
+        vendor_marketing:
+          description: Subscribe or unsubscribe the user from vendor marketing emails
+          type: boolean
     UsersCreateAPIKeyRequest:
       example:
-        lifetime: 168h
         description: Test API key
+        lifetime: 168h
       properties:
         description:
           description: API Key description
@@ -6502,9 +7664,9 @@ components:
       - lifetime
     UsersCreateAPIKeyResponse:
       example:
-        expires: 2000-01-23T04:56:07.000+00:00
         api_key: api_key
         description: Test API key
+        expires: 2000-01-23T04:56:07.000+00:00
       properties:
         api_key:
           description: API Key
@@ -6522,12 +7684,12 @@ components:
       - description
     UsersAPIKeyResponse:
       example:
-        expires: 2000-01-23T04:56:07.000+00:00
-        usage_count: 0
-        created: 2000-01-23T04:56:07.000+00:00
-        last_used: 2000-01-23T04:56:07.000+00:00
-        description: description
         id: id
+        description: description
+        created: 2000-01-23T04:56:07.000+00:00
+        expires: 2000-01-23T04:56:07.000+00:00
+        last_used: 2000-01-23T04:56:07.000+00:00
+        usage_count: 0
       properties:
         id:
           description: API Key ID
@@ -6557,8 +7719,8 @@ components:
       - usage_count
     UserDetailsResponse:
       example:
-        name: name
         id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        name: name
         given_name: given_name
         family_name: family_name
         email: email
@@ -6583,129 +7745,129 @@ components:
       - id
     ScanDataDomainResponse:
       example:
-        seed: true
-        last_seen: 2000-01-23T04:56:07.000+00:00
-        root_domain: true
+        id: id
+        name: name
+        dns_destinations:
+        - id: id
+          name: name
+        - id: id
+          name: name
+        alias: ""
+        ips:
+        - id: id
+          name: name
+        - id: id
+          name: name
+        services:
+        - id: id
+          name: name
+        - id: id
+          name: name
+        certificates:
+        - id: id
+          name: name
+        - id: id
+          name: name
+        cloud_regions:
+        - id: id
+          name: name
+        - id: id
+          name: name
+        asns:
+        - id: id
+          name: name
+        - id: id
+          name: name
+        entities:
+        - id: id
+          name: name
+        - id: id
+          name: name
+        risk_counts:
+          info: 0
+          low: 6
+          medium: 1
+          high: 5
+          critical: 5
+        risks:
+        - link_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          urn: urn
+          asset_type: asset_type
+          asset_name: asset_name
+          asset_node_id: asset_node_id
+          name: name
+          description: description
+          remediation: remediation
+          severity: severity
+          category: category
+          tags:
+          - tags
+          - tags
+          has_known_exploit: true
+          is_br_risk: true
+          epss_score: 0.8008281904610115
+          epss_percentile: 6.027456183070403
+          epss_model_ver: epss_model_ver
+          epss_last_update: 2000-01-23T04:56:07.000+00:00
+          created: 2000-01-23T04:56:07.000+00:00
+          last_seen: 2000-01-23T04:56:07.000+00:00
+        - link_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          urn: urn
+          asset_type: asset_type
+          asset_name: asset_name
+          asset_node_id: asset_node_id
+          name: name
+          description: description
+          remediation: remediation
+          severity: severity
+          category: category
+          tags:
+          - tags
+          - tags
+          has_known_exploit: true
+          is_br_risk: true
+          epss_score: 0.8008281904610115
+          epss_percentile: 6.027456183070403
+          epss_model_ver: epss_model_ver
+          epss_last_update: 2000-01-23T04:56:07.000+00:00
+          created: 2000-01-23T04:56:07.000+00:00
+          last_seen: 2000-01-23T04:56:07.000+00:00
         caa_record: caa_record
-        dns_wildcard: true
-        stale: true
+        dkim_max: 2
+        dkim_min: 7
         dkim_record:
         - dkim_record
         - dkim_record
-        security_txt_policy: security_txt_policy
-        alias: ""
-        dkim_max: 2
-        asns:
-        - name: name
-          id: id
-        - name: name
-          id: id
-        id: id
-        security_txt_url: security_txt_url
-        mta_sts_policy:
-        - mta_sts_policy
-        - mta_sts_policy
-        rdap_expiration: rdap_expiration
-        limited: true
-        created: 2000-01-23T04:56:07.000+00:00
-        cloud_regions:
-        - name: name
-          id: id
-        - name: name
-          id: id
-        services:
-        - name: name
-          id: id
-        - name: name
-          id: id
-        ips:
-        - name: name
-          id: id
-        - name: name
-          id: id
-        rdap_handle: rdap_handle
-        risk_counts:
-          high: 5
-          critical: 5
-          low: 6
-          medium: 1
-          info: 0
-        risks:
-        - severity: severity
-          is_br_risk: true
-          epss_score: 0.8008281904610115
-          epss_last_update: 2000-01-23T04:56:07.000+00:00
-          last_seen: 2000-01-23T04:56:07.000+00:00
-          created: 2000-01-23T04:56:07.000+00:00
-          description: description
-          asset_node_id: asset_node_id
-          link_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          tags:
-          - tags
-          - tags
-          risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          urn: urn
-          has_known_exploit: true
-          remediation: remediation
-          epss_model_ver: epss_model_ver
-          asset_name: asset_name
-          asset_type: asset_type
-          name: name
-          category: category
-          epss_percentile: 6.027456183070403
-        - severity: severity
-          is_br_risk: true
-          epss_score: 0.8008281904610115
-          epss_last_update: 2000-01-23T04:56:07.000+00:00
-          last_seen: 2000-01-23T04:56:07.000+00:00
-          created: 2000-01-23T04:56:07.000+00:00
-          description: description
-          asset_node_id: asset_node_id
-          link_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          tags:
-          - tags
-          - tags
-          risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          urn: urn
-          has_known_exploit: true
-          remediation: remediation
-          epss_model_ver: epss_model_ver
-          asset_name: asset_name
-          asset_type: asset_type
-          name: name
-          category: category
-          epss_percentile: 6.027456183070403
-        name_server: true
-        certificates:
-        - name: name
-          id: id
-        - name: name
-          id: id
-        entities:
-        - name: name
-          id: id
-        - name: name
-          id: id
-        dkim_min: 7
-        name: name
-        mta_sts_report:
-        - mta_sts_report
-        - mta_sts_report
-        rdap_registration: rdap_registration
         dmarc_record:
         - dmarc_record
         - dmarc_record
-        spf_record:
-        - spf_record
-        - spf_record
-        dns_destinations:
-        - name: name
-          id: id
-        - name: name
-          id: id
+        dns_wildcard: true
+        limited: true
         mta_sts_txt_record:
         - mta_sts_txt_record
         - mta_sts_txt_record
+        mta_sts_policy:
+        - mta_sts_policy
+        - mta_sts_policy
+        mta_sts_report:
+        - mta_sts_report
+        - mta_sts_report
+        security_txt_policy: security_txt_policy
+        security_txt_url: security_txt_url
+        rdap_expiration: rdap_expiration
+        rdap_handle: rdap_handle
+        rdap_registration: rdap_registration
+        root_domain: true
+        spf_record:
+        - spf_record
+        - spf_record
+        stale: true
+        name_server: true
+        seed: true
+        created: 2000-01-23T04:56:07.000+00:00
+        last_seen: 2000-01-23T04:56:07.000+00:00
       properties:
         id:
           description: Domain ID
@@ -6714,11 +7876,13 @@ components:
           description: Domain name
           type: string
         dns_destinations:
+          deprecated: true
           description: "[DEPRECATED] use `ips` and `alias` instead, they contain the\
             \ same data."
           items:
             $ref: "#/components/schemas/ScanDataNodeResponse"
           type: array
+          default: null
         alias:
           allOf:
           - $ref: "#/components/schemas/ScanDataNodeResponse"
@@ -6728,37 +7892,44 @@ components:
           items:
             $ref: "#/components/schemas/ScanDataNodeResponse"
           type: array
+          default: null
         services:
           description: Services
           items:
             $ref: "#/components/schemas/ScanDataNodeResponse"
           type: array
+          default: null
         certificates:
           description: Certificates
           items:
             $ref: "#/components/schemas/ScanDataNodeResponse"
           type: array
+          default: null
         cloud_regions:
           description: Cloud regions
           items:
             $ref: "#/components/schemas/ScanDataNodeResponse"
           type: array
+          default: null
         asns:
           description: ASNs
           items:
             $ref: "#/components/schemas/ScanDataNodeResponse"
           type: array
+          default: null
         entities:
           description: Entities
           items:
             $ref: "#/components/schemas/ScanDataNodeResponse"
           type: array
+          default: null
         risk_counts:
           $ref: "#/components/schemas/ScanDataRiskCountsResponse"
         risks:
           items:
             $ref: "#/components/schemas/ScanDataRiskResponse"
           type: array
+          default: null
         caa_record:
           description: CAA record
           type: string
@@ -6773,11 +7944,13 @@ components:
           items:
             type: string
           type: array
+          default: null
         dmarc_record:
           description: DMARC record
           items:
             type: string
           type: array
+          default: null
         dns_wildcard:
           description: Whether the domain uses DNS wildcard responses
           type: boolean
@@ -6789,16 +7962,19 @@ components:
           items:
             type: string
           type: array
+          default: null
         mta_sts_policy:
           description: MTA-STS policy
           items:
             type: string
           type: array
+          default: null
         mta_sts_report:
           description: MTA-STS TLS-RPT record
           items:
             type: string
           type: array
+          default: null
         security_txt_policy:
           description: security.txt policy body
           type: string
@@ -6822,6 +7998,7 @@ components:
           items:
             type: string
           type: array
+          default: null
         stale:
           description: Whether the domain is stale or not
           type: boolean
@@ -6858,10 +8035,10 @@ components:
       - stale
     ScanDataOutOfScopeDomainResponse:
       example:
-        last_seen: 2000-01-23T04:56:07.000+00:00
-        created: 2000-01-23T04:56:07.000+00:00
-        name: name
         id: id
+        name: name
+        created: 2000-01-23T04:56:07.000+00:00
+        last_seen: 2000-01-23T04:56:07.000+00:00
       properties:
         id:
           description: Domain ID
@@ -6884,102 +8061,102 @@ components:
       - name
     ScanDataIPResponse:
       example:
-        country: country
-        seed: true
-        last_seen: 2000-01-23T04:56:07.000+00:00
-        limited: true
-        city: city
-        created: 2000-01-23T04:56:07.000+00:00
+        id: id
         ip: ip
-        latitude: 0.8008281904610115
-        cloud_regions:
-        - name: name
-          id: id
-        - name: name
-          id: id
-        services:
-        - name: name
-          id: id
-        - name: name
-          id: id
         dns_sources:
-        - name: name
-          id: id
-        - name: name
-          id: id
+        - id: id
+          name: name
+        - id: id
+          name: name
+        dns_ptrs:
+        - id: id
+          name: name
+        - id: id
+          name: name
+        services:
+        - id: id
+          name: name
+        - id: id
+          name: name
+        certificates:
+        - id: id
+          name: name
+        - id: id
+          name: name
+        cloud_regions:
+        - id: id
+          name: name
+        - id: id
+          name: name
+        asns:
+        - id: id
+          name: name
+        - id: id
+          name: name
+        entities:
+        - id: id
+          name: name
+        - id: id
+          name: name
         risk_counts:
-          high: 5
-          critical: 5
+          info: 0
           low: 6
           medium: 1
-          info: 0
+          high: 5
+          critical: 5
         risks:
-        - severity: severity
-          is_br_risk: true
-          epss_score: 0.8008281904610115
-          epss_last_update: 2000-01-23T04:56:07.000+00:00
-          last_seen: 2000-01-23T04:56:07.000+00:00
-          created: 2000-01-23T04:56:07.000+00:00
-          description: description
+        - link_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          urn: urn
+          asset_type: asset_type
+          asset_name: asset_name
           asset_node_id: asset_node_id
-          link_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          name: name
+          description: description
+          remediation: remediation
+          severity: severity
+          category: category
           tags:
           - tags
           - tags
-          risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          urn: urn
           has_known_exploit: true
-          remediation: remediation
-          epss_model_ver: epss_model_ver
-          asset_name: asset_name
-          asset_type: asset_type
-          name: name
-          category: category
-          epss_percentile: 6.027456183070403
-        - severity: severity
           is_br_risk: true
           epss_score: 0.8008281904610115
+          epss_percentile: 6.027456183070403
+          epss_model_ver: epss_model_ver
           epss_last_update: 2000-01-23T04:56:07.000+00:00
-          last_seen: 2000-01-23T04:56:07.000+00:00
           created: 2000-01-23T04:56:07.000+00:00
-          description: description
+          last_seen: 2000-01-23T04:56:07.000+00:00
+        - link_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          urn: urn
+          asset_type: asset_type
+          asset_name: asset_name
           asset_node_id: asset_node_id
-          link_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          name: name
+          description: description
+          remediation: remediation
+          severity: severity
+          category: category
           tags:
           - tags
           - tags
-          risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          urn: urn
           has_known_exploit: true
-          remediation: remediation
-          epss_model_ver: epss_model_ver
-          asset_name: asset_name
-          asset_type: asset_type
-          name: name
-          category: category
+          is_br_risk: true
+          epss_score: 0.8008281904610115
           epss_percentile: 6.027456183070403
-        dns_ptrs:
-        - name: name
-          id: id
-        - name: name
-          id: id
-        certificates:
-        - name: name
-          id: id
-        - name: name
-          id: id
-        entities:
-        - name: name
-          id: id
-        - name: name
-          id: id
-        asns:
-        - name: name
-          id: id
-        - name: name
-          id: id
-        id: id
+          epss_model_ver: epss_model_ver
+          epss_last_update: 2000-01-23T04:56:07.000+00:00
+          created: 2000-01-23T04:56:07.000+00:00
+          last_seen: 2000-01-23T04:56:07.000+00:00
+        limited: true
+        country: country
+        city: city
+        latitude: 0.8008281904610115
         longitude: 6.027456183070403
+        seed: true
+        created: 2000-01-23T04:56:07.000+00:00
+        last_seen: 2000-01-23T04:56:07.000+00:00
       properties:
         id:
           description: IP ID
@@ -6992,42 +8169,50 @@ components:
           items:
             $ref: "#/components/schemas/ScanDataNodeResponse"
           type: array
+          default: null
         dns_ptrs:
           description: DNS pointers
           items:
             $ref: "#/components/schemas/ScanDataNodeResponse"
           type: array
+          default: null
         services:
           description: Services
           items:
             $ref: "#/components/schemas/ScanDataNodeResponse"
           type: array
+          default: null
         certificates:
           description: Certificates
           items:
             $ref: "#/components/schemas/ScanDataNodeResponse"
           type: array
+          default: null
         cloud_regions:
           description: Cloud regions
           items:
             $ref: "#/components/schemas/ScanDataNodeResponse"
           type: array
+          default: null
         asns:
           description: ASNs
           items:
             $ref: "#/components/schemas/ScanDataNodeResponse"
           type: array
+          default: null
         entities:
           description: Entities
           items:
             $ref: "#/components/schemas/ScanDataNodeResponse"
           type: array
+          default: null
         risk_counts:
           $ref: "#/components/schemas/ScanDataRiskCountsResponse"
         risks:
           items:
             $ref: "#/components/schemas/ScanDataRiskResponse"
           type: array
+          default: null
         limited:
           description: Whether the IP is limited or not
           type: boolean
@@ -7071,32 +8256,32 @@ components:
       - services
     ScanDataWebPresenceResponse:
       example:
-        components:
-        - name: name
-          id: id
-        - name: name
-          id: id
-        status_code: 0
-        last_seen: 2000-01-23T04:56:07.000+00:00
-        page_title: page_title
-        created: 2000-01-23T04:56:07.000+00:00
-        screenshot_id: screenshot_id
-        url: url
-        content_type: content_type
-        redirects:
-        - status_code: 6
-          id: id
-          tls_status: tls_status
-          url: url
-        - status_code: 6
-          id: id
-          tls_status: tls_status
-          url: url
-        domain: domain
         id: id
-        form_input: true
+        url: url
+        domain: domain
+        screenshot_id: screenshot_id
         http_server: http_server
+        status_code: 0
+        page_title: page_title
         tls_status: tls_status
+        content_type: content_type
+        form_input: true
+        components:
+        - id: id
+          name: name
+        - id: id
+          name: name
+        redirects:
+        - id: id
+          url: url
+          status_code: 6
+          tls_status: tls_status
+        - id: id
+          url: url
+          status_code: 6
+          tls_status: tls_status
+        created: 2000-01-23T04:56:07.000+00:00
+        last_seen: 2000-01-23T04:56:07.000+00:00
       properties:
         id:
           description: URL ID
@@ -7133,11 +8318,13 @@ components:
           items:
             $ref: "#/components/schemas/ScanDataNodeResponse"
           type: array
+          default: null
         redirects:
           description: Redirects
           items:
             $ref: "#/components/schemas/ScanDataWebPresenceRedirectResponse"
           type: array
+          default: null
         created:
           description: URL creation date
           format: date-time
@@ -7159,10 +8346,10 @@ components:
       - url
     ScanDataWebPresenceRedirectResponse:
       example:
-        status_code: 6
         id: id
-        tls_status: tls_status
         url: url
+        status_code: 6
+        tls_status: tls_status
       properties:
         id:
           description: Redirect ID
@@ -7183,70 +8370,70 @@ components:
       - url
     ScanDataComponentResponse:
       example:
+        id: id
+        name: name
         urn: urn
+        cpe23: cpe23
+        vendor: vendor
+        version: version
+        services:
+        - id: id
+          name: name
+        - id: id
+          name: name
         risk_counts:
-          high: 5
-          critical: 5
+          info: 0
           low: 6
           medium: 1
-          info: 0
+          high: 5
+          critical: 5
         risks:
-        - severity: severity
-          is_br_risk: true
-          epss_score: 0.8008281904610115
-          epss_last_update: 2000-01-23T04:56:07.000+00:00
-          last_seen: 2000-01-23T04:56:07.000+00:00
-          created: 2000-01-23T04:56:07.000+00:00
-          description: description
+        - link_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          urn: urn
+          asset_type: asset_type
+          asset_name: asset_name
           asset_node_id: asset_node_id
-          link_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          name: name
+          description: description
+          remediation: remediation
+          severity: severity
+          category: category
           tags:
           - tags
           - tags
-          risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          urn: urn
           has_known_exploit: true
-          remediation: remediation
-          epss_model_ver: epss_model_ver
-          asset_name: asset_name
-          asset_type: asset_type
-          name: name
-          category: category
-          epss_percentile: 6.027456183070403
-        - severity: severity
           is_br_risk: true
           epss_score: 0.8008281904610115
+          epss_percentile: 6.027456183070403
+          epss_model_ver: epss_model_ver
           epss_last_update: 2000-01-23T04:56:07.000+00:00
-          last_seen: 2000-01-23T04:56:07.000+00:00
           created: 2000-01-23T04:56:07.000+00:00
-          description: description
+          last_seen: 2000-01-23T04:56:07.000+00:00
+        - link_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          urn: urn
+          asset_type: asset_type
+          asset_name: asset_name
           asset_node_id: asset_node_id
-          link_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          name: name
+          description: description
+          remediation: remediation
+          severity: severity
+          category: category
           tags:
           - tags
           - tags
-          risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          urn: urn
           has_known_exploit: true
-          remediation: remediation
-          epss_model_ver: epss_model_ver
-          asset_name: asset_name
-          asset_type: asset_type
-          name: name
-          category: category
+          is_br_risk: true
+          epss_score: 0.8008281904610115
           epss_percentile: 6.027456183070403
-        last_seen: 2000-01-23T04:56:07.000+00:00
-        vendor: vendor
+          epss_model_ver: epss_model_ver
+          epss_last_update: 2000-01-23T04:56:07.000+00:00
+          created: 2000-01-23T04:56:07.000+00:00
+          last_seen: 2000-01-23T04:56:07.000+00:00
         created: 2000-01-23T04:56:07.000+00:00
-        name: name
-        id: id
-        services:
-        - name: name
-          id: id
-        - name: name
-          id: id
-        version: version
-        cpe23: cpe23
+        last_seen: 2000-01-23T04:56:07.000+00:00
       properties:
         id:
           description: Component ID
@@ -7271,12 +8458,14 @@ components:
           items:
             $ref: "#/components/schemas/ScanDataNodeResponse"
           type: array
+          default: null
         risk_counts:
           $ref: "#/components/schemas/ScanDataRiskCountsResponse"
         risks:
           items:
             $ref: "#/components/schemas/ScanDataRiskResponse"
           type: array
+          default: null
         created:
           description: Component creation date
           format: date-time
@@ -7294,73 +8483,73 @@ components:
       - urn
     ScanDataServiceResponse:
       example:
-        socket_encrypted: true
-        iana_description: iana_description
-        last_seen: 2000-01-23T04:56:07.000+00:00
-        created: 2000-01-23T04:56:07.000+00:00
-        shodan_last_update: 2000-01-23T04:56:07.000+00:00
-        socket_authorized: true
-        risk_counts:
-          high: 5
-          critical: 5
-          low: 6
-          medium: 1
-          info: 0
-        protocol: protocol
-        risks:
-        - severity: severity
-          is_br_risk: true
-          epss_score: 0.8008281904610115
-          epss_last_update: 2000-01-23T04:56:07.000+00:00
-          last_seen: 2000-01-23T04:56:07.000+00:00
-          created: 2000-01-23T04:56:07.000+00:00
-          description: description
-          asset_node_id: asset_node_id
-          link_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          tags:
-          - tags
-          - tags
-          risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          urn: urn
-          has_known_exploit: true
-          remediation: remediation
-          epss_model_ver: epss_model_ver
-          asset_name: asset_name
-          asset_type: asset_type
-          name: name
-          category: category
-          epss_percentile: 6.027456183070403
-        - severity: severity
-          is_br_risk: true
-          epss_score: 0.8008281904610115
-          epss_last_update: 2000-01-23T04:56:07.000+00:00
-          last_seen: 2000-01-23T04:56:07.000+00:00
-          created: 2000-01-23T04:56:07.000+00:00
-          description: description
-          asset_node_id: asset_node_id
-          link_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          tags:
-          - tags
-          - tags
-          risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          urn: urn
-          has_known_exploit: true
-          remediation: remediation
-          epss_model_ver: epss_model_ver
-          asset_name: asset_name
-          asset_type: asset_type
-          name: name
-          category: category
-          epss_percentile: 6.027456183070403
-        port: 0
+        id: id
         name: name
         host:
-          name: name
           id: id
           type: type
+          name: name
+        port: 0
+        protocol: protocol
         iana_name: iana_name
+        iana_description: iana_description
+        socket_encrypted: true
+        socket_authorized: true
+        risk_counts:
+          info: 0
+          low: 6
+          medium: 1
+          high: 5
+          critical: 5
+        risks:
+        - link_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          urn: urn
+          asset_type: asset_type
+          asset_name: asset_name
+          asset_node_id: asset_node_id
+          name: name
+          description: description
+          remediation: remediation
+          severity: severity
+          category: category
+          tags:
+          - tags
+          - tags
+          has_known_exploit: true
+          is_br_risk: true
+          epss_score: 0.8008281904610115
+          epss_percentile: 6.027456183070403
+          epss_model_ver: epss_model_ver
+          epss_last_update: 2000-01-23T04:56:07.000+00:00
+          created: 2000-01-23T04:56:07.000+00:00
+          last_seen: 2000-01-23T04:56:07.000+00:00
+        - link_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          urn: urn
+          asset_type: asset_type
+          asset_name: asset_name
+          asset_node_id: asset_node_id
+          name: name
+          description: description
+          remediation: remediation
+          severity: severity
+          category: category
+          tags:
+          - tags
+          - tags
+          has_known_exploit: true
+          is_br_risk: true
+          epss_score: 0.8008281904610115
+          epss_percentile: 6.027456183070403
+          epss_model_ver: epss_model_ver
+          epss_last_update: 2000-01-23T04:56:07.000+00:00
+          created: 2000-01-23T04:56:07.000+00:00
+          last_seen: 2000-01-23T04:56:07.000+00:00
+        shodan_last_update: 2000-01-23T04:56:07.000+00:00
         source_last_updated: 2000-01-23T04:56:07.000+00:00
-        id: id
+        created: 2000-01-23T04:56:07.000+00:00
+        last_seen: 2000-01-23T04:56:07.000+00:00
       properties:
         id:
           description: Service ID
@@ -7394,6 +8583,7 @@ components:
           items:
             $ref: "#/components/schemas/ScanDataRiskResponse"
           type: array
+          default: null
         shodan_last_update:
           deprecated: true
           description: Last time Shodan data was updated for the host IP. Has been
@@ -7420,8 +8610,8 @@ components:
       - name
     ScanDataNodeResponse:
       example:
-        name: name
         id: id
+        name: name
       properties:
         id:
           description: Node ID
@@ -7435,11 +8625,11 @@ components:
     ScanDataRiskCountsResponse:
       description: Risk counts per severity
       example:
-        high: 5
-        critical: 5
+        info: 0
         low: 6
         medium: 1
-        info: 0
+        high: 5
+        critical: 5
       properties:
         info:
           description: Number of info risks
@@ -7464,28 +8654,28 @@ components:
       - medium
     ScanDataRiskResponse:
       example:
-        severity: severity
-        is_br_risk: true
-        epss_score: 0.8008281904610115
-        epss_last_update: 2000-01-23T04:56:07.000+00:00
-        last_seen: 2000-01-23T04:56:07.000+00:00
-        created: 2000-01-23T04:56:07.000+00:00
-        description: description
-        asset_node_id: asset_node_id
         link_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        urn: urn
+        asset_type: asset_type
+        asset_name: asset_name
+        asset_node_id: asset_node_id
+        name: name
+        description: description
+        remediation: remediation
+        severity: severity
+        category: category
         tags:
         - tags
         - tags
-        risk_node_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-        urn: urn
         has_known_exploit: true
-        remediation: remediation
-        epss_model_ver: epss_model_ver
-        asset_name: asset_name
-        asset_type: asset_type
-        name: name
-        category: category
+        is_br_risk: true
+        epss_score: 0.8008281904610115
         epss_percentile: 6.027456183070403
+        epss_model_ver: epss_model_ver
+        epss_last_update: 2000-01-23T04:56:07.000+00:00
+        created: 2000-01-23T04:56:07.000+00:00
+        last_seen: 2000-01-23T04:56:07.000+00:00
       properties:
         link_id:
           description: Link ID of Risk
@@ -7527,6 +8717,7 @@ components:
           items:
             type: string
           type: array
+          default: null
         has_known_exploit:
           description: Risk has a known exploit
           type: boolean
@@ -7576,77 +8767,77 @@ components:
     ScanDataLinkChangesResponse:
       example:
         comparison:
+          iteration_from: iteration_from
+          iteration_to: iteration_to
           iteration_ids:
           - iteration_ids
           - iteration_ids
-          iteration_from: iteration_from
-          iteration_to: iteration_to
-        removed:
-        - link_type: link_type
-          risk_severity_number: 0
-          removed_in: removed_in
-          added_in: added_in
-          from:
-            id: id
-            type: type
-            display_name: display_name
-            key: key
-          id: id
-          to:
-            id: id
-            type: type
-            display_name: display_name
-            key: key
-          risk_severity: risk_severity
-        - link_type: link_type
-          risk_severity_number: 0
-          removed_in: removed_in
-          added_in: added_in
-          from:
-            id: id
-            type: type
-            display_name: display_name
-            key: key
-          id: id
-          to:
-            id: id
-            type: type
-            display_name: display_name
-            key: key
-          risk_severity: risk_severity
         added:
-        - link_type: link_type
-          risk_severity_number: 0
-          removed_in: removed_in
+        - id: id
+          link_type: link_type
           added_in: added_in
+          removed_in: removed_in
           from:
             id: id
             type: type
-            display_name: display_name
             key: key
-          id: id
+            display_name: display_name
           to:
             id: id
             type: type
-            display_name: display_name
             key: key
+            display_name: display_name
           risk_severity: risk_severity
-        - link_type: link_type
           risk_severity_number: 0
-          removed_in: removed_in
+        - id: id
+          link_type: link_type
           added_in: added_in
+          removed_in: removed_in
           from:
             id: id
             type: type
-            display_name: display_name
             key: key
-          id: id
+            display_name: display_name
           to:
             id: id
             type: type
-            display_name: display_name
             key: key
+            display_name: display_name
           risk_severity: risk_severity
+          risk_severity_number: 0
+        removed:
+        - id: id
+          link_type: link_type
+          added_in: added_in
+          removed_in: removed_in
+          from:
+            id: id
+            type: type
+            key: key
+            display_name: display_name
+          to:
+            id: id
+            type: type
+            key: key
+            display_name: display_name
+          risk_severity: risk_severity
+          risk_severity_number: 0
+        - id: id
+          link_type: link_type
+          added_in: added_in
+          removed_in: removed_in
+          from:
+            id: id
+            type: type
+            key: key
+            display_name: display_name
+          to:
+            id: id
+            type: type
+            key: key
+            display_name: display_name
+          risk_severity: risk_severity
+          risk_severity_number: 0
       properties:
         comparison:
           $ref: "#/components/schemas/ScanDataLinkChangesResponse_comparison"
@@ -7655,33 +8846,35 @@ components:
           items:
             $ref: "#/components/schemas/ScanDataLinkChangeResponse"
           type: array
+          default: null
         removed:
           description: List of removed links
           items:
             $ref: "#/components/schemas/ScanDataLinkChangeResponse"
           type: array
+          default: null
       required:
       - added
       - comparison
       - removed
     ScanDataLinkChangeResponse:
       example:
+        id: id
         link_type: link_type
-        risk_severity_number: 0
-        removed_in: removed_in
         added_in: added_in
+        removed_in: removed_in
         from:
           id: id
           type: type
-          display_name: display_name
           key: key
-        id: id
+          display_name: display_name
         to:
           id: id
           type: type
-          display_name: display_name
           key: key
+          display_name: display_name
         risk_severity: risk_severity
+        risk_severity_number: 0
       properties:
         id:
           description: Link ID
@@ -7712,13 +8905,13 @@ components:
       - to
     GenericGraphNode:
       example:
-        last_seen: 2000-01-23T04:56:07.000+00:00
-        created: 2000-01-23T04:56:07.000+00:00
-        name: name
         id: id
         scan_id: scan_id
         label: label
+        name: name
+        created: 2000-01-23T04:56:07.000+00:00
         updated: 2000-01-23T04:56:07.000+00:00
+        last_seen: 2000-01-23T04:56:07.000+00:00
       properties:
         id:
           type: string
@@ -7758,12 +8951,12 @@ components:
         - ips_ignored
     Group:
       example:
-        created: 2000-01-23T04:56:07.000+00:00
-        name: name
-        attributes: "{}"
         id: id
-        priority: 5.962133916683182
+        name: name
+        created: 2000-01-23T04:56:07.000+00:00
+        priority: 7.061401241503109
         type: type
+        attributes: "{}"
       properties:
         id:
           type: string
@@ -7786,8 +8979,8 @@ components:
       - type
     Role:
       example:
-        role: role
         group_id: group_id
+        role: role
       properties:
         group_id:
           type: string
@@ -7825,6 +9018,14 @@ components:
       description: "For Ad Hoc scans this doesn't need to be included. For Continuous\
         \ scans, if this is not provided, only data from the latest iteration will\
         \ be used."
+      example:
+        from: 1970-01-01T00:00:00Z
+        to: 1970-01-01T00:00:00Z
+        all_time: true
+        relative_duration:
+          days: 1
+          weeks: 1
+          months: 1
       properties:
         from:
           description: From time (ISO 8601)
@@ -7836,6 +9037,12 @@ components:
           example: 1970-01-01T00:00:00Z
           format: date-time
           type: string
+        all_time:
+          description: Include data from the first scan iteration through to report
+            generation time.
+          type: boolean
+        relative_duration:
+          $ref: "#/components/schemas/ReportTimeSelection_relative_duration"
     CreateSummaryReportBody:
       properties:
         type:
@@ -7886,31 +9093,62 @@ components:
         send_email:
           description: Send email notification when report is ready
           type: boolean
+        executive_summary:
+          description: Executive summary displayed on the initial tab
+          maxLength: 3000
+          type: string
+        branded:
+          description: Display organisation logo on the initial tab. Requires feature
+            to be enabled for the organisation.
+          type: boolean
       required:
       - name
       - scan_id
       - type
     ReportResponse:
       example:
-        can_manage: true
-        file_name: file_name
-        created: 2000-01-23T04:56:07.000+00:00
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        scan_ids:
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        scan_names:
+        - scan_names
+        - scan_names
+        scan_count: 0
+        scan_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        organisation_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        scan_name: scan_name
+        iteration_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        state: pending
         type: summary
         display_name: display_name
-        iteration_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-        organisation_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-        download_url: download_url
+        file_name: file_name
         template_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-        scan_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-        state: pending
-        scan_name: scan_name
+        created: 2000-01-23T04:56:07.000+00:00
         updated: 2000-01-23T04:56:07.000+00:00
+        download_url: download_url
+        can_manage: true
       properties:
         id:
           description: Report ID
           format: uuid
           type: string
+        scan_ids:
+          description: "IDs of included scans, in the same order as scan_names"
+          items:
+            format: uuid
+            type: string
+          type: array
+          default: null
+        scan_names:
+          description: Names of the scans included in the report
+          items:
+            type: string
+          type: array
+          default: null
+        scan_count:
+          description: Number of scans included in the report
+          type: integer
         scan_id:
           description: Scan ID
           format: uuid
@@ -7953,7 +9191,9 @@ components:
             60s.
           type: string
         can_manage:
-          description: User has "scans.reports:manage" role for this report
+          description: Whether the user may delete this report. Multi-scan reports
+            require report-read access to every included scan and management of the
+            owning organisation.
           type: boolean
       required:
       - created
@@ -7995,16 +9235,16 @@ components:
           type: string
     ReportTemplateResponse:
       example:
-        organisation_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-        file_name: file_name
-        created: 2000-01-23T04:56:07.000+00:00
-        download_url: download_url
-        upload_url: upload_url
         id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        organisation_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         state: pending
         type: type
         display_name: display_name
+        file_name: file_name
+        created: 2000-01-23T04:56:07.000+00:00
         updated: 2000-01-23T04:56:07.000+00:00
+        download_url: download_url
+        upload_url: upload_url
       properties:
         id:
           description: Report ID
@@ -8058,6 +9298,147 @@ components:
           type: string
       required:
       - code
+    joinFreeOrganisation_200_response:
+      example:
+        organisation:
+          id: id
+          name: name
+          tier: tier
+          attributes: "{}"
+          owner_id: owner_id
+          email_suffixes:
+          - email_suffixes
+          - email_suffixes
+          deleted: true
+          created: 2000-01-23T04:56:07.000+00:00
+          created_by: created_by
+          updated: 2000-01-23T04:56:07.000+00:00
+          updated_by: updated_by
+          roles:
+          - roles
+          - roles
+          groups:
+          - groups
+          - groups
+          owner_user:
+            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            name: name
+            given_name: given_name
+            family_name: family_name
+            email: email
+          created_by_user:
+            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            name: name
+            given_name: given_name
+            family_name: family_name
+            email: email
+        scan:
+          id: id
+          name: name
+          scan_group_id: scan_group_id
+          scan_group_name: scan_group_name
+          tags:
+          - tags
+          - tags
+          type: adhoc
+          enabled: true
+          deleted: true
+          created: 2000-01-23T04:56:07.000+00:00
+          created_by: created_by
+          updated: 2000-01-23T04:56:07.000+00:00
+          node: "{}"
+          iteration: "{}"
+          created_by_user:
+            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            name: name
+            given_name: given_name
+            family_name: family_name
+            email: email
+          monitor: true
+          monitor_schedule: monitor_schedule
+          monitor_next: 2000-01-23T04:56:07.000+00:00
+          shallow_page_depth: 0.8008281904610115
+          deep_page_depth: 6.027456183070403
+          dns_namelist: true
+          ignore_ip_nodes: true
+          include_br_risks: "{}"
+          auto_reports:
+            summary:
+              enabled: true
+              send_email: true
+              executive_summary: executive_summary
+              time_zone: time_zone
+              time_selection:
+                from: 1970-01-01T00:00:00Z
+                to: 1970-01-01T00:00:00Z
+                all_time: true
+                relative_duration:
+                  days: 1
+                  weeks: 1
+                  months: 1
+              branded: true
+            excel_summary:
+              enabled: true
+              send_email: true
+              executive_summary: executive_summary
+              time_zone: time_zone
+              branded: true
+            docx_templated:
+              enabled: true
+              send_email: true
+              template_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              executive_summary: executive_summary
+              time_zone: time_zone
+              include_placeholders: true
+            osint_docx_templated:
+              enabled: true
+              send_email: true
+              template_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              executive_summary: executive_summary
+              time_zone: time_zone
+              include_placeholders: true
+          insights_generated: 2000-01-23T04:56:07.000+00:00
+          insights: "{}"
+          seeds: 2.3021358869347655
+          groups:
+          - id: id
+            name: name
+            created: 2000-01-23T04:56:07.000+00:00
+            priority: 7.061401241503109
+            type: type
+            attributes: "{}"
+          - id: id
+            name: name
+            created: 2000-01-23T04:56:07.000+00:00
+            priority: 7.061401241503109
+            type: type
+            attributes: "{}"
+          roles:
+          - group_id: group_id
+            role: role
+          - group_id: group_id
+            role: role
+          organisation_id: organisation_id
+      properties:
+        organisation:
+          $ref: "#/components/schemas/OrganisationResponse"
+        scan:
+          $ref: "#/components/schemas/ScanResponse"
+      required:
+      - organisation
+      - scan
+    joinFreeOrganisation_400_response:
+      example:
+        code: user_limit_reached
+      properties:
+        code:
+          enum:
+          - user_limit_reached
+          - scan_unavailable
+          - already_in_org
+          type: string
+      required:
+      - code
     updateScanById_request_include_br_risks:
       properties:
         urn:component:application:apache:
@@ -8093,6 +9474,8 @@ components:
           type: string
         include_br_risks:
           $ref: "#/components/schemas/updateScanById_request_include_br_risks"
+        auto_reports:
+          $ref: "#/components/schemas/AutoReports"
     createTagByOrganisationID_request:
       properties:
         name:
@@ -8111,6 +9494,29 @@ components:
           type: string
       required:
       - tag_id
+    addTagToScan_request:
+      properties:
+        tag_name:
+          maxLength: 255
+          type: string
+      required:
+      - tag_name
+    addTagToSupplierScan_request:
+      nullable: true
+      oneOf: []
+      properties:
+        scan_id:
+          format: uuid
+          type: string
+        tag_id:
+          format: uuid
+          type: string
+        tag_name:
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - scan_id
     updateUserPreferences_request:
       description: Free-form object containing user attributes to be merged
       properties:
@@ -8135,8 +9541,8 @@ components:
           type: string
     CreateScanRequest_include_br_risks:
       example:
-        urn:component:application:openssl: true
         urn:component:application:apache: true
+        urn:component:application:openssl: true
       properties:
         urn:component:application:apache:
           description: Include backported resolvable risks for Apache
@@ -8148,10 +9554,10 @@ components:
       - urn:component:application:apache
     SeedsResponse_inner:
       example:
-        size: 0.8008281904610115
-        name: name
         id: id
+        name: name
         type: Domain
+        size: 0.8008281904610115
         tags:
         - tags
         - tags
@@ -8178,22 +9584,23 @@ components:
           items:
             type: string
           type: array
+          default: null
       required:
       - id
       - name
       - type
     UserResponse_scan_groups_inner:
       example:
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         organisation_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-        roles:
-        - roles
-        - roles
         name: name
+        is_default: true
         groups:
         - groups
         - groups
-        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-        is_default: true
+        roles:
+        - roles
+        - roles
       properties:
         id:
           format: uuid
@@ -8211,11 +9618,13 @@ components:
           items:
             type: string
           type: array
+          default: null
         roles:
           description: Roles the user has in the organisation
           items:
             type: string
           type: array
+          default: null
       required:
       - groups
       - id
@@ -8225,9 +9634,9 @@ components:
       - roles
     ScanDataServiceResponse_host:
       example:
-        name: name
         id: id
         type: type
+        name: name
       properties:
         id:
           description: Host ID
@@ -8244,11 +9653,11 @@ components:
       - type
     ScanDataLinkChangesResponse_comparison:
       example:
+        iteration_from: iteration_from
+        iteration_to: iteration_to
         iteration_ids:
         - iteration_ids
         - iteration_ids
-        iteration_from: iteration_from
-        iteration_to: iteration_to
       properties:
         iteration_from:
           description: The starting iteration ID
@@ -8261,6 +9670,7 @@ components:
           items:
             type: string
           type: array
+          default: null
       required:
       - iteration_from
       - iteration_ids
@@ -8269,8 +9679,8 @@ components:
       example:
         id: id
         type: type
-        display_name: display_name
         key: key
+        display_name: display_name
       properties:
         id:
           description: Node ID (from)
@@ -8293,8 +9703,8 @@ components:
       example:
         id: id
         type: type
-        display_name: display_name
         key: key
+        display_name: display_name
       properties:
         id:
           description: Node ID (to)
@@ -8313,6 +9723,22 @@ components:
       - id
       - key
       - type
+    ReportTimeSelection_relative_duration:
+      description: Relative historical window to resolve when generating the report.
+      example:
+        days: 1
+        weeks: 1
+        months: 1
+      properties:
+        days:
+          minimum: 1
+          type: integer
+        weeks:
+          minimum: 1
+          type: integer
+        months:
+          minimum: 1
+          type: integer
     inline_object:
       example:
         count: 0

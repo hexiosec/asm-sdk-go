@@ -59,8 +59,10 @@ type ActionResponse struct {
 	// Timestamp at which the action was resolved
 	ResolvedAt *time.Time `json:"resolved_at,omitempty"`
 	// Has been replaced with the get risks endpoint
+	// Deprecated
 	Links []ActionLinkResponse `json:"links,omitempty"`
 	// Has been replaced with the get risks endpoint
+	// Deprecated
 	LinkIds []string `json:"link_ids,omitempty"`
 	// Has been replaced with the asset_* params
 	// Deprecated
@@ -599,6 +601,7 @@ func (o *ActionResponse) SetResolvedAt(v time.Time) {
 }
 
 // GetLinks returns the Links field value if set, zero value otherwise.
+// Deprecated
 func (o *ActionResponse) GetLinks() []ActionLinkResponse {
 	if o == nil || IsNil(o.Links) {
 		var ret []ActionLinkResponse
@@ -609,6 +612,7 @@ func (o *ActionResponse) GetLinks() []ActionLinkResponse {
 
 // GetLinksOk returns a tuple with the Links field value if set, nil otherwise
 // and a boolean to check if the value has been set.
+// Deprecated
 func (o *ActionResponse) GetLinksOk() ([]ActionLinkResponse, bool) {
 	if o == nil || IsNil(o.Links) {
 		return nil, false
@@ -626,11 +630,13 @@ func (o *ActionResponse) HasLinks() bool {
 }
 
 // SetLinks gets a reference to the given []ActionLinkResponse and assigns it to the Links field.
+// Deprecated
 func (o *ActionResponse) SetLinks(v []ActionLinkResponse) {
 	o.Links = v
 }
 
 // GetLinkIds returns the LinkIds field value if set, zero value otherwise.
+// Deprecated
 func (o *ActionResponse) GetLinkIds() []string {
 	if o == nil || IsNil(o.LinkIds) {
 		var ret []string
@@ -641,6 +647,7 @@ func (o *ActionResponse) GetLinkIds() []string {
 
 // GetLinkIdsOk returns a tuple with the LinkIds field value if set, nil otherwise
 // and a boolean to check if the value has been set.
+// Deprecated
 func (o *ActionResponse) GetLinkIdsOk() ([]string, bool) {
 	if o == nil || IsNil(o.LinkIds) {
 		return nil, false
@@ -658,6 +665,7 @@ func (o *ActionResponse) HasLinkIds() bool {
 }
 
 // SetLinkIds gets a reference to the given []string and assigns it to the LinkIds field.
+// Deprecated
 func (o *ActionResponse) SetLinkIds(v []string) {
 	o.LinkIds = v
 }

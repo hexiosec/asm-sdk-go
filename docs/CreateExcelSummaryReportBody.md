@@ -8,6 +8,8 @@ Name | Type | Description | Notes
 **ScanId** | **string** | Scan ID | 
 **Name** | **string** | Report display name | 
 **SendEmail** | Pointer to **bool** | Send email notification when report is ready | [optional] 
+**ExecutiveSummary** | Pointer to **string** | Executive summary displayed on the initial tab | [optional] 
+**Branded** | Pointer to **bool** | Display organisation logo on the initial tab. Requires feature to be enabled for the organisation. | [optional] 
 
 ## Methods
 
@@ -112,6 +114,56 @@ SetSendEmail sets SendEmail field to given value.
 `func (o *CreateExcelSummaryReportBody) HasSendEmail() bool`
 
 HasSendEmail returns a boolean if a field has been set.
+
+### GetExecutiveSummary
+
+`func (o *CreateExcelSummaryReportBody) GetExecutiveSummary() string`
+
+GetExecutiveSummary returns the ExecutiveSummary field if non-nil, zero value otherwise.
+
+### GetExecutiveSummaryOk
+
+`func (o *CreateExcelSummaryReportBody) GetExecutiveSummaryOk() (*string, bool)`
+
+GetExecutiveSummaryOk returns a tuple with the ExecutiveSummary field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetExecutiveSummary
+
+`func (o *CreateExcelSummaryReportBody) SetExecutiveSummary(v string)`
+
+SetExecutiveSummary sets ExecutiveSummary field to given value.
+
+### HasExecutiveSummary
+
+`func (o *CreateExcelSummaryReportBody) HasExecutiveSummary() bool`
+
+HasExecutiveSummary returns a boolean if a field has been set.
+
+### GetBranded
+
+`func (o *CreateExcelSummaryReportBody) GetBranded() bool`
+
+GetBranded returns the Branded field if non-nil, zero value otherwise.
+
+### GetBrandedOk
+
+`func (o *CreateExcelSummaryReportBody) GetBrandedOk() (*bool, bool)`
+
+GetBrandedOk returns a tuple with the Branded field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetBranded
+
+`func (o *CreateExcelSummaryReportBody) SetBranded(v bool)`
+
+SetBranded sets Branded field to given value.
+
+### HasBranded
+
+`func (o *CreateExcelSummaryReportBody) HasBranded() bool`
+
+HasBranded returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

@@ -24,6 +24,12 @@ var _ MappedNullable = &ReportResponse{}
 type ReportResponse struct {
 	// Report ID
 	Id string `json:"id"`
+	// IDs of included scans, in the same order as scan_names
+	ScanIds []string `json:"scan_ids,omitempty"`
+	// Names of the scans included in the report
+	ScanNames []string `json:"scan_names,omitempty"`
+	// Number of scans included in the report
+	ScanCount *int32 `json:"scan_count,omitempty"`
 	// Scan ID
 	ScanId *string `json:"scan_id,omitempty"`
 	// Organisation ID for organisation-scoped reports
@@ -46,7 +52,7 @@ type ReportResponse struct {
 	Updated time.Time `json:"updated"`
 	// Will only be present when the report is done. Expires after 60s.
 	DownloadUrl *string `json:"download_url,omitempty"`
-	// User has \"scans.reports:manage\" role for this report
+	// Whether the user may delete this report. Multi-scan reports require report-read access to every included scan and management of the owning organisation.
 	CanManage *bool `json:"can_manage,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
@@ -98,6 +104,102 @@ func (o *ReportResponse) GetIdOk() (*string, bool) {
 // SetId sets field value
 func (o *ReportResponse) SetId(v string) {
 	o.Id = v
+}
+
+// GetScanIds returns the ScanIds field value if set, zero value otherwise.
+func (o *ReportResponse) GetScanIds() []string {
+	if o == nil || IsNil(o.ScanIds) {
+		var ret []string
+		return ret
+	}
+	return o.ScanIds
+}
+
+// GetScanIdsOk returns a tuple with the ScanIds field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ReportResponse) GetScanIdsOk() ([]string, bool) {
+	if o == nil || IsNil(o.ScanIds) {
+		return nil, false
+	}
+	return o.ScanIds, true
+}
+
+// HasScanIds returns a boolean if a field has been set.
+func (o *ReportResponse) HasScanIds() bool {
+	if o != nil && !IsNil(o.ScanIds) {
+		return true
+	}
+
+	return false
+}
+
+// SetScanIds gets a reference to the given []string and assigns it to the ScanIds field.
+func (o *ReportResponse) SetScanIds(v []string) {
+	o.ScanIds = v
+}
+
+// GetScanNames returns the ScanNames field value if set, zero value otherwise.
+func (o *ReportResponse) GetScanNames() []string {
+	if o == nil || IsNil(o.ScanNames) {
+		var ret []string
+		return ret
+	}
+	return o.ScanNames
+}
+
+// GetScanNamesOk returns a tuple with the ScanNames field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ReportResponse) GetScanNamesOk() ([]string, bool) {
+	if o == nil || IsNil(o.ScanNames) {
+		return nil, false
+	}
+	return o.ScanNames, true
+}
+
+// HasScanNames returns a boolean if a field has been set.
+func (o *ReportResponse) HasScanNames() bool {
+	if o != nil && !IsNil(o.ScanNames) {
+		return true
+	}
+
+	return false
+}
+
+// SetScanNames gets a reference to the given []string and assigns it to the ScanNames field.
+func (o *ReportResponse) SetScanNames(v []string) {
+	o.ScanNames = v
+}
+
+// GetScanCount returns the ScanCount field value if set, zero value otherwise.
+func (o *ReportResponse) GetScanCount() int32 {
+	if o == nil || IsNil(o.ScanCount) {
+		var ret int32
+		return ret
+	}
+	return *o.ScanCount
+}
+
+// GetScanCountOk returns a tuple with the ScanCount field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ReportResponse) GetScanCountOk() (*int32, bool) {
+	if o == nil || IsNil(o.ScanCount) {
+		return nil, false
+	}
+	return o.ScanCount, true
+}
+
+// HasScanCount returns a boolean if a field has been set.
+func (o *ReportResponse) HasScanCount() bool {
+	if o != nil && !IsNil(o.ScanCount) {
+		return true
+	}
+
+	return false
+}
+
+// SetScanCount gets a reference to the given int32 and assigns it to the ScanCount field.
+func (o *ReportResponse) SetScanCount(v int32) {
+	o.ScanCount = &v
 }
 
 // GetScanId returns the ScanId field value if set, zero value otherwise.
@@ -487,6 +589,15 @@ func (o ReportResponse) MarshalJSON() ([]byte, error) {
 func (o ReportResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["id"] = o.Id
+	if !IsNil(o.ScanIds) {
+		toSerialize["scan_ids"] = o.ScanIds
+	}
+	if !IsNil(o.ScanNames) {
+		toSerialize["scan_names"] = o.ScanNames
+	}
+	if !IsNil(o.ScanCount) {
+		toSerialize["scan_count"] = o.ScanCount
+	}
 	if !IsNil(o.ScanId) {
 		toSerialize["scan_id"] = o.ScanId
 	}
@@ -565,6 +676,9 @@ func (o *ReportResponse) UnmarshalJSON(data []byte) (err error) {
 
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "id")
+		delete(additionalProperties, "scan_ids")
+		delete(additionalProperties, "scan_names")
+		delete(additionalProperties, "scan_count")
 		delete(additionalProperties, "scan_id")
 		delete(additionalProperties, "organisation_id")
 		delete(additionalProperties, "scan_name")

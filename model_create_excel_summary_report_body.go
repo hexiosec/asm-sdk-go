@@ -28,6 +28,10 @@ type CreateExcelSummaryReportBody struct {
 	Name string `json:"name"`
 	// Send email notification when report is ready
 	SendEmail *bool `json:"send_email,omitempty"`
+	// Executive summary displayed on the initial tab
+	ExecutiveSummary *string `json:"executive_summary,omitempty"`
+	// Display organisation logo on the initial tab. Requires feature to be enabled for the organisation.
+	Branded *bool `json:"branded,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -157,6 +161,70 @@ func (o *CreateExcelSummaryReportBody) SetSendEmail(v bool) {
 	o.SendEmail = &v
 }
 
+// GetExecutiveSummary returns the ExecutiveSummary field value if set, zero value otherwise.
+func (o *CreateExcelSummaryReportBody) GetExecutiveSummary() string {
+	if o == nil || IsNil(o.ExecutiveSummary) {
+		var ret string
+		return ret
+	}
+	return *o.ExecutiveSummary
+}
+
+// GetExecutiveSummaryOk returns a tuple with the ExecutiveSummary field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateExcelSummaryReportBody) GetExecutiveSummaryOk() (*string, bool) {
+	if o == nil || IsNil(o.ExecutiveSummary) {
+		return nil, false
+	}
+	return o.ExecutiveSummary, true
+}
+
+// HasExecutiveSummary returns a boolean if a field has been set.
+func (o *CreateExcelSummaryReportBody) HasExecutiveSummary() bool {
+	if o != nil && !IsNil(o.ExecutiveSummary) {
+		return true
+	}
+
+	return false
+}
+
+// SetExecutiveSummary gets a reference to the given string and assigns it to the ExecutiveSummary field.
+func (o *CreateExcelSummaryReportBody) SetExecutiveSummary(v string) {
+	o.ExecutiveSummary = &v
+}
+
+// GetBranded returns the Branded field value if set, zero value otherwise.
+func (o *CreateExcelSummaryReportBody) GetBranded() bool {
+	if o == nil || IsNil(o.Branded) {
+		var ret bool
+		return ret
+	}
+	return *o.Branded
+}
+
+// GetBrandedOk returns a tuple with the Branded field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateExcelSummaryReportBody) GetBrandedOk() (*bool, bool) {
+	if o == nil || IsNil(o.Branded) {
+		return nil, false
+	}
+	return o.Branded, true
+}
+
+// HasBranded returns a boolean if a field has been set.
+func (o *CreateExcelSummaryReportBody) HasBranded() bool {
+	if o != nil && !IsNil(o.Branded) {
+		return true
+	}
+
+	return false
+}
+
+// SetBranded gets a reference to the given bool and assigns it to the Branded field.
+func (o *CreateExcelSummaryReportBody) SetBranded(v bool) {
+	o.Branded = &v
+}
+
 func (o CreateExcelSummaryReportBody) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -172,6 +240,12 @@ func (o CreateExcelSummaryReportBody) ToMap() (map[string]interface{}, error) {
 	toSerialize["name"] = o.Name
 	if !IsNil(o.SendEmail) {
 		toSerialize["send_email"] = o.SendEmail
+	}
+	if !IsNil(o.ExecutiveSummary) {
+		toSerialize["executive_summary"] = o.ExecutiveSummary
+	}
+	if !IsNil(o.Branded) {
+		toSerialize["branded"] = o.Branded
 	}
 
 	for key, value := range o.AdditionalProperties {
@@ -222,6 +296,8 @@ func (o *CreateExcelSummaryReportBody) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "scan_id")
 		delete(additionalProperties, "name")
 		delete(additionalProperties, "send_email")
+		delete(additionalProperties, "executive_summary")
+		delete(additionalProperties, "branded")
 		o.AdditionalProperties = additionalProperties
 	}
 

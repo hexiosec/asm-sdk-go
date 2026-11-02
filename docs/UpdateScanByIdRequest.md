@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 **IgnoreIpNodes** | Pointer to **bool** | Whether to hide IP risks | [optional] 
 **CalendarSchedule** | Pointer to **string** | The frequency of scan iteration  i.e. \&quot;daily\&quot;, \&quot;weekly\&quot;, \&quot;monthly\&quot;, \&quot;quarterly\&quot;, \&quot;yearly\&quot;  | [optional] 
 **IncludeBrRisks** | Pointer to [**UpdateScanByIdRequestIncludeBrRisks**](UpdateScanByIdRequestIncludeBrRisks.md) |  | [optional] 
+**AutoReports** | Pointer to [**AutoReports**](AutoReports.md) |  | [optional] 
 
 ## Methods
 
@@ -179,6 +180,31 @@ SetIncludeBrRisks sets IncludeBrRisks field to given value.
 `func (o *UpdateScanByIdRequest) HasIncludeBrRisks() bool`
 
 HasIncludeBrRisks returns a boolean if a field has been set.
+
+### GetAutoReports
+
+`func (o *UpdateScanByIdRequest) GetAutoReports() AutoReports`
+
+GetAutoReports returns the AutoReports field if non-nil, zero value otherwise.
+
+### GetAutoReportsOk
+
+`func (o *UpdateScanByIdRequest) GetAutoReportsOk() (*AutoReports, bool)`
+
+GetAutoReportsOk returns a tuple with the AutoReports field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetAutoReports
+
+`func (o *UpdateScanByIdRequest) SetAutoReports(v AutoReports)`
+
+SetAutoReports sets AutoReports field to given value.
+
+### HasAutoReports
+
+`func (o *UpdateScanByIdRequest) HasAutoReports() bool`
+
+HasAutoReports returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

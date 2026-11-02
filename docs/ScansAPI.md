@@ -766,7 +766,7 @@ Name | Type | Description  | Notes
 
 ## GetScans
 
-> []ScanResponse GetScans(ctx).ScanGroupId(scanGroupId).Type_(type_).Limit(limit).Offset(offset).Order(order).Dir(dir).Expand(expand).Search(search).SearchSeeds(searchSeeds).IncludeDisabled(includeDisabled).IncludeDeleted(includeDeleted).Execute()
+> []ScanResponse GetScans(ctx).ScanGroupId(scanGroupId).Type_(type_).Limit(limit).Offset(offset).Order(order).Dir(dir).Expand(expand).Search(search).SearchSeeds(searchSeeds).Tags(tags).IncludeDisabled(includeDisabled).IncludeDeleted(includeDeleted).Execute()
 
 Get the Scans for a specified scan group
 
@@ -794,12 +794,13 @@ func main() {
 	expand := []string{"Expand_example"} // []string | Fields to expand with additional information (optional)
 	search := "search_example" // string | Search string (optional)
 	searchSeeds := true // bool | Include seeds in text search (optional)
+	tags := []string{"Inner_example"} // []string | Filter scans by tag names (optional)
 	includeDisabled := true // bool | Include disabled scans (optional)
 	includeDeleted := true // bool | Include deleted scans (optional)
 
 	configuration := asm.NewConfiguration()
 	apiClient := asm.NewAPIClient(configuration)
-	resp, r, err := apiClient.ScansAPI.GetScans(context.Background()).ScanGroupId(scanGroupId).Type_(type_).Limit(limit).Offset(offset).Order(order).Dir(dir).Expand(expand).Search(search).SearchSeeds(searchSeeds).IncludeDisabled(includeDisabled).IncludeDeleted(includeDeleted).Execute()
+	resp, r, err := apiClient.ScansAPI.GetScans(context.Background()).ScanGroupId(scanGroupId).Type_(type_).Limit(limit).Offset(offset).Order(order).Dir(dir).Expand(expand).Search(search).SearchSeeds(searchSeeds).Tags(tags).IncludeDisabled(includeDisabled).IncludeDeleted(includeDeleted).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `ScansAPI.GetScans``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -829,6 +830,7 @@ Name | Type | Description  | Notes
  **expand** | **[]string** | Fields to expand with additional information | 
  **search** | **string** | Search string | 
  **searchSeeds** | **bool** | Include seeds in text search | 
+ **tags** | **[]string** | Filter scans by tag names | 
  **includeDisabled** | **bool** | Include disabled scans | 
  **includeDeleted** | **bool** | Include deleted scans | 
 
@@ -852,7 +854,7 @@ Name | Type | Description  | Notes
 
 ## GetScansCount
 
-> InlineObject GetScansCount(ctx).ScanGroupId(scanGroupId).Type_(type_).Search(search).SearchSeeds(searchSeeds).IncludeDisabled(includeDisabled).IncludeDeleted(includeDeleted).Execute()
+> InlineObject GetScansCount(ctx).ScanGroupId(scanGroupId).Type_(type_).Search(search).SearchSeeds(searchSeeds).Tags(tags).IncludeDisabled(includeDisabled).IncludeDeleted(includeDeleted).Execute()
 
 Get the count of Scans for a specified scan group according to the filter settings
 
@@ -875,12 +877,13 @@ func main() {
 	type_ := []string{"Type_example"} // []string | Filter by scan types
 	search := "search_example" // string | Search string (optional)
 	searchSeeds := true // bool | Include seeds in text search (optional)
+	tags := []string{"Inner_example"} // []string | Filter scans by tag names (optional)
 	includeDisabled := true // bool | Include disabled scans (optional)
 	includeDeleted := true // bool | Include deleted scans (optional)
 
 	configuration := asm.NewConfiguration()
 	apiClient := asm.NewAPIClient(configuration)
-	resp, r, err := apiClient.ScansAPI.GetScansCount(context.Background()).ScanGroupId(scanGroupId).Type_(type_).Search(search).SearchSeeds(searchSeeds).IncludeDisabled(includeDisabled).IncludeDeleted(includeDeleted).Execute()
+	resp, r, err := apiClient.ScansAPI.GetScansCount(context.Background()).ScanGroupId(scanGroupId).Type_(type_).Search(search).SearchSeeds(searchSeeds).Tags(tags).IncludeDisabled(includeDisabled).IncludeDeleted(includeDeleted).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `ScansAPI.GetScansCount``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -905,6 +908,7 @@ Name | Type | Description  | Notes
  **type_** | **[]string** | Filter by scan types | 
  **search** | **string** | Search string | 
  **searchSeeds** | **bool** | Include seeds in text search | 
+ **tags** | **[]string** | Filter scans by tag names | 
  **includeDisabled** | **bool** | Include disabled scans | 
  **includeDeleted** | **bool** | Include deleted scans | 
 
@@ -928,7 +932,7 @@ Name | Type | Description  | Notes
 
 ## GetScansForOrg
 
-> []ScanResponse GetScansForOrg(ctx).OrganisationId(organisationId).Scope(scope).Limit(limit).Offset(offset).Order(order).Dir(dir).Type_(type_).Expand(expand).Execute()
+> []ScanResponse GetScansForOrg(ctx).OrganisationId(organisationId).IncludeSupplierScans(includeSupplierScans).Scope(scope).Limit(limit).Offset(offset).Order(order).Dir(dir).Type_(type_).Tags(tags).Search(search).SearchSeeds(searchSeeds).IncludeDisabled(includeDisabled).IncludeDeleted(includeDeleted).Expand(expand).Execute()
 
 Get the Scans for a specified organisation with pagination
 
@@ -948,17 +952,23 @@ import (
 
 func main() {
 	organisationId := "organisationId_example" // string | Organisation ID
+	includeSupplierScans := true // bool | Include accessible supplier scans in organisation results (optional) (default to false)
 	scope := "scope_example" // string | Scope of scans to return (optional) (default to "member")
 	limit := float32(8.14) // float32 | Maximum number of entries to return (optional) (default to 1000)
 	offset := float32(8.14) // float32 | Offset into the list of entries to return (optional) (default to 0)
 	order := "order_example" // string | Column to order results by (optional) (default to "created")
 	dir := "dir_example" // string | Sort direction (optional) (default to "asc")
 	type_ := []string{"Type_example"} // []string | Filter by scan types (optional)
+	tags := []string{"Inner_example"} // []string | Filter scans by tag names (optional)
+	search := "search_example" // string | Search scan names or seed names (optional)
+	searchSeeds := true // bool | Include seed names in search (optional)
+	includeDisabled := true // bool | Include disabled scans (optional)
+	includeDeleted := true // bool | Include deleted scans (optional)
 	expand := []string{"Expand_example"} // []string | Fields to expand with additional information (optional)
 
 	configuration := asm.NewConfiguration()
 	apiClient := asm.NewAPIClient(configuration)
-	resp, r, err := apiClient.ScansAPI.GetScansForOrg(context.Background()).OrganisationId(organisationId).Scope(scope).Limit(limit).Offset(offset).Order(order).Dir(dir).Type_(type_).Expand(expand).Execute()
+	resp, r, err := apiClient.ScansAPI.GetScansForOrg(context.Background()).OrganisationId(organisationId).IncludeSupplierScans(includeSupplierScans).Scope(scope).Limit(limit).Offset(offset).Order(order).Dir(dir).Type_(type_).Tags(tags).Search(search).SearchSeeds(searchSeeds).IncludeDisabled(includeDisabled).IncludeDeleted(includeDeleted).Expand(expand).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `ScansAPI.GetScansForOrg``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -980,12 +990,18 @@ Other parameters are passed through a pointer to a apiGetScansForOrgRequest stru
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **organisationId** | **string** | Organisation ID | 
+ **includeSupplierScans** | **bool** | Include accessible supplier scans in organisation results | [default to false]
  **scope** | **string** | Scope of scans to return | [default to &quot;member&quot;]
  **limit** | **float32** | Maximum number of entries to return | [default to 1000]
  **offset** | **float32** | Offset into the list of entries to return | [default to 0]
  **order** | **string** | Column to order results by | [default to &quot;created&quot;]
  **dir** | **string** | Sort direction | [default to &quot;asc&quot;]
  **type_** | **[]string** | Filter by scan types | 
+ **tags** | **[]string** | Filter scans by tag names | 
+ **search** | **string** | Search scan names or seed names | 
+ **searchSeeds** | **bool** | Include seed names in search | 
+ **includeDisabled** | **bool** | Include disabled scans | 
+ **includeDeleted** | **bool** | Include deleted scans | 
  **expand** | **[]string** | Fields to expand with additional information | 
 
 ### Return type
@@ -1008,7 +1024,7 @@ Name | Type | Description  | Notes
 
 ## GetScansForOrgCount
 
-> InlineObject GetScansForOrgCount(ctx).OrganisationId(organisationId).Scope(scope).Type_(type_).Execute()
+> InlineObject GetScansForOrgCount(ctx).OrganisationId(organisationId).IncludeSupplierScans(includeSupplierScans).Scope(scope).Type_(type_).Tags(tags).Search(search).SearchSeeds(searchSeeds).IncludeDisabled(includeDisabled).IncludeDeleted(includeDeleted).Execute()
 
 Get the count of scans for a specified organisation
 
@@ -1028,12 +1044,18 @@ import (
 
 func main() {
 	organisationId := "organisationId_example" // string | Organisation ID
+	includeSupplierScans := true // bool | Include accessible supplier scans in organisation results (optional) (default to false)
 	scope := "scope_example" // string | Scope of scans to count (optional) (default to "member")
 	type_ := []string{"Type_example"} // []string | Filter by scan types (optional)
+	tags := []string{"Inner_example"} // []string | Filter scans by tag names (optional)
+	search := "search_example" // string | Search scan names or seed names (optional)
+	searchSeeds := true // bool | Include seed names in search (optional)
+	includeDisabled := true // bool | Include disabled scans (optional)
+	includeDeleted := true // bool | Include deleted scans (optional)
 
 	configuration := asm.NewConfiguration()
 	apiClient := asm.NewAPIClient(configuration)
-	resp, r, err := apiClient.ScansAPI.GetScansForOrgCount(context.Background()).OrganisationId(organisationId).Scope(scope).Type_(type_).Execute()
+	resp, r, err := apiClient.ScansAPI.GetScansForOrgCount(context.Background()).OrganisationId(organisationId).IncludeSupplierScans(includeSupplierScans).Scope(scope).Type_(type_).Tags(tags).Search(search).SearchSeeds(searchSeeds).IncludeDisabled(includeDisabled).IncludeDeleted(includeDeleted).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `ScansAPI.GetScansForOrgCount``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -1055,8 +1077,14 @@ Other parameters are passed through a pointer to a apiGetScansForOrgCountRequest
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **organisationId** | **string** | Organisation ID | 
+ **includeSupplierScans** | **bool** | Include accessible supplier scans in organisation results | [default to false]
  **scope** | **string** | Scope of scans to count | [default to &quot;member&quot;]
  **type_** | **[]string** | Filter by scan types | 
+ **tags** | **[]string** | Filter scans by tag names | 
+ **search** | **string** | Search scan names or seed names | 
+ **searchSeeds** | **bool** | Include seed names in search | 
+ **includeDisabled** | **bool** | Include disabled scans | 
+ **includeDeleted** | **bool** | Include deleted scans | 
 
 ### Return type
 
@@ -1151,7 +1179,7 @@ Name | Type | Description  | Notes
 
 ## GetSupplierScansForOrg
 
-> []ScanResponse GetSupplierScansForOrg(ctx).OrganisationId(organisationId).Limit(limit).Offset(offset).Order(order).Dir(dir).Type_(type_).Search(search).SearchSeeds(searchSeeds).IncludeDisabled(includeDisabled).IncludeDeleted(includeDeleted).Expand(expand).Execute()
+> []ScanResponse GetSupplierScansForOrg(ctx).OrganisationId(organisationId).Limit(limit).Offset(offset).Order(order).Dir(dir).Type_(type_).Tags(tags).Search(search).SearchSeeds(searchSeeds).IncludeDisabled(includeDisabled).IncludeDeleted(includeDeleted).Expand(expand).Execute()
 
 Get supplier scans for a specified organisation with pagination
 
@@ -1176,6 +1204,7 @@ func main() {
 	order := "order_example" // string | Column to order results by (optional) (default to "created")
 	dir := "dir_example" // string | Sort direction (optional) (default to "asc")
 	type_ := []string{"Type_example"} // []string | Filter by scan types (optional)
+	tags := []string{"Inner_example"} // []string | Filter scans by tag names (optional)
 	search := "search_example" // string | Search scans by scan name or seed name (optional)
 	searchSeeds := true // bool | Include seed names in the search filter (optional)
 	includeDisabled := true // bool | Include disabled scans (optional)
@@ -1184,7 +1213,7 @@ func main() {
 
 	configuration := asm.NewConfiguration()
 	apiClient := asm.NewAPIClient(configuration)
-	resp, r, err := apiClient.ScansAPI.GetSupplierScansForOrg(context.Background()).OrganisationId(organisationId).Limit(limit).Offset(offset).Order(order).Dir(dir).Type_(type_).Search(search).SearchSeeds(searchSeeds).IncludeDisabled(includeDisabled).IncludeDeleted(includeDeleted).Expand(expand).Execute()
+	resp, r, err := apiClient.ScansAPI.GetSupplierScansForOrg(context.Background()).OrganisationId(organisationId).Limit(limit).Offset(offset).Order(order).Dir(dir).Type_(type_).Tags(tags).Search(search).SearchSeeds(searchSeeds).IncludeDisabled(includeDisabled).IncludeDeleted(includeDeleted).Expand(expand).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `ScansAPI.GetSupplierScansForOrg``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -1211,6 +1240,7 @@ Name | Type | Description  | Notes
  **order** | **string** | Column to order results by | [default to &quot;created&quot;]
  **dir** | **string** | Sort direction | [default to &quot;asc&quot;]
  **type_** | **[]string** | Filter by scan types | 
+ **tags** | **[]string** | Filter scans by tag names | 
  **search** | **string** | Search scans by scan name or seed name | 
  **searchSeeds** | **bool** | Include seed names in the search filter | 
  **includeDisabled** | **bool** | Include disabled scans | 
@@ -1237,7 +1267,7 @@ Name | Type | Description  | Notes
 
 ## GetSupplierScansForOrgCount
 
-> InlineObject GetSupplierScansForOrgCount(ctx).OrganisationId(organisationId).Type_(type_).Search(search).SearchSeeds(searchSeeds).IncludeDisabled(includeDisabled).IncludeDeleted(includeDeleted).Execute()
+> InlineObject GetSupplierScansForOrgCount(ctx).OrganisationId(organisationId).Type_(type_).Tags(tags).Search(search).SearchSeeds(searchSeeds).IncludeDisabled(includeDisabled).IncludeDeleted(includeDeleted).Execute()
 
 Get the count of supplier scans for a specified organisation
 
@@ -1258,6 +1288,7 @@ import (
 func main() {
 	organisationId := "organisationId_example" // string | Organisation ID
 	type_ := []string{"Type_example"} // []string | Filter by scan types (optional)
+	tags := []string{"Inner_example"} // []string | Filter scans by tag names (optional)
 	search := "search_example" // string | Search scans by scan name or seed name (optional)
 	searchSeeds := true // bool | Include seed names in the search filter (optional)
 	includeDisabled := true // bool | Include disabled scans (optional)
@@ -1265,7 +1296,7 @@ func main() {
 
 	configuration := asm.NewConfiguration()
 	apiClient := asm.NewAPIClient(configuration)
-	resp, r, err := apiClient.ScansAPI.GetSupplierScansForOrgCount(context.Background()).OrganisationId(organisationId).Type_(type_).Search(search).SearchSeeds(searchSeeds).IncludeDisabled(includeDisabled).IncludeDeleted(includeDeleted).Execute()
+	resp, r, err := apiClient.ScansAPI.GetSupplierScansForOrgCount(context.Background()).OrganisationId(organisationId).Type_(type_).Tags(tags).Search(search).SearchSeeds(searchSeeds).IncludeDisabled(includeDisabled).IncludeDeleted(includeDeleted).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `ScansAPI.GetSupplierScansForOrgCount``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -1288,6 +1319,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **organisationId** | **string** | Organisation ID | 
  **type_** | **[]string** | Filter by scan types | 
+ **tags** | **[]string** | Filter scans by tag names | 
  **search** | **string** | Search scans by scan name or seed name | 
  **searchSeeds** | **bool** | Include seed names in the search filter | 
  **includeDisabled** | **bool** | Include disabled scans | 

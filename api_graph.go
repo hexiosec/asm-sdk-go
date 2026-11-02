@@ -24,6 +24,173 @@ import (
 // GraphAPIService GraphAPI service
 type GraphAPIService service
 
+type ApiBulkUpdateNodesByScanIdRequest struct {
+	ctx context.Context
+	ApiService *GraphAPIService
+	scanId string
+	bulkUpdateNodesRequest *BulkUpdateNodesRequest
+}
+
+// Parameters to update nodes in bulk
+func (r ApiBulkUpdateNodesByScanIdRequest) BulkUpdateNodesRequest(bulkUpdateNodesRequest BulkUpdateNodesRequest) ApiBulkUpdateNodesByScanIdRequest {
+	r.bulkUpdateNodesRequest = &bulkUpdateNodesRequest
+	return r
+}
+
+func (r ApiBulkUpdateNodesByScanIdRequest) Execute() (*http.Response, error) {
+	return r.ApiService.BulkUpdateNodesByScanIdExecute(r)
+}
+
+/*
+BulkUpdateNodesByScanId Bulk update nodes
+
+Required role: `scans:write`
+
+This endpoint allows you to update multiple nodes for a scan in one request by:
+  - marking nodes as secondary/primary assets
+  - adding tags to nodes
+  - removing tags from nodes
+
+**Note:**
+  - Only **Domain**, **IPv4** or **IPv6** nodes can be bulk updated.
+  - If `mark_as_secondary` is set and `node_ids` contains a seed node, the request is rejected. Seed nodes can still be used with `add_tags` and `remove_tags`.
+  - A maximum of **50** node IDs can be updated per request.
+  - Node IDs that do not exist, or do not belong to the scan, cause the request to fail.
+  - Tag operations require the organisation tier tags feature.
+  - `mark_as_secondary`, `add_tags`, and `remove_tags` are all optional. If omitted, the request is treated as a no-op and returns `204`.
+
+This endpoint requires that the associated organisation has API access enabled.
+If API access is not allowed, the response code will be 403 (Forbidden).
+
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param scanId Scan ID
+ @return ApiBulkUpdateNodesByScanIdRequest
+*/
+func (a *GraphAPIService) BulkUpdateNodesByScanId(ctx context.Context, scanId string) ApiBulkUpdateNodesByScanIdRequest {
+	return ApiBulkUpdateNodesByScanIdRequest{
+		ApiService: a,
+		ctx: ctx,
+		scanId: scanId,
+	}
+}
+
+// Execute executes the request
+func (a *GraphAPIService) BulkUpdateNodesByScanIdExecute(r ApiBulkUpdateNodesByScanIdRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GraphAPIService.BulkUpdateNodesByScanId")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/graph/nodes/bulk/{scan_id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"scan_id"+"}", url.PathEscape(parameterValueToString(r.scanId, "scanId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.bulkUpdateNodesRequest == nil {
+		return nil, reportError("bulkUpdateNodesRequest is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.bulkUpdateNodesRequest
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["APIKey"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["X-Hexiosec-API-Key"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
 type ApiUpdateNodeByIdRequest struct {
 	ctx context.Context
 	ApiService *GraphAPIService

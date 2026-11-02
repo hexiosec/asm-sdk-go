@@ -27,6 +27,7 @@ type ScanDataDomainResponse struct {
 	// Domain name
 	Name string `json:"name"`
 	// [DEPRECATED] use `ips` and `alias` instead, they contain the same data.
+	// Deprecated
 	DnsDestinations []ScanDataNodeResponse `json:"dns_destinations"`
 	// CNAME Domain
 	Alias *ScanDataNodeResponse `json:"alias,omitempty"`
@@ -175,6 +176,7 @@ func (o *ScanDataDomainResponse) SetName(v string) {
 }
 
 // GetDnsDestinations returns the DnsDestinations field value
+// Deprecated
 func (o *ScanDataDomainResponse) GetDnsDestinations() []ScanDataNodeResponse {
 	if o == nil {
 		var ret []ScanDataNodeResponse
@@ -186,6 +188,7 @@ func (o *ScanDataDomainResponse) GetDnsDestinations() []ScanDataNodeResponse {
 
 // GetDnsDestinationsOk returns a tuple with the DnsDestinations field value
 // and a boolean to check if the value has been set.
+// Deprecated
 func (o *ScanDataDomainResponse) GetDnsDestinationsOk() ([]ScanDataNodeResponse, bool) {
 	if o == nil {
 		return nil, false
@@ -194,6 +197,7 @@ func (o *ScanDataDomainResponse) GetDnsDestinationsOk() ([]ScanDataNodeResponse,
 }
 
 // SetDnsDestinations sets field value
+// Deprecated
 func (o *ScanDataDomainResponse) SetDnsDestinations(v []ScanDataNodeResponse) {
 	o.DnsDestinations = v
 }

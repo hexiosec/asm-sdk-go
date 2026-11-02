@@ -8,6 +8,7 @@ Method | HTTP request | Description
 [**GetOrganisationAsset**](OrganisationsAPI.md#GetOrganisationAsset) | **Get** /v1/orgs/{id}/asset/{key} | Get an organisation asset by key
 [**GetOrganisationByID**](OrganisationsAPI.md#GetOrganisationByID) | **Get** /v1/orgs/{id} | Get an organisation by ID
 [**GetOrganisations**](OrganisationsAPI.md#GetOrganisations) | **Get** /v1/orgs | Get the organisations for which the current user is a member
+[**JoinFreeOrganisation**](OrganisationsAPI.md#JoinFreeOrganisation) | **Post** /organisations/join_free_org | Join an existing free organisation and return its current continuous scan
 
 
 
@@ -288,6 +289,67 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**[]OrganisationResponse**](OrganisationResponse.md)
+
+### Authorization
+
+[APIKey](../README.md#APIKey)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## JoinFreeOrganisation
+
+> JoinFreeOrganisation200Response JoinFreeOrganisation(ctx).Execute()
+
+Join an existing free organisation and return its current continuous scan
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	asm "github.com/hexiosec/asm-sdk-go"
+)
+
+func main() {
+
+	configuration := asm.NewConfiguration()
+	apiClient := asm.NewAPIClient(configuration)
+	resp, r, err := apiClient.OrganisationsAPI.JoinFreeOrganisation(context.Background()).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `OrganisationsAPI.JoinFreeOrganisation``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `JoinFreeOrganisation`: JoinFreeOrganisation200Response
+	fmt.Fprintf(os.Stdout, "Response from `OrganisationsAPI.JoinFreeOrganisation`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+This endpoint does not need any parameter.
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiJoinFreeOrganisationRequest struct via the builder pattern
+
+
+### Return type
+
+[**JoinFreeOrganisation200Response**](JoinFreeOrganisation200Response.md)
 
 ### Authorization
 

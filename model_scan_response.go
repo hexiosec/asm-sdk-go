@@ -30,6 +30,8 @@ type ScanResponse struct {
 	ScanGroupId *string `json:"scan_group_id,omitempty"`
 	// Scan Group name if requested
 	ScanGroupName *string `json:"scan_group_name,omitempty"`
+	// Scan tags by name if requested
+	Tags []string `json:"tags,omitempty"`
 	Type ScanType `json:"type"`
 	// Scan enabled
 	Enabled bool `json:"enabled"`
@@ -62,6 +64,7 @@ type ScanResponse struct {
 	IgnoreIpNodes *bool `json:"ignore_ip_nodes,omitempty"`
 	// Config for backported resolvable risks
 	IncludeBrRisks map[string]interface{} `json:"include_br_risks"`
+	AutoReports AutoReports `json:"auto_reports"`
 	// Timestamp at which the insights were generated
 	InsightsGenerated *time.Time `json:"insights_generated,omitempty"`
 	// Insights for Scan
@@ -83,7 +86,7 @@ type _ScanResponse ScanResponse
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewScanResponse(id string, name string, type_ ScanType, enabled bool, deleted bool, created time.Time, createdBy string, updated time.Time, includeBrRisks map[string]interface{}) *ScanResponse {
+func NewScanResponse(id string, name string, type_ ScanType, enabled bool, deleted bool, created time.Time, createdBy string, updated time.Time, includeBrRisks map[string]interface{}, autoReports AutoReports) *ScanResponse {
 	this := ScanResponse{}
 	this.Id = id
 	this.Name = name
@@ -94,6 +97,7 @@ func NewScanResponse(id string, name string, type_ ScanType, enabled bool, delet
 	this.CreatedBy = createdBy
 	this.Updated = updated
 	this.IncludeBrRisks = includeBrRisks
+	this.AutoReports = autoReports
 	return &this
 }
 
@@ -215,6 +219,38 @@ func (o *ScanResponse) HasScanGroupName() bool {
 // SetScanGroupName gets a reference to the given string and assigns it to the ScanGroupName field.
 func (o *ScanResponse) SetScanGroupName(v string) {
 	o.ScanGroupName = &v
+}
+
+// GetTags returns the Tags field value if set, zero value otherwise.
+func (o *ScanResponse) GetTags() []string {
+	if o == nil || IsNil(o.Tags) {
+		var ret []string
+		return ret
+	}
+	return o.Tags
+}
+
+// GetTagsOk returns a tuple with the Tags field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ScanResponse) GetTagsOk() ([]string, bool) {
+	if o == nil || IsNil(o.Tags) {
+		return nil, false
+	}
+	return o.Tags, true
+}
+
+// HasTags returns a boolean if a field has been set.
+func (o *ScanResponse) HasTags() bool {
+	if o != nil && !IsNil(o.Tags) {
+		return true
+	}
+
+	return false
+}
+
+// SetTags gets a reference to the given []string and assigns it to the Tags field.
+func (o *ScanResponse) SetTags(v []string) {
+	o.Tags = v
 }
 
 // GetType returns the Type field value
@@ -705,6 +741,30 @@ func (o *ScanResponse) SetIncludeBrRisks(v map[string]interface{}) {
 	o.IncludeBrRisks = v
 }
 
+// GetAutoReports returns the AutoReports field value
+func (o *ScanResponse) GetAutoReports() AutoReports {
+	if o == nil {
+		var ret AutoReports
+		return ret
+	}
+
+	return o.AutoReports
+}
+
+// GetAutoReportsOk returns a tuple with the AutoReports field value
+// and a boolean to check if the value has been set.
+func (o *ScanResponse) GetAutoReportsOk() (*AutoReports, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.AutoReports, true
+}
+
+// SetAutoReports sets field value
+func (o *ScanResponse) SetAutoReports(v AutoReports) {
+	o.AutoReports = v
+}
+
 // GetInsightsGenerated returns the InsightsGenerated field value if set, zero value otherwise.
 func (o *ScanResponse) GetInsightsGenerated() time.Time {
 	if o == nil || IsNil(o.InsightsGenerated) {
@@ -915,6 +975,9 @@ func (o ScanResponse) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.ScanGroupName) {
 		toSerialize["scan_group_name"] = o.ScanGroupName
 	}
+	if !IsNil(o.Tags) {
+		toSerialize["tags"] = o.Tags
+	}
 	toSerialize["type"] = o.Type
 	toSerialize["enabled"] = o.Enabled
 	toSerialize["deleted"] = o.Deleted
@@ -952,6 +1015,7 @@ func (o ScanResponse) ToMap() (map[string]interface{}, error) {
 		toSerialize["ignore_ip_nodes"] = o.IgnoreIpNodes
 	}
 	toSerialize["include_br_risks"] = o.IncludeBrRisks
+	toSerialize["auto_reports"] = o.AutoReports
 	if !IsNil(o.InsightsGenerated) {
 		toSerialize["insights_generated"] = o.InsightsGenerated
 	}
@@ -992,6 +1056,7 @@ func (o *ScanResponse) UnmarshalJSON(data []byte) (err error) {
 		"created_by",
 		"updated",
 		"include_br_risks",
+		"auto_reports",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -1025,6 +1090,7 @@ func (o *ScanResponse) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "name")
 		delete(additionalProperties, "scan_group_id")
 		delete(additionalProperties, "scan_group_name")
+		delete(additionalProperties, "tags")
 		delete(additionalProperties, "type")
 		delete(additionalProperties, "enabled")
 		delete(additionalProperties, "deleted")
@@ -1042,6 +1108,7 @@ func (o *ScanResponse) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "dns_namelist")
 		delete(additionalProperties, "ignore_ip_nodes")
 		delete(additionalProperties, "include_br_risks")
+		delete(additionalProperties, "auto_reports")
 		delete(additionalProperties, "insights_generated")
 		delete(additionalProperties, "insights")
 		delete(additionalProperties, "seeds")

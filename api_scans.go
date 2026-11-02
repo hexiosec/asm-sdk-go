@@ -1736,6 +1736,7 @@ type ApiGetScansRequest struct {
 	expand *[]string
 	search *string
 	searchSeeds *bool
+	tags *[]string
 	includeDisabled *bool
 	includeDeleted *bool
 }
@@ -1791,6 +1792,12 @@ func (r ApiGetScansRequest) Search(search string) ApiGetScansRequest {
 // Include seeds in text search
 func (r ApiGetScansRequest) SearchSeeds(searchSeeds bool) ApiGetScansRequest {
 	r.searchSeeds = &searchSeeds
+	return r
+}
+
+// Filter scans by tag names
+func (r ApiGetScansRequest) Tags(tags []string) ApiGetScansRequest {
+	r.tags = &tags
 	return r
 }
 
@@ -1897,6 +1904,17 @@ func (a *ScansAPIService) GetScansExecute(r ApiGetScansRequest) ([]ScanResponse,
 	if r.searchSeeds != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "search_seeds", r.searchSeeds, "form", "")
 	}
+	if r.tags != nil {
+		t := *r.tags
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "tags", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "tags", t, "form", "multi")
+		}
+	}
 	if r.includeDisabled != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "include_disabled", r.includeDisabled, "form", "")
 	}
@@ -1999,6 +2017,7 @@ type ApiGetScansCountRequest struct {
 	type_ *[]string
 	search *string
 	searchSeeds *bool
+	tags *[]string
 	includeDisabled *bool
 	includeDeleted *bool
 }
@@ -2024,6 +2043,12 @@ func (r ApiGetScansCountRequest) Search(search string) ApiGetScansCountRequest {
 // Include seeds in text search
 func (r ApiGetScansCountRequest) SearchSeeds(searchSeeds bool) ApiGetScansCountRequest {
 	r.searchSeeds = &searchSeeds
+	return r
+}
+
+// Filter scans by tag names
+func (r ApiGetScansCountRequest) Tags(tags []string) ApiGetScansCountRequest {
+	r.tags = &tags
 	return r
 }
 
@@ -2106,6 +2131,17 @@ func (a *ScansAPIService) GetScansCountExecute(r ApiGetScansCountRequest) (*Inli
 	}
 	if r.searchSeeds != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "search_seeds", r.searchSeeds, "form", "")
+	}
+	if r.tags != nil {
+		t := *r.tags
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "tags", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "tags", t, "form", "multi")
+		}
 	}
 	if r.includeDisabled != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "include_disabled", r.includeDisabled, "form", "")
@@ -2206,18 +2242,30 @@ type ApiGetScansForOrgRequest struct {
 	ctx context.Context
 	ApiService *ScansAPIService
 	organisationId *string
+	includeSupplierScans *bool
 	scope *string
 	limit *float32
 	offset *float32
 	order *string
 	dir *string
 	type_ *[]string
+	tags *[]string
+	search *string
+	searchSeeds *bool
+	includeDisabled *bool
+	includeDeleted *bool
 	expand *[]string
 }
 
 // Organisation ID
 func (r ApiGetScansForOrgRequest) OrganisationId(organisationId string) ApiGetScansForOrgRequest {
 	r.organisationId = &organisationId
+	return r
+}
+
+// Include accessible supplier scans in organisation results
+func (r ApiGetScansForOrgRequest) IncludeSupplierScans(includeSupplierScans bool) ApiGetScansForOrgRequest {
+	r.includeSupplierScans = &includeSupplierScans
 	return r
 }
 
@@ -2254,6 +2302,36 @@ func (r ApiGetScansForOrgRequest) Dir(dir string) ApiGetScansForOrgRequest {
 // Filter by scan types
 func (r ApiGetScansForOrgRequest) Type_(type_ []string) ApiGetScansForOrgRequest {
 	r.type_ = &type_
+	return r
+}
+
+// Filter scans by tag names
+func (r ApiGetScansForOrgRequest) Tags(tags []string) ApiGetScansForOrgRequest {
+	r.tags = &tags
+	return r
+}
+
+// Search scan names or seed names
+func (r ApiGetScansForOrgRequest) Search(search string) ApiGetScansForOrgRequest {
+	r.search = &search
+	return r
+}
+
+// Include seed names in search
+func (r ApiGetScansForOrgRequest) SearchSeeds(searchSeeds bool) ApiGetScansForOrgRequest {
+	r.searchSeeds = &searchSeeds
+	return r
+}
+
+// Include disabled scans
+func (r ApiGetScansForOrgRequest) IncludeDisabled(includeDisabled bool) ApiGetScansForOrgRequest {
+	r.includeDisabled = &includeDisabled
+	return r
+}
+
+// Include deleted scans
+func (r ApiGetScansForOrgRequest) IncludeDeleted(includeDeleted bool) ApiGetScansForOrgRequest {
+	r.includeDeleted = &includeDeleted
 	return r
 }
 
@@ -2316,6 +2394,13 @@ func (a *ScansAPIService) GetScansForOrgExecute(r ApiGetScansForOrgRequest) ([]S
 	}
 
 	parameterAddToHeaderOrQuery(localVarQueryParams, "organisation_id", r.organisationId, "form", "")
+	if r.includeSupplierScans != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "include_supplier_scans", r.includeSupplierScans, "form", "")
+	} else {
+		var defaultValue bool = false
+		parameterAddToHeaderOrQuery(localVarQueryParams, "include_supplier_scans", defaultValue, "form", "")
+		r.includeSupplierScans = &defaultValue
+	}
 	if r.scope != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "scope", r.scope, "form", "")
 	} else {
@@ -2361,6 +2446,29 @@ func (a *ScansAPIService) GetScansForOrgExecute(r ApiGetScansForOrgRequest) ([]S
 		} else {
 			parameterAddToHeaderOrQuery(localVarQueryParams, "type", t, "form", "multi")
 		}
+	}
+	if r.tags != nil {
+		t := *r.tags
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "tags", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "tags", t, "form", "multi")
+		}
+	}
+	if r.search != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "search", r.search, "form", "")
+	}
+	if r.searchSeeds != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "search_seeds", r.searchSeeds, "form", "")
+	}
+	if r.includeDisabled != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "include_disabled", r.includeDisabled, "form", "")
+	}
+	if r.includeDeleted != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "include_deleted", r.includeDeleted, "form", "")
 	}
 	if r.expand != nil {
 		t := *r.expand
@@ -2466,13 +2574,25 @@ type ApiGetScansForOrgCountRequest struct {
 	ctx context.Context
 	ApiService *ScansAPIService
 	organisationId *string
+	includeSupplierScans *bool
 	scope *string
 	type_ *[]string
+	tags *[]string
+	search *string
+	searchSeeds *bool
+	includeDisabled *bool
+	includeDeleted *bool
 }
 
 // Organisation ID
 func (r ApiGetScansForOrgCountRequest) OrganisationId(organisationId string) ApiGetScansForOrgCountRequest {
 	r.organisationId = &organisationId
+	return r
+}
+
+// Include accessible supplier scans in organisation results
+func (r ApiGetScansForOrgCountRequest) IncludeSupplierScans(includeSupplierScans bool) ApiGetScansForOrgCountRequest {
+	r.includeSupplierScans = &includeSupplierScans
 	return r
 }
 
@@ -2485,6 +2605,36 @@ func (r ApiGetScansForOrgCountRequest) Scope(scope string) ApiGetScansForOrgCoun
 // Filter by scan types
 func (r ApiGetScansForOrgCountRequest) Type_(type_ []string) ApiGetScansForOrgCountRequest {
 	r.type_ = &type_
+	return r
+}
+
+// Filter scans by tag names
+func (r ApiGetScansForOrgCountRequest) Tags(tags []string) ApiGetScansForOrgCountRequest {
+	r.tags = &tags
+	return r
+}
+
+// Search scan names or seed names
+func (r ApiGetScansForOrgCountRequest) Search(search string) ApiGetScansForOrgCountRequest {
+	r.search = &search
+	return r
+}
+
+// Include seed names in search
+func (r ApiGetScansForOrgCountRequest) SearchSeeds(searchSeeds bool) ApiGetScansForOrgCountRequest {
+	r.searchSeeds = &searchSeeds
+	return r
+}
+
+// Include disabled scans
+func (r ApiGetScansForOrgCountRequest) IncludeDisabled(includeDisabled bool) ApiGetScansForOrgCountRequest {
+	r.includeDisabled = &includeDisabled
+	return r
+}
+
+// Include deleted scans
+func (r ApiGetScansForOrgCountRequest) IncludeDeleted(includeDeleted bool) ApiGetScansForOrgCountRequest {
+	r.includeDeleted = &includeDeleted
 	return r
 }
 
@@ -2541,6 +2691,13 @@ func (a *ScansAPIService) GetScansForOrgCountExecute(r ApiGetScansForOrgCountReq
 	}
 
 	parameterAddToHeaderOrQuery(localVarQueryParams, "organisation_id", r.organisationId, "form", "")
+	if r.includeSupplierScans != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "include_supplier_scans", r.includeSupplierScans, "form", "")
+	} else {
+		var defaultValue bool = false
+		parameterAddToHeaderOrQuery(localVarQueryParams, "include_supplier_scans", defaultValue, "form", "")
+		r.includeSupplierScans = &defaultValue
+	}
 	if r.scope != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "scope", r.scope, "form", "")
 	} else {
@@ -2558,6 +2715,29 @@ func (a *ScansAPIService) GetScansForOrgCountExecute(r ApiGetScansForOrgCountReq
 		} else {
 			parameterAddToHeaderOrQuery(localVarQueryParams, "type", t, "form", "multi")
 		}
+	}
+	if r.tags != nil {
+		t := *r.tags
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "tags", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "tags", t, "form", "multi")
+		}
+	}
+	if r.search != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "search", r.search, "form", "")
+	}
+	if r.searchSeeds != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "search_seeds", r.searchSeeds, "form", "")
+	}
+	if r.includeDisabled != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "include_disabled", r.includeDisabled, "form", "")
+	}
+	if r.includeDeleted != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "include_deleted", r.includeDeleted, "form", "")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -2814,6 +2994,7 @@ type ApiGetSupplierScansForOrgRequest struct {
 	order *string
 	dir *string
 	type_ *[]string
+	tags *[]string
 	search *string
 	searchSeeds *bool
 	includeDisabled *bool
@@ -2854,6 +3035,12 @@ func (r ApiGetSupplierScansForOrgRequest) Dir(dir string) ApiGetSupplierScansFor
 // Filter by scan types
 func (r ApiGetSupplierScansForOrgRequest) Type_(type_ []string) ApiGetSupplierScansForOrgRequest {
 	r.type_ = &type_
+	return r
+}
+
+// Filter scans by tag names
+func (r ApiGetSupplierScansForOrgRequest) Tags(tags []string) ApiGetSupplierScansForOrgRequest {
+	r.tags = &tags
 	return r
 }
 
@@ -2976,6 +3163,17 @@ func (a *ScansAPIService) GetSupplierScansForOrgExecute(r ApiGetSupplierScansFor
 			parameterAddToHeaderOrQuery(localVarQueryParams, "type", t, "form", "multi")
 		}
 	}
+	if r.tags != nil {
+		t := *r.tags
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "tags", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "tags", t, "form", "multi")
+		}
+	}
 	if r.search != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "search", r.search, "form", "")
 	}
@@ -3093,6 +3291,7 @@ type ApiGetSupplierScansForOrgCountRequest struct {
 	ApiService *ScansAPIService
 	organisationId *string
 	type_ *[]string
+	tags *[]string
 	search *string
 	searchSeeds *bool
 	includeDisabled *bool
@@ -3108,6 +3307,12 @@ func (r ApiGetSupplierScansForOrgCountRequest) OrganisationId(organisationId str
 // Filter by scan types
 func (r ApiGetSupplierScansForOrgCountRequest) Type_(type_ []string) ApiGetSupplierScansForOrgCountRequest {
 	r.type_ = &type_
+	return r
+}
+
+// Filter scans by tag names
+func (r ApiGetSupplierScansForOrgCountRequest) Tags(tags []string) ApiGetSupplierScansForOrgCountRequest {
+	r.tags = &tags
 	return r
 }
 
@@ -3194,6 +3399,17 @@ func (a *ScansAPIService) GetSupplierScansForOrgCountExecute(r ApiGetSupplierSca
 			}
 		} else {
 			parameterAddToHeaderOrQuery(localVarQueryParams, "type", t, "form", "multi")
+		}
+	}
+	if r.tags != nil {
+		t := *r.tags
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "tags", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "tags", t, "form", "multi")
 		}
 	}
 	if r.search != nil {

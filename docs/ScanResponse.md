@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 **Name** | **string** | Scan name | 
 **ScanGroupId** | Pointer to **string** | Scan Group ID | [optional] 
 **ScanGroupName** | Pointer to **string** | Scan Group name if requested | [optional] 
+**Tags** | Pointer to **[]string** | Scan tags by name if requested | [optional] 
 **Type** | [**ScanType**](ScanType.md) |  | 
 **Enabled** | **bool** | Scan enabled | 
 **Deleted** | **bool** | Scan deleted | 
@@ -25,6 +26,7 @@ Name | Type | Description | Notes
 **DnsNamelist** | Pointer to **bool** | Scan configuration | [optional] 
 **IgnoreIpNodes** | Pointer to **bool** | Scan configuration | [optional] 
 **IncludeBrRisks** | **map[string]interface{}** | Config for backported resolvable risks | 
+**AutoReports** | [**AutoReports**](AutoReports.md) |  | 
 **InsightsGenerated** | Pointer to **time.Time** | Timestamp at which the insights were generated | [optional] 
 **Insights** | Pointer to **map[string]interface{}** | Insights for Scan | [optional] 
 **Seeds** | Pointer to **float32** | Number of seeds associated with scan | [optional] 
@@ -36,7 +38,7 @@ Name | Type | Description | Notes
 
 ### NewScanResponse
 
-`func NewScanResponse(id string, name string, type_ ScanType, enabled bool, deleted bool, created time.Time, createdBy string, updated time.Time, includeBrRisks map[string]interface{}, ) *ScanResponse`
+`func NewScanResponse(id string, name string, type_ ScanType, enabled bool, deleted bool, created time.Time, createdBy string, updated time.Time, includeBrRisks map[string]interface{}, autoReports AutoReports, ) *ScanResponse`
 
 NewScanResponse instantiates a new ScanResponse object
 This constructor will assign default values to properties that have it defined,
@@ -140,6 +142,31 @@ SetScanGroupName sets ScanGroupName field to given value.
 `func (o *ScanResponse) HasScanGroupName() bool`
 
 HasScanGroupName returns a boolean if a field has been set.
+
+### GetTags
+
+`func (o *ScanResponse) GetTags() []string`
+
+GetTags returns the Tags field if non-nil, zero value otherwise.
+
+### GetTagsOk
+
+`func (o *ScanResponse) GetTagsOk() (*[]string, bool)`
+
+GetTagsOk returns a tuple with the Tags field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetTags
+
+`func (o *ScanResponse) SetTags(v []string)`
+
+SetTags sets Tags field to given value.
+
+### HasTags
+
+`func (o *ScanResponse) HasTags() bool`
+
+HasTags returns a boolean if a field has been set.
 
 ### GetType
 
@@ -529,6 +556,26 @@ and a boolean to check if the value has been set.
 `func (o *ScanResponse) SetIncludeBrRisks(v map[string]interface{})`
 
 SetIncludeBrRisks sets IncludeBrRisks field to given value.
+
+
+### GetAutoReports
+
+`func (o *ScanResponse) GetAutoReports() AutoReports`
+
+GetAutoReports returns the AutoReports field if non-nil, zero value otherwise.
+
+### GetAutoReportsOk
+
+`func (o *ScanResponse) GetAutoReportsOk() (*AutoReports, bool)`
+
+GetAutoReportsOk returns a tuple with the AutoReports field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetAutoReports
+
+`func (o *ScanResponse) SetAutoReports(v AutoReports)`
+
+SetAutoReports sets AutoReports field to given value.
 
 
 ### GetInsightsGenerated

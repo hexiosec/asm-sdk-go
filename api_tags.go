@@ -18,6 +18,8 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
+	"reflect"
 )
 
 
@@ -102,6 +104,328 @@ func (a *TagsAPIService) AddTagToNodeExecute(r ApiAddTagToNodeRequest) (*NodeTag
 	}
 	// body params
 	localVarPostBody = r.addTagToNodeRequest
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["APIKey"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["X-Hexiosec-API-Key"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiAddTagToScanRequest struct {
+	ctx context.Context
+	ApiService *TagsAPIService
+	scanId string
+	addTagToScanRequest *AddTagToScanRequest
+}
+
+func (r ApiAddTagToScanRequest) AddTagToScanRequest(addTagToScanRequest AddTagToScanRequest) ApiAddTagToScanRequest {
+	r.addTagToScanRequest = &addTagToScanRequest
+	return r
+}
+
+func (r ApiAddTagToScanRequest) Execute() (*ScanTagResponse, *http.Response, error) {
+	return r.ApiService.AddTagToScanExecute(r)
+}
+
+/*
+AddTagToScan Add a tag to a scan
+
+Required role: `scans.scan_tags:write`
+
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param scanId Scan ID
+ @return ApiAddTagToScanRequest
+*/
+func (a *TagsAPIService) AddTagToScan(ctx context.Context, scanId string) ApiAddTagToScanRequest {
+	return ApiAddTagToScanRequest{
+		ApiService: a,
+		ctx: ctx,
+		scanId: scanId,
+	}
+}
+
+// Execute executes the request
+//  @return ScanTagResponse
+func (a *TagsAPIService) AddTagToScanExecute(r ApiAddTagToScanRequest) (*ScanTagResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ScanTagResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TagsAPIService.AddTagToScan")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/tags/scans/{scan_id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"scan_id"+"}", url.PathEscape(parameterValueToString(r.scanId, "scanId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.addTagToScanRequest == nil {
+		return localVarReturnValue, nil, reportError("addTagToScanRequest is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.addTagToScanRequest
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["APIKey"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["X-Hexiosec-API-Key"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiAddTagToSupplierScanRequest struct {
+	ctx context.Context
+	ApiService *TagsAPIService
+	supplierScanGroupId string
+	addTagToSupplierScanRequest *AddTagToSupplierScanRequest
+}
+
+func (r ApiAddTagToSupplierScanRequest) AddTagToSupplierScanRequest(addTagToSupplierScanRequest AddTagToSupplierScanRequest) ApiAddTagToSupplierScanRequest {
+	r.addTagToSupplierScanRequest = &addTagToSupplierScanRequest
+	return r
+}
+
+func (r ApiAddTagToSupplierScanRequest) Execute() (*SupplierScanTagResponse, *http.Response, error) {
+	return r.ApiService.AddTagToSupplierScanExecute(r)
+}
+
+/*
+AddTagToSupplierScan Add a tag to a supplier scan group
+
+Required role: `supplier:manage`
+
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param supplierScanGroupId Supplier Scan Group ID
+ @return ApiAddTagToSupplierScanRequest
+*/
+func (a *TagsAPIService) AddTagToSupplierScan(ctx context.Context, supplierScanGroupId string) ApiAddTagToSupplierScanRequest {
+	return ApiAddTagToSupplierScanRequest{
+		ApiService: a,
+		ctx: ctx,
+		supplierScanGroupId: supplierScanGroupId,
+	}
+}
+
+// Execute executes the request
+//  @return SupplierScanTagResponse
+func (a *TagsAPIService) AddTagToSupplierScanExecute(r ApiAddTagToSupplierScanRequest) (*SupplierScanTagResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *SupplierScanTagResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TagsAPIService.AddTagToSupplierScan")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/tags/supplier_scans/{supplier_scan_group_id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"supplier_scan_group_id"+"}", url.PathEscape(parameterValueToString(r.supplierScanGroupId, "supplierScanGroupId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.addTagToSupplierScanRequest == nil {
+		return localVarReturnValue, nil, reportError("addTagToSupplierScanRequest is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.addTagToSupplierScanRequest
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
@@ -506,6 +830,453 @@ func (a *TagsAPIService) DeleteTagByOrganisationIDExecute(r ApiDeleteTagByOrgani
 	return localVarHTTPResponse, nil
 }
 
+type ApiGetScanTagsByScanIDRequest struct {
+	ctx context.Context
+	ApiService *TagsAPIService
+	scanId string
+	updatedSince *time.Time
+	limit *int32
+	offset *int32
+	order *string
+	dir *string
+	expand *[]string
+}
+
+// Only return scan tags updated at or after this timestamp
+func (r ApiGetScanTagsByScanIDRequest) UpdatedSince(updatedSince time.Time) ApiGetScanTagsByScanIDRequest {
+	r.updatedSince = &updatedSince
+	return r
+}
+
+// Maximum number of entries to return
+func (r ApiGetScanTagsByScanIDRequest) Limit(limit int32) ApiGetScanTagsByScanIDRequest {
+	r.limit = &limit
+	return r
+}
+
+// Offset into the list of entries to return
+func (r ApiGetScanTagsByScanIDRequest) Offset(offset int32) ApiGetScanTagsByScanIDRequest {
+	r.offset = &offset
+	return r
+}
+
+// Column to order results by
+func (r ApiGetScanTagsByScanIDRequest) Order(order string) ApiGetScanTagsByScanIDRequest {
+	r.order = &order
+	return r
+}
+
+// Sort direction
+func (r ApiGetScanTagsByScanIDRequest) Dir(dir string) ApiGetScanTagsByScanIDRequest {
+	r.dir = &dir
+	return r
+}
+
+// Fields to expand with additional information
+func (r ApiGetScanTagsByScanIDRequest) Expand(expand []string) ApiGetScanTagsByScanIDRequest {
+	r.expand = &expand
+	return r
+}
+
+func (r ApiGetScanTagsByScanIDRequest) Execute() ([]ScanTagResponse, *http.Response, error) {
+	return r.ApiService.GetScanTagsByScanIDExecute(r)
+}
+
+/*
+GetScanTagsByScanID Get tags for a scan
+
+Required role: `scans.scan_tags:read`
+
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param scanId Scan ID
+ @return ApiGetScanTagsByScanIDRequest
+*/
+func (a *TagsAPIService) GetScanTagsByScanID(ctx context.Context, scanId string) ApiGetScanTagsByScanIDRequest {
+	return ApiGetScanTagsByScanIDRequest{
+		ApiService: a,
+		ctx: ctx,
+		scanId: scanId,
+	}
+}
+
+// Execute executes the request
+//  @return []ScanTagResponse
+func (a *TagsAPIService) GetScanTagsByScanIDExecute(r ApiGetScanTagsByScanIDRequest) ([]ScanTagResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []ScanTagResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TagsAPIService.GetScanTagsByScanID")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/tags/scans/{scan_id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"scan_id"+"}", url.PathEscape(parameterValueToString(r.scanId, "scanId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.updatedSince != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "updated_since", r.updatedSince, "form", "")
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
+	}
+	if r.offset != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "offset", r.offset, "form", "")
+	}
+	if r.order != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "order", r.order, "form", "")
+	}
+	if r.dir != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "dir", r.dir, "form", "")
+	}
+	if r.expand != nil {
+		t := *r.expand
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "expand", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "expand", t, "form", "multi")
+		}
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["APIKey"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["X-Hexiosec-API-Key"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetSupplierScanTagsBySupplierScanGroupIDRequest struct {
+	ctx context.Context
+	ApiService *TagsAPIService
+	supplierScanGroupId string
+	scanId *string
+	updatedSince *time.Time
+	limit *int32
+	offset *int32
+	order *string
+	dir *string
+	expand *[]string
+}
+
+// Scan ID
+func (r ApiGetSupplierScanTagsBySupplierScanGroupIDRequest) ScanId(scanId string) ApiGetSupplierScanTagsBySupplierScanGroupIDRequest {
+	r.scanId = &scanId
+	return r
+}
+
+// Only return supplier scan tags updated at or after this timestamp
+func (r ApiGetSupplierScanTagsBySupplierScanGroupIDRequest) UpdatedSince(updatedSince time.Time) ApiGetSupplierScanTagsBySupplierScanGroupIDRequest {
+	r.updatedSince = &updatedSince
+	return r
+}
+
+// Maximum number of entries to return
+func (r ApiGetSupplierScanTagsBySupplierScanGroupIDRequest) Limit(limit int32) ApiGetSupplierScanTagsBySupplierScanGroupIDRequest {
+	r.limit = &limit
+	return r
+}
+
+// Offset into the list of entries to return
+func (r ApiGetSupplierScanTagsBySupplierScanGroupIDRequest) Offset(offset int32) ApiGetSupplierScanTagsBySupplierScanGroupIDRequest {
+	r.offset = &offset
+	return r
+}
+
+// Column to order results by
+func (r ApiGetSupplierScanTagsBySupplierScanGroupIDRequest) Order(order string) ApiGetSupplierScanTagsBySupplierScanGroupIDRequest {
+	r.order = &order
+	return r
+}
+
+// Sort direction
+func (r ApiGetSupplierScanTagsBySupplierScanGroupIDRequest) Dir(dir string) ApiGetSupplierScanTagsBySupplierScanGroupIDRequest {
+	r.dir = &dir
+	return r
+}
+
+// Fields to expand with additional information
+func (r ApiGetSupplierScanTagsBySupplierScanGroupIDRequest) Expand(expand []string) ApiGetSupplierScanTagsBySupplierScanGroupIDRequest {
+	r.expand = &expand
+	return r
+}
+
+func (r ApiGetSupplierScanTagsBySupplierScanGroupIDRequest) Execute() ([]SupplierScanTagResponse, *http.Response, error) {
+	return r.ApiService.GetSupplierScanTagsBySupplierScanGroupIDExecute(r)
+}
+
+/*
+GetSupplierScanTagsBySupplierScanGroupID Get tags for a supplier scan group
+
+Required role: `organisations:read`
+
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param supplierScanGroupId Supplier Scan Group ID
+ @return ApiGetSupplierScanTagsBySupplierScanGroupIDRequest
+*/
+func (a *TagsAPIService) GetSupplierScanTagsBySupplierScanGroupID(ctx context.Context, supplierScanGroupId string) ApiGetSupplierScanTagsBySupplierScanGroupIDRequest {
+	return ApiGetSupplierScanTagsBySupplierScanGroupIDRequest{
+		ApiService: a,
+		ctx: ctx,
+		supplierScanGroupId: supplierScanGroupId,
+	}
+}
+
+// Execute executes the request
+//  @return []SupplierScanTagResponse
+func (a *TagsAPIService) GetSupplierScanTagsBySupplierScanGroupIDExecute(r ApiGetSupplierScanTagsBySupplierScanGroupIDRequest) ([]SupplierScanTagResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []SupplierScanTagResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TagsAPIService.GetSupplierScanTagsBySupplierScanGroupID")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/tags/supplier_scans/{supplier_scan_group_id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"supplier_scan_group_id"+"}", url.PathEscape(parameterValueToString(r.supplierScanGroupId, "supplierScanGroupId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.scanId == nil {
+		return localVarReturnValue, nil, reportError("scanId is required and must be specified")
+	}
+
+	parameterAddToHeaderOrQuery(localVarQueryParams, "scan_id", r.scanId, "form", "")
+	if r.updatedSince != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "updated_since", r.updatedSince, "form", "")
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
+	}
+	if r.offset != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "offset", r.offset, "form", "")
+	}
+	if r.order != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "order", r.order, "form", "")
+	}
+	if r.dir != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "dir", r.dir, "form", "")
+	}
+	if r.expand != nil {
+		t := *r.expand
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "expand", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "expand", t, "form", "multi")
+		}
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["APIKey"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["X-Hexiosec-API-Key"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiGetTagsByOrganisationIDRequest struct {
 	ctx context.Context
 	ApiService *TagsAPIService
@@ -568,7 +1339,7 @@ func (r ApiGetTagsByOrganisationIDRequest) Execute() ([]TagResponse, *http.Respo
 /*
 GetTagsByOrganisationID Get tags for an organisation
 
-Required role: `organisations.tags:manage`
+Required role: `organisations.tags:view`
 
 This endpoint requires that the associated organisation has API access enabled.
 If API access is not allowed, the response code will be 403 (Forbidden).
@@ -1107,6 +1878,303 @@ func (a *TagsAPIService) RemoveTagFromNodeExecute(r ApiRemoveTagFromNodeRequest)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["APIKey"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["X-Hexiosec-API-Key"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type ApiRemoveTagFromScanRequest struct {
+	ctx context.Context
+	ApiService *TagsAPIService
+	scanId string
+	tagId string
+}
+
+func (r ApiRemoveTagFromScanRequest) Execute() (*http.Response, error) {
+	return r.ApiService.RemoveTagFromScanExecute(r)
+}
+
+/*
+RemoveTagFromScan Remove a tag from a scan
+
+Required role: `scans.scan_tags:write`
+
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param scanId Scan ID
+ @param tagId Tag ID
+ @return ApiRemoveTagFromScanRequest
+*/
+func (a *TagsAPIService) RemoveTagFromScan(ctx context.Context, scanId string, tagId string) ApiRemoveTagFromScanRequest {
+	return ApiRemoveTagFromScanRequest{
+		ApiService: a,
+		ctx: ctx,
+		scanId: scanId,
+		tagId: tagId,
+	}
+}
+
+// Execute executes the request
+func (a *TagsAPIService) RemoveTagFromScanExecute(r ApiRemoveTagFromScanRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TagsAPIService.RemoveTagFromScan")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/tags/scans/{scan_id}/{tag_id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"scan_id"+"}", url.PathEscape(parameterValueToString(r.scanId, "scanId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"tag_id"+"}", url.PathEscape(parameterValueToString(r.tagId, "tagId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["APIKey"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["X-Hexiosec-API-Key"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type ApiRemoveTagFromSupplierScanRequest struct {
+	ctx context.Context
+	ApiService *TagsAPIService
+	supplierScanGroupId string
+	tagId string
+	scanId *string
+}
+
+// Scan ID
+func (r ApiRemoveTagFromSupplierScanRequest) ScanId(scanId string) ApiRemoveTagFromSupplierScanRequest {
+	r.scanId = &scanId
+	return r
+}
+
+func (r ApiRemoveTagFromSupplierScanRequest) Execute() (*http.Response, error) {
+	return r.ApiService.RemoveTagFromSupplierScanExecute(r)
+}
+
+/*
+RemoveTagFromSupplierScan Remove a tag from a supplier scan group
+
+Required role: `supplier:manage`
+
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param supplierScanGroupId Supplier Scan Group ID
+ @param tagId Tag ID
+ @return ApiRemoveTagFromSupplierScanRequest
+*/
+func (a *TagsAPIService) RemoveTagFromSupplierScan(ctx context.Context, supplierScanGroupId string, tagId string) ApiRemoveTagFromSupplierScanRequest {
+	return ApiRemoveTagFromSupplierScanRequest{
+		ApiService: a,
+		ctx: ctx,
+		supplierScanGroupId: supplierScanGroupId,
+		tagId: tagId,
+	}
+}
+
+// Execute executes the request
+func (a *TagsAPIService) RemoveTagFromSupplierScanExecute(r ApiRemoveTagFromSupplierScanRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TagsAPIService.RemoveTagFromSupplierScan")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/v1/tags/supplier_scans/{supplier_scan_group_id}/{tag_id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"supplier_scan_group_id"+"}", url.PathEscape(parameterValueToString(r.supplierScanGroupId, "supplierScanGroupId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"tag_id"+"}", url.PathEscape(parameterValueToString(r.tagId, "tagId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.scanId == nil {
+		return nil, reportError("scanId is required and must be specified")
+	}
+
+	parameterAddToHeaderOrQuery(localVarQueryParams, "scan_id", r.scanId, "form", "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

@@ -5,9 +5,12 @@ All URIs are relative to *https://asm.hexiosec.com/api*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**CountUserAPIKeys**](UsersAPI.md#CountUserAPIKeys) | **Get** /users/api_key/count | Get API key count for the user logged in to the current session
-[**GetUsers**](UsersAPI.md#GetUsers) | **Get** /v1/users | Get the users in an organisation or scan group
+[**GetUserMarketingPreferences**](UsersAPI.md#GetUserMarketingPreferences) | **Get** /v1/users/marketing_preferences | Get marketing email preferences for the user logged in to the current session
+[**GetUsers**](UsersAPI.md#GetUsers) | **Get** /v1/users | Get the users in an organisation
+[**GetUsersByScanGroup**](UsersAPI.md#GetUsersByScanGroup) | **Get** /v1/users/scan_group/{scan_group_id} | Get the users in a scan group
 [**ListUserAPIKeys**](UsersAPI.md#ListUserAPIKeys) | **Get** /users/api_key | Get API keys for the user logged in to the current session
 [**RevokeUserAPIKey**](UsersAPI.md#RevokeUserAPIKey) | **Delete** /users/api_key/{key_id} | Revoke an API key for the user logged in to the current session
+[**UpdateUserMarketingPreferences**](UsersAPI.md#UpdateUserMarketingPreferences) | **Patch** /v1/users/marketing_preferences | Update marketing email preferences for the user logged in to the current session
 [**UpdateUserPreferences**](UsersAPI.md#UpdateUserPreferences) | **Patch** /users/preferences | Update preferences for the user logged in to the current session
 [**UsersApiKeyPost**](UsersAPI.md#UsersApiKeyPost) | **Post** /users/api_key | Create an API key for the user logged in to the current session
 
@@ -72,11 +75,70 @@ Other parameters are passed through a pointer to a apiCountUserAPIKeysRequest st
 [[Back to README]](../README.md)
 
 
+## GetUserMarketingPreferences
+
+> MarketingPreferencesResponse GetUserMarketingPreferences(ctx).Execute()
+
+Get marketing email preferences for the user logged in to the current session
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	asm "github.com/hexiosec/asm-sdk-go"
+)
+
+func main() {
+
+	configuration := asm.NewConfiguration()
+	apiClient := asm.NewAPIClient(configuration)
+	resp, r, err := apiClient.UsersAPI.GetUserMarketingPreferences(context.Background()).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `UsersAPI.GetUserMarketingPreferences``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetUserMarketingPreferences`: MarketingPreferencesResponse
+	fmt.Fprintf(os.Stdout, "Response from `UsersAPI.GetUserMarketingPreferences`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+This endpoint does not need any parameter.
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetUserMarketingPreferencesRequest struct via the builder pattern
+
+
+### Return type
+
+[**MarketingPreferencesResponse**](MarketingPreferencesResponse.md)
+
+### Authorization
+
+[APIKey](../README.md#APIKey)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## GetUsers
 
-> []UserResponse GetUsers(ctx).OrganisationId(organisationId).ScanGroupId(scanGroupId).Execute()
+> []UserResponse GetUsers(ctx).OrganisationId(organisationId).IncludeDisabled(includeDisabled).Execute()
 
-Get the users in an organisation or scan group
+Get the users in an organisation
 
 
 
@@ -93,12 +155,12 @@ import (
 )
 
 func main() {
-	organisationId := "organisationId_example" // string | Organisation ID (optional)
-	scanGroupId := "scanGroupId_example" // string | Scan Group ID (optional)
+	organisationId := "organisationId_example" // string | Organisation ID
+	includeDisabled := true // bool | Include disabled users when requesting users for an organisation (optional)
 
 	configuration := asm.NewConfiguration()
 	apiClient := asm.NewAPIClient(configuration)
-	resp, r, err := apiClient.UsersAPI.GetUsers(context.Background()).OrganisationId(organisationId).ScanGroupId(scanGroupId).Execute()
+	resp, r, err := apiClient.UsersAPI.GetUsers(context.Background()).OrganisationId(organisationId).IncludeDisabled(includeDisabled).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `UsersAPI.GetUsers``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -120,11 +182,81 @@ Other parameters are passed through a pointer to a apiGetUsersRequest struct via
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **organisationId** | **string** | Organisation ID | 
- **scanGroupId** | **string** | Scan Group ID | 
+ **includeDisabled** | **bool** | Include disabled users when requesting users for an organisation | 
 
 ### Return type
 
 [**[]UserResponse**](UserResponse.md)
+
+### Authorization
+
+[APIKey](../README.md#APIKey)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetUsersByScanGroup
+
+> []UserSummaryResponse GetUsersByScanGroup(ctx, scanGroupId).Execute()
+
+Get the users in a scan group
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	asm "github.com/hexiosec/asm-sdk-go"
+)
+
+func main() {
+	scanGroupId := "scanGroupId_example" // string | Scan Group ID
+
+	configuration := asm.NewConfiguration()
+	apiClient := asm.NewAPIClient(configuration)
+	resp, r, err := apiClient.UsersAPI.GetUsersByScanGroup(context.Background(), scanGroupId).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `UsersAPI.GetUsersByScanGroup``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetUsersByScanGroup`: []UserSummaryResponse
+	fmt.Fprintf(os.Stdout, "Response from `UsersAPI.GetUsersByScanGroup`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**scanGroupId** | **string** | Scan Group ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetUsersByScanGroupRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+[**[]UserSummaryResponse**](UserSummaryResponse.md)
 
 ### Authorization
 
@@ -271,6 +403,70 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## UpdateUserMarketingPreferences
+
+> MarketingPreferencesResponse UpdateUserMarketingPreferences(ctx).UpdateMarketingPreferencesRequest(updateMarketingPreferencesRequest).Execute()
+
+Update marketing email preferences for the user logged in to the current session
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	asm "github.com/hexiosec/asm-sdk-go"
+)
+
+func main() {
+	updateMarketingPreferencesRequest := *asm.NewUpdateMarketingPreferencesRequest() // UpdateMarketingPreferencesRequest | 
+
+	configuration := asm.NewConfiguration()
+	apiClient := asm.NewAPIClient(configuration)
+	resp, r, err := apiClient.UsersAPI.UpdateUserMarketingPreferences(context.Background()).UpdateMarketingPreferencesRequest(updateMarketingPreferencesRequest).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `UsersAPI.UpdateUserMarketingPreferences``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `UpdateUserMarketingPreferences`: MarketingPreferencesResponse
+	fmt.Fprintf(os.Stdout, "Response from `UsersAPI.UpdateUserMarketingPreferences`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiUpdateUserMarketingPreferencesRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **updateMarketingPreferencesRequest** | [**UpdateMarketingPreferencesRequest**](UpdateMarketingPreferencesRequest.md) |  | 
+
+### Return type
+
+[**MarketingPreferencesResponse**](MarketingPreferencesResponse.md)
+
+### Authorization
+
+[APIKey](../README.md#APIKey)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
 - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
